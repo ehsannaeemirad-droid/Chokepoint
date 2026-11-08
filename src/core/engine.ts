@@ -10,18 +10,40 @@
  */
 import { runAiPhase, runHostPostures } from '../ai/ai';
 import { resolveCyber, resolveSabotage, resolveStrike, validateStrike } from '../combat/combat';
+import logisticsData from '../data/logistics.json';
 import { hexDistance } from '../map/hex';
 import type { TheaterMap } from '../map/TheaterMap';
 import {
   addIranWarCost,
-  checkOutcome,
   thirdPartyPhase,
   updateChokepoints,
   updateHosts,
+  updateSuperpowers,
 } from '../politics/politics';
+import { updateEscalation } from '../politics/escalation';
+import { COALITION_FACTIONS, ROE_POSTURES, activeRoe, roeEffectsText, updateRoe } from '../politics/roe';
+import { buildScorecard } from '../politics/scorecard';
+import { checkOutcome, updateVictoryClocks } from '../politics/victory';
+import {
+  applyPendingDomestic,
+  domesticCfg,
+  economyAirliftRegen,
+  economyResupplyAmount,
+  updateDomestic,
+} from '../politics/domestic';
+import {
+  applyInitiativeOrder,
+  updateIsraelInitiative,
+  validateInitiativeOrder,
+} from '../politics/initiative';
+import {
+  applyTalksOrder,
+  updateTalks,
+  validateTalksOrder,
+} from '../politics/talks';
 import { BALANCE } from './config';
 import { factionRng } from './rng';
-import type { GameSnapshot, Order, ResolveEvent, UnitInstance } from './types';
+import type { GameSnapshot, LogisticsConfig, Order, Reinforcement, ResolveEvent, UnitInstance } from './types';
 import {
   clamp,
   defenderOfNode,
@@ -42,61 +64,40 @@ export interface ReinforcementPackage {
   amount: number;
 }
 
-export const REINFORCEMENTS: ReinforcementPackage[] = [
-  {
-    id: 'interceptors',
-    label: 'Airlift 20 interceptors',
-    note: 'Replenishes the shared Patriot/THAAD magazine.',
-    cost: 4,
-    turns: 3,
-    kind: 'interceptors',
-    amount: 20,
-  },
-  {
-    id: 'patriot',
-    label: 'Patriot battery',
-    note: 'A PAC-3 battery at Al Udeid.',
-    cost: 6,
-    turns: 4,
-    kind: 'patriot',
-    amount: 1,
-  },
-  {
-    id: 'thaad',
-    label: 'THAAD battery',
-    note: 'Terminal ballistic defence at Al Dhafra.',
-    cost: 8,
-    turns: 6,
-    kind: 'thaad',
-    amount: 1,
-  },
-  {
-    id: 'air',
-    label: 'F-15E squadron',
-    note: 'Twelve more strike aircraft and crews.',
-    cost: 7,
-    turns: 5,
-    kind: 'air',
-    amount: 1,
-  },
-  {
-    id: 'csg',
-    label: 'Second carrier strike group',
-    note: 'A mobile airbase and another naval presence in the Gulf.',
-    cost: 10,
-    turns: 6,
-    kind: 'csg',
-    amount: 1,
-  },
-];
+/**
+ * Phase 3: reinforcement transit times are scenario data
+ * (`src/data/logistics.json`), per package type. Routine supplies arrive in
+ * 2-4 turns; heavy formations keep their existing 5-6 turn transits pending an
+ * owner-approved balance pass (see DESIGN.md Decisions).
+ */
+export const REINFORCEMENTS: ReinforcementPackage[] = logisticsData.packages as unknown as ReinforcementPackage[];
 
-export const ISRAEL_AIRLIFT = {
-  id: 'israel-airlift',
-  label: 'US airlift to Israel (+15 interceptors)',
-  note: 'Competes with US reinforcement airlift. Arrives in 2 turns.',
-  cost: 2,
-  turns: 2,
+export const ISRAEL_AIRLIFT = logisticsData.israelAirlift as unknown as {
+  id: string;
+  label: string;
+  note: string;
+  cost: number;
+  turns: number;
+  amount: number;
 };
+
+/**
+ * Improvement 2: defaults for scenarios without a `logistics` block — Gulf
+ * shipping suffers when the strait burns, but never indefinitely.
+ */
+export const DEFAULT_LOGISTICS_CFG: LogisticsConfig = {
+  interdictHormuz: 60,
+  maxDelay: 3,
+};
+
+export function logisticsCfg(snap: GameSnapshot): LogisticsConfig {
+  return snap.logisticsCfg ?? DEFAULT_LOGISTICS_CFG;
+}
+
+/** Effective arrival turn including accrued strait-risk delay. */
+export function effectiveArrival(r: Reinforcement): number {
+  return r.arrivesTurn + (r.delayTurns ?? 0);
+}
 
 export interface OrderCheck {
   ok: boolean;
@@ -163,6 +164,33 @@ export function validateOrder(snap: GameSnapshot, map: TheaterMap, order: Order)
     case 'airlift': {
       if (snap.resources.airlift < 5) return { ok: false, reason: 'No airlift capacity left this turn' };
       if (snap.resources.politicalWill < ISRAEL_AIRLIFT.cost) return { ok: false, reason: 'Not enough political will' };
+      return { ok: true };
+    }
+    case 'communicate': {
+      if (snap.faction !== 'usa') return { ok: false, reason: 'Only Washington can address the American public' };
+      const cost = domesticCfg(snap).communicate.cost;
+      if (snap.domestic && snap.domestic.cooldown > 0) {
+        return { ok: false, reason: `Public address recharging (${snap.domestic.cooldown} turns)` };
+      }
+      if (snap.resources.politicalWill < cost) return { ok: false, reason: `Needs ${cost} political will` };
+      return { ok: true };
+    }
+    case 'israel-initiative': {
+      const block = validateInitiativeOrder(snap, order.stance);
+      if (block) return { ok: false, reason: block };
+      return { ok: true };
+    }
+    case 'talks': {
+      const block = validateTalksOrder(snap, order.stance);
+      if (block) return { ok: false, reason: block };
+      return { ok: true };
+    }
+    case 'roe': {
+      if (!COALITION_FACTIONS.has(snap.faction)) {
+        return { ok: false, reason: 'Only the coalition sets rules of engagement' };
+      }
+      if (!ROE_POSTURES.includes(order.posture)) return { ok: false, reason: 'Unknown posture' };
+      if (snap.roe?.posture === order.posture) return { ok: false, reason: 'That is already the standing posture' };
       return { ok: true };
     }
     case 'special': {
@@ -346,8 +374,9 @@ export function applyOrder(
         kind: pkg.kind,
         amount: pkg.amount,
       });
+      const straitRisk = snap.meters.hormuz > logisticsCfg(snap).interdictHormuz;
       events.push({
-        text: `${pkg.label} requested from CONUS — arrives in ${transit} turns${snap.suezClosed ? ' (Suez is closed)' : ''}.`,
+        text: `${pkg.label} requested from CONUS — arrives in ${transit} turns${snap.suezClosed ? ' (Suez is closed)' : ''}${straitRisk ? ' — Gulf shipping under threat, expect strait delays' : ''}.`,
         tone: 'info',
         faction: 'usa',
       });
@@ -367,6 +396,40 @@ export function applyOrder(
         text: 'US airlift allocated to Israel: 15 interceptors arrive in 2 turns.',
         tone: 'info',
         faction: 'usa',
+      });
+      return;
+    }
+    case 'communicate': {
+      if (!snap.domestic) return;
+      const cfg = domesticCfg(snap).communicate;
+      snap.resources.politicalWill = clamp(snap.resources.politicalWill - cfg.cost, 0, 100);
+      snap.domestic.cooldown = cfg.cooldown;
+      const before = snap.domestic.congress;
+      snap.domestic.congress = clamp(snap.domestic.congress + cfg.gain, 0, 100);
+      events.push({
+        text: `Public address: the administration makes its case to Congress and the country (support ${Math.round(before)} → ${Math.round(snap.domestic.congress)}).`,
+        tone: 'good',
+        faction: 'usa',
+      });
+      return;
+    }
+    case 'israel-initiative': {
+      applyInitiativeOrder(snap, order.stance, events);
+      return;
+    }
+    case 'talks': {
+      applyTalksOrder(snap, order.stance, events);
+      return;
+    }
+    case 'roe': {
+      if (!snap.roe) snap.roe = { posture: 'standard' };
+      if (snap.roe.posture === order.posture) return;
+      snap.roe.posture = order.posture;
+      const label = order.posture.toUpperCase();
+      events.push({
+        text: `Rules of engagement set to ${label}: ${roeEffectsText(activeRoe(snap))}.`,
+        tone: order.posture === 'aggressive' ? 'warn' : 'info',
+        faction: snap.faction,
       });
       return;
     }
@@ -437,26 +500,44 @@ function attritionPhase(
   rng: () => number,
   events: ResolveEvent[],
 ): void {
-  // Sealed American resupply cycle.
+  // Sealed American resupply cycle, scaled by economic pressure (Phase 2).
   if (snap.turn % BALANCE.airliftResupplyUSATurns === 0) {
+    const amount = economyResupplyAmount(snap);
     snap.resources.interceptorsUSA = clamp(
-      snap.resources.interceptorsUSA + BALANCE.airliftResupplyUSAAmount,
+      snap.resources.interceptorsUSA + amount,
       0,
       220,
     );
     events.push({
-      text: `Strategic airlift delivered ${BALANCE.airliftResupplyUSAAmount} interceptors to the Gulf.`,
+      text: `Strategic airlift delivered ${amount} interceptors to the Gulf.`,
       tone: 'good',
       faction: 'usa',
     });
   }
 
-  // Airlift capacity regenerates.
-  snap.resources.airlift = clamp(snap.resources.airlift + 5, 0, BALANCE.sharedAirliftCapacity);
+  // Airlift capacity regenerates (economic pressure cuts the budget).
+  snap.resources.airlift = clamp(snap.resources.airlift + economyAirliftRegen(snap), 0, BALANCE.sharedAirliftCapacity);
+
+  // Improvement 2: in-transit strait risk. While Hormuz disruption stays above
+  // the scenario threshold, every pending shipment accrues one turn of delay
+  // per turn, capped by the scenario. Deterministic — the meter decides, not
+  // the dice.
+  const logistics = logisticsCfg(snap);
+  for (const r of snap.reinforcements) {
+    if (r.arrivesTurn <= snap.turn) continue; // arriving this turn is not re-delayed
+    if (snap.meters.hormuz > logistics.interdictHormuz && (r.delayTurns ?? 0) < logistics.maxDelay) {
+      r.delayTurns = (r.delayTurns ?? 0) + 1;
+      events.push({
+        text: `Strait risk delays ${r.label}: ETA slips to turn ${effectiveArrival(r)}.`,
+        tone: 'warn',
+        faction: 'usa',
+      });
+    }
+  }
 
   // Arrivals.
-  const arriving = snap.reinforcements.filter((r) => r.arrivesTurn <= snap.turn);
-  snap.reinforcements = snap.reinforcements.filter((r) => r.arrivesTurn > snap.turn);
+  const arriving = snap.reinforcements.filter((r) => effectiveArrival(r) <= snap.turn);
+  snap.reinforcements = snap.reinforcements.filter((r) => effectiveArrival(r) > snap.turn);
   for (const r of arriving) {
     if (r.id === ISRAEL_AIRLIFT.id) {
       snap.resources.interceptorsIsrael = clamp(snap.resources.interceptorsIsrael + r.amount, 0, 180);
@@ -498,6 +579,15 @@ function attritionPhase(
   if (snap.resources.politicalWill < 20) addIranWarCost(snap, -1);
 
   updateChokepoints(snap, map);
+  // Improvement 1: the escalation ladder and its red lines, then the
+  // great-power response loop (which the baseline defined but never ran).
+  updateEscalation(snap, events);
+  updateSuperpowers(snap, events);
+  // Improvement 6: ROE posture drift (congress, host threat).
+  updateRoe(snap, events);
+  updateDomestic(snap, events);
+  updateIsraelInitiative(snap, events);
+  updateTalks(snap, events);
   updateHosts(snap, map, events);
   runHostPostures(snap, map, events);
   thirdPartyPhase(snap, map, rng, events);
@@ -526,15 +616,31 @@ export interface TurnResult {
 
 export function runTurn(snap: GameSnapshot, map: TheaterMap): TurnResult {
   const events: ResolveEvent[] = [];
+  // Announced congressional restrictions bind from the start of their effective
+  // turn, i.e. before the first order of that turn resolves.
+  applyPendingDomestic(snap, events);
   const orderRng = factionRng(snap.seed, snap.turn, 'orders');
   for (const order of snap.orders) applyOrder(snap, map, order, orderRng, events);
 
   runAiPhase(snap, map, events);
   attritionPhase(snap, map, factionRng(snap.seed, snap.turn, 'attrition'), events);
 
+  // Advance the per-turn victory streaks, then judge the campaign.
+  updateVictoryClocks(snap, map);
   const result = checkOutcome(snap, map);
   snap.status = result.status;
   snap.outcome = result.outcome;
+
+  // Improvement 7: a terminal outcome also gets a graded multi-axis
+  // settlement, computed once and stored on the snapshot. The tutorial (no
+  // victory block) keeps its scripted ending without a scorecard.
+  if (result.status !== 'playing' && snap.victory && !snap.scorecard) {
+    snap.scorecard = buildScorecard(snap, map);
+    events.push({
+      text: `Settlement — Iran ${snap.scorecard.iranTotal}, coalition ${snap.scorecard.coalitionTotal} (${snap.scorecard.margin >= 0 ? '+' : ''}${snap.scorecard.margin} margin).`,
+      tone: 'info',
+    });
+  }
 
   if (snap.scenarioId === 'tutorial' && snap.turn >= 5 && snap.status === 'playing') {
     const held = operationalGulfBases(snap, map) >= 3;

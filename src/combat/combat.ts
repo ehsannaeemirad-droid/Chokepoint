@@ -9,6 +9,8 @@ import { clamp, defenderOfNode, removeUnit, unitsAt, unitType } from '../core/wo
 import { hexDistance } from '../map/hex';
 import type { TheaterMap } from '../map/TheaterMap';
 import { BALANCE } from '../core/config';
+import { addCasualties, restrictionBlocksStrike } from '../politics/domestic';
+import { roeBlocksStrike, roeDamageMultiplier } from '../politics/roe';
 import {
   addIranWarCost,
   maxSuperpowerTier,
@@ -187,7 +189,7 @@ function applyImpact(
     const state = snap.nodes[nodeId]!;
     const factor = node.hardened ? 1.0 : 4.2;
     state.integrity = clamp(state.integrity - damage * factor, 0, state.maxIntegrity);
-    recordImpact(snap, map, nodeId);
+    recordImpact(snap, map, nodeId, 1, attack.attacker);
     if (node.host === 'iran') addIranWarCost(snap, 2);
     return;
   }
@@ -205,6 +207,8 @@ function applyImpact(
   target.strength -= damage * 3.5;
   if (target.strength <= 0) {
     removeUnit(snap, target.uid);
+    // A US formation destroyed by an incoming salvo is a domestic casualty event.
+    if (target.faction === 'usa') addCasualties(snap, 2);
     events.push({
       text: `${target.name} destroyed at ${attack.col},${attack.row}.`,
       tone: 'bad',
@@ -267,6 +271,15 @@ export function validateStrike(
     return { ok: false, reason: 'That facility is not a hostile target' };
   }
 
+  // Phase 2: congressional restrictions on US offensive operations.
+  const congressionalBlock = restrictionBlocksStrike(snap, unit.faction, node);
+  if (congressionalBlock) return { ok: false, reason: congressionalBlock };
+
+  // Improvement 6: the coalition rules-of-engagement posture can forbid
+  // population-centre strikes under the constrained preset.
+  const roeBlock = roeBlocksStrike(snap, unit.faction, node);
+  if (roeBlock) return { ok: false, reason: roeBlock };
+
   // Great-power red lines. Russia and China do not fight, but they can forbid.
   const coalition = unit.faction === 'usa' || unit.faction === 'israel';
   if (coalition && node?.host === 'iran') {
@@ -311,6 +324,9 @@ export function resolveStrike(
   const defender = node ? defenderOfNode(node) : enemies[0]?.faction ?? null;
   const threatClass: ThreatClass = def.threatClass ?? 'cruise';
   const rounds = def.bunkerBuster ? 2 : 1;
+  // Improvement 6: the ROE posture colours coalition firepower. Iranian
+  // strikes are untouched (multiplier 1 for non-coalition attackers).
+  const damage = def.atk * roeDamageMultiplier(snap, unit.faction);
   let hits = 0;
   let intercepted = 0;
   let surfaceOnly = false;
@@ -342,14 +358,14 @@ export function resolveStrike(
             : 0.9
           : 4.4;
       const floor = penetrates ? 0 : (node.surfaceFloor ?? 55);
-      const next = state.integrity - (def.atk * armour) / rounds;
+      const next = state.integrity - (damage * armour) / rounds;
       state.integrity = clamp(Math.max(next, Math.min(state.integrity, floor)), 0, state.maxIntegrity);
       surfaceOnly = surfaceOnly || !penetrates;
       if (node.host === 'iran') addIranWarCost(snap, penetrates ? 6 : 2);
-      recordImpact(snap, map, node.id, 0.5);
+      recordImpact(snap, map, node.id, 0.5, unit.faction);
     } else if (enemies.length > 0) {
       const target = enemies[Math.floor(rng() * enemies.length)]!;
-      target.strength -= def.atk * 4.5;
+      target.strength -= damage * 4.5;
       if (target.strength <= 0) {
         removeUnit(snap, target.uid);
         events.push({ text: `${target.name} destroyed by ${unit.name}.`, tone: 'good', focus: { col, row } });
@@ -389,6 +405,8 @@ export function resolveStrike(
     if (rng() < lossChance) {
       attackerLost = true;
       removeUnit(snap, unit.uid);
+      // Losing a US aircrew over Iran is the heaviest domestic casualty event.
+      if (unit.faction === 'usa') addCasualties(snap, 2);
       events.push({
         text: `${unit.name} was lost on the return leg — no replacement available this campaign.`,
         tone: 'bad',

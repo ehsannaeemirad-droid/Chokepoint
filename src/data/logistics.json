@@ -1,0 +1,69 @@
+{
+  "packages": [
+    {
+      "id": "interceptors",
+      "label": "Airlift 20 interceptors",
+      "note": "Replenishes the shared Patriot/THAAD magazine.",
+      "cost": 4,
+      "turns": 3,
+      "kind": "interceptors",
+      "amount": 20,
+      "label_fa": "پرواز ترابری ۲۰ موشک رهگیر",
+      "note_fa": "مخزن مشترک پاتریوت/تاد را بازپرگیری می‌کند."
+    },
+    {
+      "id": "patriot",
+      "label": "Patriot battery",
+      "note": "A PAC-3 battery at Al Udeid.",
+      "cost": 6,
+      "turns": 4,
+      "kind": "patriot",
+      "amount": 1,
+      "label_fa": "باتری پاتریوت",
+      "note_fa": "یک باتری پی‌ای‌سی-۳ در العدید."
+    },
+    {
+      "id": "thaad",
+      "label": "THAAD battery",
+      "note": "Terminal ballistic defence at Al Dhafra.",
+      "cost": 8,
+      "turns": 6,
+      "kind": "thaad",
+      "amount": 1,
+      "label_fa": "باتری تاد",
+      "note_fa": "پدافند پایانی بالستیک در الظفره."
+    },
+    {
+      "id": "air",
+      "label": "F-15E squadron",
+      "note": "Twelve more strike aircraft and crews.",
+      "cost": 7,
+      "turns": 5,
+      "kind": "air",
+      "amount": 1,
+      "label_fa": "اسکادران اف-۱۵ای",
+      "note_fa": "دوازده فروند هواپیمای تهاجمی دیگر با خلبان."
+    },
+    {
+      "id": "csg",
+      "label": "Second carrier strike group",
+      "note": "A mobile airbase and another naval presence in the Gulf.",
+      "cost": 10,
+      "turns": 6,
+      "kind": "csg",
+      "amount": 1,
+      "label_fa": "گروه ضربت ناوهونده دوم",
+      "note_fa": "یک پایگاه هوایی سیار و حضور دریایی دیگر در خلیج."
+    }
+  ],
+  "israelAirlift": {
+    "id": "israel-airlift",
+    "label": "US airlift to Israel (+15 interceptors)",
+    "note": "Competes with US reinforcement airlift. Arrives in 2 turns.",
+    "cost": 2,
+    "turns": 2,
+    "amount": 15,
+    "label_fa": "ترابری هوایی آمریکا به اسرائیل (+۱۵ رهگیر)",
+    "note_fa": "با ترابری نیروهای کمکی آمریکا رقابت می‌کند. در ۲ نوبت می‌رسد."
+  }
+}

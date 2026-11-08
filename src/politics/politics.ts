@@ -6,7 +6,8 @@
  * by the survival calculus of allies who can take their bases away.
  */
 import { BALANCE } from '../core/config';
-import type { FactionId, GameSnapshot, MapNodeDef, ResolveEvent, SuperpowerState } from '../core/types';
+import { addCasualties } from './domestic';
+import { roeEscalationMultiplier } from './roe';
 import type { FactionId, GameSnapshot, MapNodeDef, ResolveEvent, SuperpowerState } from '../core/types';
 import {
   clamp,
@@ -14,7 +15,6 @@ import {
   isIsraelPopulation,
   isMajorGulfBase,
   nodeState,
-  operationalGulfBases,
   unitType,
 } from '../core/world';
 import { hexDistance } from '../map/hex';
@@ -53,8 +53,14 @@ export function calcHormuz(snap: GameSnapshot, map: TheaterMap): number {
   return clamp(score, 0, 100);
 }
 
-/** Apply a missile/drone impact to a node and cascade the political effects. */
-export function recordImpact(snap: GameSnapshot, map: TheaterMap, nodeId: string, severity = 1): void {
+/** Apply a missile/drone impact to a node and cascade the political effects.
+ *
+ * `attacker` (improvement 6) scales the escalation a strike on Iranian soil
+ * generates by the attacker's ROE posture: a constrained coalition leaves a
+ * softer signature (×0.5), an aggressive one a heavier one (×1.5). Attacks
+ * with no known attacker or a non-coalition attacker are unaffected.
+ */
+export function recordImpact(snap: GameSnapshot, map: TheaterMap, nodeId: string, severity = 1, attacker?: FactionId): void {
   const node = map.nodeById.get(nodeId);
   if (!node) return;
   snap.nodeImpacts[nodeId] = (snap.nodeImpacts[nodeId] ?? 0) + 1;
@@ -74,10 +80,14 @@ export function recordImpact(snap: GameSnapshot, map: TheaterMap, nodeId: string
   }
   // Hitting Iran itself — its nuclear sites, cities and oil — is what turns a
   // regional war into a great-power crisis.
-  if (node.host === 'iran') addEscalation(snap, escalationForNode(node) * severity);
+  if (node.host === 'iran') {
+    addEscalation(snap, escalationForNode(node) * severity * roeEscalationMultiplier(snap, attacker ?? ''));
+  }
   const defender = defenderOfNode(node);
   if (defender === 'usa') {
     snap.resources.politicalWill = clamp(snap.resources.politicalWill - 2, 0, 100);
+    // Impacts on a major US base are domestic casualty events (Phase 2).
+    if (isMajorGulfBase(nodeId)) addCasualties(snap, 1);
   }
   if (node.host === 'iran') addIranWarCost(snap, 4 * severity);
 }
@@ -109,13 +119,6 @@ export function superpowerTier(stance: number): number {
 
 export function maxSuperpowerTier(snap: GameSnapshot): number {
   return Math.max(superpowerTier(snap.superpowers?.russia?.stance ?? 0), superpowerTier(snap.superpowers?.china?.stance ?? 0));
-}
-
-export function superpowerTier(stance: number): number {
-  if (stance >= BALANCE.superpowerNoFlyTier) return 3;
-  if (stance >= BALANCE.superpowerShieldTier) return 2;
-  if (stance >= BALANCE.superpowerArmsTier) return 1;
-  return 0;
 }
 
 /** Coalition aircraft may not enter Iranian airspace once the no-fly zone holds. */
@@ -195,7 +198,9 @@ export function updateChokepoints(snap: GameSnapshot, map: TheaterMap): void {
   if (snap.meters.hormuz > 50) snap.meters.hormuzTurnsAbove50 += 1;
   if (snap.meters.hormuz > 70) snap.meters.hormuzTurnsAbove70 += 1;
   snap.meters.oilPrice = clamp(
-    60 + snap.meters.hormuz * 0.9 + (snap.suezClosed ? 25 : 0),
+    // Global oil price index (Phase 1): Hormuz disruption, the sustained-
+    // disruption premium and Suez closure all feed one visible index.
+    60 + snap.meters.hormuz * 0.9 + snap.meters.hormuzTurnsAbove50 * 2 + (snap.suezClosed ? 25 : 0),
     40,
     220,
   );
@@ -367,80 +372,6 @@ export function thirdPartyPhase(snap: GameSnapshot, map: TheaterMap, rng: () => 
 
   // --- India's naval presence is reflected in the Hormuz calculation --------
   void map;
-}
-
-export interface Outcome {
-  status: 'playing' | 'won' | 'lost';
-  outcome: string;
-}
-
-/** Check every faction's victory/defeat conditions (player-relative result). */
-export function checkOutcome(snap: GameSnapshot, map: TheaterMap): Outcome {
-  const bases = operationalGulfBases(snap, map);
-  const hardened = ['isfahan', 'natanz', 'fordow'].map((id) => nodeState(snap, id).integrity);
-  const hardenedDown = hardened.every((v) => v <= 0);
-  const csgAlive = snap.units.some((u) => u.typeId === 'csg');
-  const launchers = snap.units.filter((u) => u.typeId === 'asm_launcher' || u.typeId === 'fateh110' || u.typeId === 'khorramshahr').length;
-  const tehran = nodeState(snap, 'tehran').integrity;
-  const iranVictory = snap.meters.iranWarCost >= snap.meters.iranWarCostThreshold && bases >= 3 && !snap.pakistanTriggered;
-
-  // A nuclear release is never a campaign victory, whatever the map says.
-  if (snap.meters.nuclearStrikes > 0 && (snap.faction === 'usa' || snap.faction === 'israel')) {
-    return {
-      status: 'lost',
-      outcome:
-        'The first nuclear release since 1945. Russia and China put their forces on alert, every Gulf host closed its bases and the campaign ends in a global crisis — not a victory.',
-    };
-  }
-
-  if (snap.faction === 'usa') {
-    if (iranVictory || (hardenedDown && snap.turn <= 30)) {
-      return {
-        status: 'won',
-        outcome: hardenedDown
-          ? 'Iran’s hardened nuclear and missile complex is destroyed. The programme is set back a decade.'
-          : 'Iran accepted a ceasefire: its war cost passed the threshold while the Gulf basing network held.',
-      };
-    }
-    if (bases === 0) {
-      return { status: 'lost', outcome: 'Every major Gulf base is out of action. Washington orders a general withdrawal.' };
-    }
-    if (!csgAlive && bases < 2) {
-      return { status: 'lost', outcome: 'The carrier strike group is lost and fewer than two bases remain: political will collapses.' };
-    }
-  }
-
-  if (snap.faction === 'israel') {
-    if (snap.turn > BALANCE.israelSurviveTurns && snap.meters.populationImpacts <= 2 && launchers < snap.meters.launchersAtStart * 0.3) {
-      return {
-        status: 'won',
-        outcome: `Israel held out for ${BALANCE.israelSurviveTurns} turns, kept its cities intact and broke Iran’s launch force.`,
-      };
-    }
-    if (snap.resources.interceptorsIsrael <= 0 && snap.meters.populationImpacts >= 5) {
-      return { status: 'lost', outcome: 'Interceptors are exhausted and five missiles have landed on Israeli cities. Domestic collapse.' };
-    }
-  }
-
-  if (snap.faction === 'iran') {
-    if (
-      (snap.turn > BALANCE.iranSurviveTurns && tehran > 0 && snap.meters.leadershipStrikes <= 3 && snap.meters.hormuzTurnsAbove50 >= 10) ||
-      snap.resources.politicalWill <= 0
-    ) {
-      return {
-        status: 'won',
-        outcome:
-          snap.resources.politicalWill <= 0
-            ? 'US political will reached zero. The Americans are withdrawing — the regime survives.'
-            : 'Thirty turns survived, the regime intact, and Hormuz strangled for ten of them. Iran has outlasted its enemies.',
-      };
-    }
-    if (hardenedDown && snap.meters.hormuz < 20 && tehran < 30) {
-      return { status: 'lost', outcome: 'Production is destroyed, Hormuz is open and Tehran is in ruins. The regime cannot continue.' };
-    }
-  }
-
-  return { status: 'playing', outcome: '' };
 }
 
 export function hostStatusLabel(host: { status: string }): string {

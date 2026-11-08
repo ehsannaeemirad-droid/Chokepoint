@@ -6,6 +6,7 @@ import Phaser from 'phaser';
 import { COLORS, FACTION_COLORS } from '../core/config';
 import type { Game } from '../core/Game';
 import type { MapNodeDef, NodeKind, UnitInstance } from '../core/types';
+import { strikeTargetsFor } from '../combat/targets';
 import { langRevision, localName } from '../i18n';
 import { hexCorners, hexDistance, hexesInRange } from './hex';
 import type { TheaterMap } from './TheaterMap';
@@ -48,6 +49,7 @@ export class MapMarkers {
       this.game.selection.hexId ?? '-',
       this.game.selection.unitUid ?? '-',
       this.game.selection.mode,
+      this.game.snap.units.length,
       langRevision(),
     ].join('|');
   }
@@ -82,6 +84,33 @@ export class MapMarkers {
           this.g.fillPoints(hexCorners(tile.x, tile.y, 28).map((p) => new Phaser.Math.Vector2(p.x, p.y)), true);
           this.g.lineStyle(1 / zoom, color, 0.25);
           this.g.strokePoints(hexCorners(tile.x, tile.y, 28).map((p) => new Phaser.Math.Vector2(p.x, p.y)), true);
+        }
+      }
+    }
+
+    // --- valid-target highlights + restriction markers (Phase 5) -------------
+    if (unit && center && this.game.selection.mode === 'strike') {
+      const targets = strikeTargetsFor(
+        this.game.snap,
+        this.map,
+        unit,
+        (nodeId) => {
+          const node = this.map.nodeById.get(nodeId);
+          return node ? localName(node) : nodeId;
+        },
+        (col, row) => `${col},${row}`,
+      );
+      for (const target of targets) {
+        const tile = this.map.hexAt(target.col, target.row);
+        if (!tile) continue;
+        this.g.fillStyle(0xd32f2f, 0.22);
+        this.g.fillPoints(hexCorners(tile.x, tile.y, 28).map((p) => new Phaser.Math.Vector2(p.x, p.y)), true);
+        this.g.lineStyle(1.5 / zoom, 0xff6b6b, 0.9);
+        this.g.strokePoints(hexCorners(tile.x, tile.y, 28).map((p) => new Phaser.Math.Vector2(p.x, p.y)), true);
+        // Restriction marker: hardened and buried sites need a bunker-buster.
+        if (target.hardened || target.buried) {
+          this.g.fillStyle(0xffa000, 0.95);
+          this.g.fillTriangle(tile.x, tile.y - 30 / zoom - 8 / zoom, tile.x - 5 / zoom, tile.y - 30 / zoom - 16 / zoom, tile.x + 5 / zoom, tile.y - 30 / zoom - 16 / zoom);
         }
       }
     }

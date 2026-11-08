@@ -1,12 +1,21 @@
 /** localStorage persistence: autosave, three manual slots, replay export. */
 import type { GameSnapshot } from '../core/types';
+import { DEFAULT_VICTORY } from '../politics/victory';
+import { DEFAULT_DOMESTIC_CFG, defaultDomesticState } from '../politics/domestic';
+import { DEFAULT_ESCALATION_CFG, defaultEscalationState } from '../politics/escalation';
+import { DEFAULT_LOGISTICS_CFG } from '../core/engine';
+import { DEFAULT_ROE_CFG, defaultRoeState } from '../politics/roe';
+import { DEFAULT_SCORECARD_CFG } from '../politics/scorecard';
+import { DEFAULT_INITIATIVE_CFG, defaultIsraelInitiative } from '../politics/initiative';
+import { DEFAULT_TALKS_CFG, defaultCeasefireTalks } from '../politics/talks';
 
 const PREFIX = 'chokepoint';
 export const SLOTS = ['auto', 'slot1', 'slot2', 'slot3'] as const;
 export type SlotId = (typeof SLOTS)[number];
 
 export interface SaveFile {
-  version: 1;
+  /** v3: the improvement blocks (escalation, logistics, ROE, scorecard) join the v2 fields. */
+  version: 3;
   savedAt: number;
   slot: SlotId;
   label: string;
@@ -21,7 +30,7 @@ const keyFor = (slot: SlotId) => `${PREFIX}:save:${slot}`;
 export function saveGame(slot: SlotId, snapshot: GameSnapshot): boolean {
   try {
     const file: SaveFile = {
-      version: 1,
+      version: 3,
       savedAt: Date.now(),
       slot,
       label: `${snapshot.faction.toUpperCase()} · turn ${snapshot.turn}`,
@@ -37,16 +46,59 @@ export function saveGame(slot: SlotId, snapshot: GameSnapshot): boolean {
   }
 }
 
+/** Save versions this build can load. v1 (pre-Phase-2) and v2 (v0.2) files are migrated. */
+const SUPPORTED_SAVE_VERSIONS = [1, 2, 3] as const;
+
 export function loadGame(slot: SlotId): SaveFile | null {
   try {
     const raw = localStorage.getItem(keyFor(slot));
     if (!raw) return null;
     const parsed = JSON.parse(raw) as SaveFile;
-    if (parsed.version !== 1 || !parsed.snapshot) return null;
-    return parsed;
+    // Migration: a v1 save predates the Phase 2-6 snapshot blocks; the same
+    // forward-compatible normalizer that served Phase 1 fills in the defaults.
+    if (!(SUPPORTED_SAVE_VERSIONS as readonly number[]).includes(parsed.version) || !parsed.snapshot) return null;
+    return { ...parsed, version: 3, snapshot: normalizeSnapshot(parsed.snapshot) };
   } catch {
     return null;
   }
+}
+
+/**
+ * Forward-compatible defaults for v1 saves written before Phase 1: the victory
+ * block and the new per-turn streaks simply start from zero. Values already
+ * present on the snapshot are never overwritten. Phase 2 adds the same
+ * treatment for the domestic block and its collapse streak.
+ */
+function normalizeSnapshot(snapshot: GameSnapshot): GameSnapshot {
+  const meters = snapshot.meters as Partial<GameSnapshot['meters']> & GameSnapshot['meters'];
+  if (meters.regimeIntactStreak === undefined) meters.regimeIntactStreak = 0;
+  if (meters.occupationStreak === undefined) meters.occupationStreak = 0;
+  if (meters.maxOccupationStreak === undefined) meters.maxOccupationStreak = 0;
+  if (meters.oilShockStreak === undefined) meters.oilShockStreak = 0;
+  if (meters.domesticPressureStreak === undefined) meters.domesticPressureStreak = 0;
+  if (meters.israeliAirAtStart === undefined) meters.israeliAirAtStart = 2;
+  if (snapshot.victory === undefined) {
+    snapshot.victory = snapshot.scenarioId === 'tutorial' ? null : DEFAULT_VICTORY;
+  }
+  if (snapshot.domesticCfg === undefined) snapshot.domesticCfg = DEFAULT_DOMESTIC_CFG;
+  if (snapshot.domestic === undefined) snapshot.domestic = defaultDomesticState(snapshot.domesticCfg);
+  if (snapshot.initiativeCfg === undefined) snapshot.initiativeCfg = DEFAULT_INITIATIVE_CFG;
+  if (snapshot.israelInitiative === undefined) snapshot.israelInitiative = defaultIsraelInitiative(snapshot.initiativeCfg);
+  if (snapshot.talksCfg === undefined) snapshot.talksCfg = DEFAULT_TALKS_CFG;
+  if (snapshot.ceasefire === undefined) snapshot.ceasefire = defaultCeasefireTalks();
+  if (snapshot.escalationCfg === undefined) snapshot.escalationCfg = DEFAULT_ESCALATION_CFG;
+  if (snapshot.escalation === undefined) snapshot.escalation = defaultEscalationState();
+  if (snapshot.logisticsCfg === undefined) snapshot.logisticsCfg = DEFAULT_LOGISTICS_CFG;
+  if (snapshot.roeCfg === undefined) snapshot.roeCfg = DEFAULT_ROE_CFG;
+  if (snapshot.roe === undefined) snapshot.roe = defaultRoeState();
+  if (snapshot.scorecardCfg === undefined) snapshot.scorecardCfg = DEFAULT_SCORECARD_CFG;
+  // A snapshot that already ended keeps its stored settlement; one saved on
+  // the terminal turn by an older build simply builds nothing here.
+  // Packages in transit in pre-improvement saves simply keep their base ETA.
+  for (const r of snapshot.reinforcements ?? []) {
+    if (r.delayTurns === undefined) r.delayTurns = 0;
+  }
+  return snapshot;
 }
 
 export function listSaves(): Array<{ slot: SlotId; label: string; savedAt: number } | null> {
@@ -65,7 +117,10 @@ export function exportReplay(snapshot: GameSnapshot): string {
   return JSON.stringify(
     {
       kind: 'chokepoint-replay',
-      version: 1,
+      /** Replay format v3 (v0.3). The payload is unchanged: seed + order log
+       * still reproduce the campaign byte-identically; the bump only marks
+       * that newer snapshot fields exist alongside. */
+      version: 3,
       scenarioId: snapshot.scenarioId,
       faction: snapshot.faction,
       seed: snapshot.seed,

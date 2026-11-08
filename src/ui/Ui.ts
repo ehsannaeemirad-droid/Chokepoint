@@ -5,12 +5,12 @@
  * The interface is bilingual (English / Persian). All chrome goes through
  * `t()`; map nodes and units use their localised data fields.
  */
-import { hostileTo, strikeRange, validateStrike } from '../combat/combat';
+import { strikeTargetsFor, type StrikeTarget } from '../combat/targets';
 import { FACTION_COLORS } from '../core/config';
-import { ISRAEL_AIRLIFT, REINFORCEMENTS } from '../core/engine';
+import { ISRAEL_AIRLIFT, REINFORCEMENTS, effectiveArrival } from '../core/engine';
 import { game, SCENARIOS, type Game, type InteractionMode } from '../core/Game';
 import type { FactionId, Order, ResolveEvent, UnitInstance } from '../core/types';
-import { defenderOfNode, unitType } from '../core/world';
+import { unitType } from '../core/world';
 import {
   getLang,
   localEffect,
@@ -21,13 +21,24 @@ import {
   type Lang,
   type StringKey,
 } from '../i18n';
-import { hexDistance } from '../map/hex';
+import { faLog, faOutcome } from '../i18n/log';
 import { TERRAIN } from '../map/terrain';
+import { bandLabel, nodeIntegrityEstimate, unitStrengthEstimate } from './fog';
 import { majorBaseState } from '../politics/politics';
+import { domesticCfg } from '../politics/domestic';
+import { escalationCfg } from '../politics/escalation';
+import { ROE_POSTURES, roeCfg } from '../politics/roe';
+import { initiativeCfg } from '../politics/initiative';
+import { talksCfg } from '../politics/talks';
+import { victoryPaths } from '../politics/victory';
 import { deleteSave, downloadText, exportReplay, listSaves, SLOTS, type SlotId } from '../services/save';
+import { Minimap } from './Minimap';
 import { bus, focusHex, zoomBy } from './bus';
+import { filterNodes, NAV_KINDS, nextOwnUid, nextThreatUid, nodeCatalog, type NavEntry, type NavKind } from './nav';
 
 const $ = <T extends HTMLElement>(selector: string): T => document.querySelector(selector) as T;
+
+const navKindKey = (kind: string): StringKey => `nav.kind.${kind}` as StringKey;
 
 const CATEGORY_LABELS: Record<string, string> = {
   air: 'AIR',
@@ -108,7 +119,15 @@ function template(): string {
   <button data-action="zoom-in" aria-label="${t('btn.zoomIn')}" data-tip="${t('btn.zoomIn')}">+</button>
   <button data-action="zoom-out" aria-label="${t('btn.zoomOut')}" data-tip="${t('btn.zoomOut')}">−</button>
   <button data-action="recentre" aria-label="${t('btn.recentre')}" data-tip="${t('btn.recentre')}">◎</button>
+  <button data-action="forces-cycle" aria-label="${t('btn.myForces')}" data-tip="${t('btn.myForces')}">⚑</button>
+  <button data-action="next-threat" aria-label="${t('btn.nextThreat')}" data-tip="${t('btn.nextThreat')}">⚠</button>
+  <button data-action="minimap-toggle" aria-label="${t('btn.minimap')}" data-tip="${t('btn.minimap')}">▣</button>
+  <button data-action="nav" aria-label="${t('btn.jump')}" data-tip="${t('btn.jump')}">⌖</button>
 </div>
+
+<div id="minimap-root" class="minimap-root"></div>
+
+<div id="nav-drawer" class="nav-drawer" role="dialog" aria-label="${t('nav.title')}"></div>
 
 <div class="bottom">
   <div id="order-strip" class="order-strip"></div>
@@ -154,17 +173,7 @@ const TUTORIAL_HINTS: Record<number, StringKey> = {
   5: 'tutorial.5',
 };
 
-interface StrikeTarget {
-  col: number;
-  row: number;
-  nodeId?: string;
-  label: string;
-  dist: number;
-  integrity?: number;
-  buried?: number;
-  hardened: boolean;
-  units: boolean;
-}
+
 
 export class Ui {
   private root: HTMLElement;
@@ -179,6 +188,20 @@ export class Ui {
   private cinEvents: ResolveEvent[] = [];
   private cinIndex = 0;
   private modalKind: 'menu' | 'outcome' | null = null;
+  private navOpen = false;
+  private navQuery = '';
+  private navKind: NavKind = 'all';
+  private threatVisited: string[] = [];
+  private forcesVisited: string[] = [];
+  private minimap: Minimap | null = null;
+
+  private get reducedMotion(): boolean {
+    try {
+      return typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch {
+      return false;
+    }
+  }
 
   constructor(gameInstance: Game = game) {
     this.game = gameInstance;
@@ -191,6 +214,8 @@ export class Ui {
       this.showToast(detail.message, detail.tone);
     }) as EventListener);
     onLangChange(() => this.rebuildShell());
+    this.mountMinimap();
+    this.bindKeyboard();
     this.render();
     this.showToast(t('toast.ready'), 'info');
     // Land on the campaign menu so a new player picks a scenario and a faction
@@ -210,6 +235,21 @@ export class Ui {
     this.root.addEventListener('click', (event) => {
       const modal = event.target as HTMLElement;
       if (modal.id === 'modal') this.closeModal();
+    });
+
+    // Bilingual search in the jump drawer re-renders the result list only.
+    this.root.addEventListener('input', (event) => {
+      const input = event.target as HTMLElement;
+      if (input.id !== 'nav-search') return;
+      this.navQuery = (input as HTMLInputElement).value;
+      const drawer = document.getElementById('nav-drawer');
+      if (drawer && this.navOpen) drawer.innerHTML = this.navDrawerHtml();
+      const fresh = document.getElementById('nav-search');
+      if (fresh) {
+        fresh.focus();
+        const caret = this.navQuery.length;
+        (fresh as HTMLInputElement).setSelectionRange(caret, caret);
+      }
     });
 
     this.root.addEventListener('pointerdown', (event) => {
@@ -344,6 +384,26 @@ export class Ui {
       this.showToast(result.ok ? t('toast.airlift') : (result.reason ?? t('toast.invalid')), result.ok ? 'good' : 'warn');
       return;
     }
+    if (verb === 'communicate') {
+      const result = this.game.queueOrder({ kind: 'communicate' });
+      this.showToast(result.ok ? t('toast.communicate') : (result.reason ?? t('toast.invalid')), result.ok ? 'good' : 'warn');
+      return;
+    }
+    if (verb === 'initiative' && a) {
+      const result = this.game.queueOrder({ kind: 'israel-initiative', stance: a as 'approved' | 'constrained' | 'accepted' });
+      this.showToast(result.ok ? t('toast.initiative') : (result.reason ?? t('toast.invalid')), result.ok ? 'good' : 'warn');
+      return;
+    }
+    if (verb === 'talks' && a) {
+      const result = this.game.queueOrder({ kind: 'talks', stance: a as 'pursue' | 'walk' });
+      this.showToast(result.ok ? t('toast.talks') : (result.reason ?? t('toast.invalid')), result.ok ? 'good' : 'warn');
+      return;
+    }
+    if (verb === 'roe' && a) {
+      const result = this.game.queueOrder({ kind: 'roe', posture: a as 'constrained' | 'standard' | 'aggressive' });
+      this.showToast(result.ok ? t('toast.roe') : (result.reason ?? t('toast.invalid')), result.ok ? 'good' : 'warn');
+      return;
+    }
     if (verb === 'produce' && a) {
       const result = this.game.queueOrder({ kind: 'produce', unitTypeId: a, count: 1 });
       this.showToast(result.ok ? t('toast.produce') : (result.reason ?? t('toast.invalid')), result.ok ? 'good' : 'warn');
@@ -357,6 +417,21 @@ export class Ui {
       }
       return;
     }
+    if (verb === 'nav') return this.toggleNav();
+    if (verb === 'nav-kind' && a) {
+      this.navKind = a as NavKind;
+      this.render();
+      return;
+    }
+    if (verb === 'nav-jump' && a) {
+      const catalog = nodeCatalog(this.game.snap, this.game.map);
+      const entry = catalog.find((e) => e.id === a);
+      if (entry) this.jumpToNode(entry);
+      return;
+    }
+    if (verb === 'forces-cycle') return this.cycleOwnForces();
+    if (verb === 'next-threat') return this.jumpToNextThreat();
+    if (verb === 'minimap-toggle') return this.toggleMinimap();
     if (verb === 'skip-cinematic') return this.revealAll();
     if (verb === 'continue-cinematic') return this.closeCinematic();
     if (verb === 'close-modal') return this.closeModal();
@@ -397,6 +472,109 @@ export class Ui {
       this.openMenu();
       return;
     }
+  }
+
+  private mountMinimap(): void {
+    const root = document.getElementById('minimap-root');
+    if (!root) return;
+    this.minimap?.destroy();
+    this.minimap = new Minimap(root, this.game);
+  }
+
+  /**
+   * Phase 5 keyboard support: arrows/WASD pan, +/- zoom, N next unit,
+   * T next threat, J jump drawer, M minimap, Escape closes (bound above).
+   */
+  private bindKeyboard(): void {
+    window.addEventListener('keydown', (event) => {
+      const target = event.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
+      const pan = 110;
+      switch (event.key) {
+        case 'ArrowLeft':
+          bus.dispatchEvent(new CustomEvent('pan', { detail: { dx: -pan, dy: 0 } }));
+          break;
+        case 'ArrowRight':
+          bus.dispatchEvent(new CustomEvent('pan', { detail: { dx: pan, dy: 0 } }));
+          break;
+        case 'ArrowUp':
+          bus.dispatchEvent(new CustomEvent('pan', { detail: { dx: 0, dy: -pan } }));
+          break;
+        case 'ArrowDown':
+          bus.dispatchEvent(new CustomEvent('pan', { detail: { dx: 0, dy: pan } }));
+          break;
+        case '+':
+        case '=':
+          zoomBy(1.25);
+          break;
+        case '-':
+          zoomBy(0.8);
+          break;
+        case 'n':
+        case 'N':
+          this.selectNextReadyUnit();
+          break;
+        case 't':
+        case 'T':
+          this.jumpToNextThreat();
+          break;
+        case 'j':
+        case 'J':
+          this.toggleNav();
+          break;
+        case 'm':
+        case 'M':
+          this.toggleMinimap();
+          break;
+        default:
+          return;
+      }
+      event.preventDefault();
+    });
+  }
+
+  private toggleNav(): void {
+    this.navOpen = !this.navOpen;
+    this.render();
+  }
+
+  private toggleMinimap(): void {
+    const root = document.getElementById('minimap-root');
+    if (!root) return;
+    root.classList.toggle('hidden');
+  }
+
+  private jumpToNode(entry: NavEntry): void {
+    focusHex({ col: entry.col, row: entry.row });
+    this.game.selectHex(entry.col, entry.row);
+    this.navOpen = false;
+    this.render();
+  }
+
+  private jumpToNextThreat(): void {
+    const uid = nextThreatUid(this.game.snap, this.threatVisited);
+    if (!uid) {
+      this.showToast(t('toast.noThreat'), 'info');
+      return;
+    }
+    this.threatVisited = [...this.threatVisited, uid].slice(-24);
+    const unit = this.game.snap.units.find((u) => u.uid === uid);
+    if (!unit) return;
+    focusHex({ col: unit.col, row: unit.row });
+    this.game.selectHex(unit.col, unit.row);
+  }
+
+  private cycleOwnForces(): void {
+    const uid = nextOwnUid(this.game.snap, this.forcesVisited);
+    if (!uid) {
+      this.showToast(t('toast.nothingNext'), 'warn');
+      return;
+    }
+    this.forcesVisited = [...this.forcesVisited, uid].slice(-48);
+    const unit = this.game.snap.units.find((u) => u.uid === uid);
+    if (!unit) return;
+    focusHex({ col: unit.col, row: unit.row });
+    this.game.selectUnit(unit.uid);
   }
 
   // ------------------------------------------------------------------ render
@@ -441,6 +619,35 @@ export class Ui {
       log.innerHTML = this.logHtml();
       log.scrollTop = log.scrollHeight;
     }
+
+    const drawer = $('#nav-drawer');
+    drawer.classList.toggle('open', this.navOpen);
+    if (this.navOpen) drawer.innerHTML = this.navDrawerHtml();
+  }
+
+  private navDrawerHtml(): string {
+    const catalog = nodeCatalog(this.game.snap, this.game.map);
+    const results = filterNodes(catalog, this.navQuery, this.navKind);
+    const chips = NAV_KINDS.map(
+      (kind) =>
+        `<button class="choice ${this.navKind === kind ? 'active' : ''}" data-action="nav-kind:${kind}">${t(navKindKey(kind))}</button>`,
+    ).join('');
+    const rows = results
+      .map(
+        (entry) =>
+          `<button class="nav-row" data-action="nav-jump:${entry.id}">
+            <span class="dot" style="background:${FACTION_COLORS[entry.kind === 'nuclear' ? 'iran' : entry.kind === 'airbase' ? 'usa' : 'neutral']}"></span>
+            <span class="f-name">${getLang() === 'fa' ? entry.nameFa : entry.name}<small>${t(navKindKey(entry.kind))}</small></span>
+            <span class="f-stat">${t('target.hex', { col: entry.col, row: entry.row })}</span>
+          </button>`,
+      )
+      .join('');
+    return `<header class="panel-head"><h3>${t('nav.title')}</h3><button data-action="nav" aria-label="${t('btn.close')}">✕</button></header>
+      <div class="panel-body">
+        <input id="nav-search" type="search" placeholder="${t('nav.search')}" aria-label="${t('nav.search')}" value="${this.navQuery.replace(/"/g, '&quot;')}">
+        <div class="choice-row nav-chips">${chips}</div>
+        <div class="nav-results">${rows || `<p class="note">${t('nav.empty')}</p>`}</div>
+      </div>`;
   }
 
   private gaugesHtml(): string {
@@ -450,6 +657,8 @@ export class Ui {
       pills.push([t('gauge.int'), `${Math.round(s.resources.interceptorsUSA)}`, t('tip.intUS')]);
       pills.push([t('gauge.will'), `${Math.round(s.resources.politicalWill)}`, t('tip.willUS')]);
       pills.push([t('gauge.lift'), `${Math.round(s.resources.airlift)}`, t('tip.lift')]);
+      pills.push([t('gauge.congress'), `${Math.round(s.domestic?.congress ?? 0)}`, t('tip.congress')]);
+      pills.push([t('gauge.econ'), `${Math.round(s.domestic?.economy ?? 0)}`, t('tip.econ')]);
     } else if (s.faction === 'israel') {
       pills.push([t('gauge.int'), `${Math.round(s.resources.interceptorsIsrael)}`, t('tip.intIL')]);
       pills.push([t('gauge.tank'), `${Math.round(s.resources.tankerSorties)}`, t('tip.tank')]);
@@ -511,6 +720,16 @@ export class Ui {
         return REINFORCEMENTS.find((r) => r.id === order.packageId)?.label ?? (fa ? 'نیروی کمکی' : 'Reinforcement');
       case 'airlift':
         return fa ? 'ترابری به اسرائیل' : 'Airlift to Israel';
+      case 'communicate':
+        return fa ? 'پیام عمومی' : 'Public address';
+      case 'israel-initiative':
+        return fa
+          ? `دستور اسرائیل: ${order.stance === 'approved' ? 'تأیید' : order.stance === 'constrained' ? 'محدود' : 'پذیرش'}`
+          : `Israel directive: ${order.stance}`;
+      case 'talks':
+        return fa ? (order.stance === 'pursue' ? 'پیگیری مذاکرات' : 'ترک مذاکرات') : order.stance === 'pursue' ? 'Pursue talks' : 'Walk away';
+      case 'roe':
+        return t(`roe.${order.posture}`);
       case 'special': {
         const nodeId = this.game.map.hexToNode.get(`${order.col},${order.row}`);
         const node = nodeId ? this.game.map.nodeById.get(nodeId) : undefined;
@@ -615,9 +834,15 @@ export class Ui {
         : target.hardened
           ? `<em class="badge hard">${t('target.hardened')}</em>`
           : '';
+      const targetEst = target.nodeId
+        ? nodeIntegrityEstimate(this.game.snap, this.game.map, target.nodeId)
+        : null;
+      const integrityText = targetEst
+        ? t('fog.band', { lo: bandLabel(targetEst) })
+        : `${Math.round(target.integrity ?? 100)}`;
       const meta = target.units
         ? t('target.metaUnits', { dist: target.dist })
-        : t('target.meta', { dist: target.dist, integrity: Math.round(target.integrity ?? 100) });
+        : t('target.meta', { dist: target.dist, integrity: integrityText });
       return `<button class="target-row" data-action="attack:${unit.uid}:${target.col},${target.row}:${target.nodeId ?? ''}">
         <span class="t-main"><b>${target.label}</b>${badge}</span>
         <span class="t-meta">${meta}</span>
@@ -636,17 +861,23 @@ export class Ui {
     const fa = getLang() === 'fa';
     const unitChips = units.length
       ? `<div class="hex-units">${units
-          .map((u) =>
-            u.faction === this.game.snap.faction
-              ? `<button class="unit-chip ${u.faction}" data-action="select:${u.uid}">${unitLabel(u)} · ${Math.round(u.strength)}%</button>`
-              : `<span class="unit-chip ${u.faction}">${unitLabel(u)} · ${Math.round(u.strength)}%</span>`,
-          )
+          .map((u) => {
+            const chipEst = unitStrengthEstimate(this.game.snap, u);
+            const strengthText = chipEst ? t('fog.band', { lo: bandLabel(chipEst) }) : `${Math.round(u.strength)}%`;
+            return u.faction === this.game.snap.faction
+              ? `<button class="unit-chip ${u.faction}" data-action="select:${u.uid}">${unitLabel(u)} · ${strengthText}</button>`
+              : `<span class="unit-chip ${u.faction}" data-tip="${t('tip.fog')}">${unitLabel(u)} · ${strengthText}</span>`;
+          })
           .join('')}</div>`
       : '';
 
     if (node) {
       const state = this.game.snap.nodes[node.id];
       const integrity = state ? Math.round(state.integrity) : 100;
+      // Phase 4: enemy facility integrity shows as a recon-quality estimate.
+      const fogEst = nodeIntegrityEstimate(this.game.snap, this.game.map, node.id);
+      const integrityText = fogEst ? t('fog.band', { lo: bandLabel(fogEst) }) : `${integrity}%`;
+      const integrityBar = fogEst ? Math.round((fogEst.lo + fogEst.hi) / 2) : integrity;
       const buriedWarn = node.buried
         ? `<div class="warn-line">${t('sheet.buried', { n: node.buried })} — ${t('sheet.buriedWarn')}</div>`
         : node.hardened
@@ -658,7 +889,7 @@ export class Ui {
           <div class="u-title"><b>${localName(node)}</b><span>${nodeKindLabel(node.kind)} · ${factionLabel(node.host)}</span></div>
           <button class="x" data-action="clear-selection" aria-label="${t('btn.close')}">✕</button>
         </div>
-        <div class="meter-row"><span>${t('sheet.integrity')}</span><div class="bar"><i style="width:${integrity}%;background:${integrity > 60 ? 'var(--ok)' : integrity > 25 ? 'var(--warn)' : 'var(--alert)'}"></i></div><b>${integrity}%</b></div>
+        <div class="meter-row"${fogEst ? ` data-tip="${t('tip.fog')}"` : ''}><span>${t('sheet.integrity')}</span><div class="bar"><i style="width:${integrityBar}%;background:${integrityBar > 60 ? 'var(--ok)' : integrityBar > 25 ? 'var(--warn)' : 'var(--alert)'}"></i></div><b>${integrityText}</b></div>
         <p class="effect">${localEffect(node)}</p>
         ${fa ? '' : `<p class="detail">${node.detail}${node.personnel ? ` · ${t('sheet.personnel', { n: node.personnel.toLocaleString() })}` : ''}</p>`}
         ${buriedWarn}
@@ -739,19 +970,26 @@ export class Ui {
         if (!node || !state) return '';
         const value = Math.round(state.integrity);
         const tag = node.buried ? ` · ${node.buried}m` : '';
-        return `<div class="facility-row"><span>${localName(node)}${tag}</span><div class="bar"><i style="width:${value}%;background:${value > 50 ? 'var(--ok)' : value > 0 ? 'var(--warn)' : 'var(--alert)'}"></i></div><b>${value}%</b></div>`;
+        const est = nodeIntegrityEstimate(s, this.game.map, id);
+        const shown = est ? Math.round((est.lo + est.hi) / 2) : value;
+        const label = est ? t('fog.band', { lo: bandLabel(est) }) : `${value}%`;
+        return `<div class="facility-row"${est ? ` data-tip="${t('tip.fog')}"` : ''}><span>${localName(node)}${tag}</span><div class="bar"><i style="width:${shown}%;background:${shown > 50 ? 'var(--ok)' : shown > 0 ? 'var(--warn)' : 'var(--alert)'}"></i></div><b>${label}</b></div>`;
       })
       .join('');
 
-    const launchers = s.units.filter((u) => u.typeId === 'asm_launcher').length;
-    const facs = s.units.filter((u) => u.typeId === 'fac').length;
+    // Phase 4: only revealed Iranian batteries are countable from the outside.
+    const seeAll = s.faction === 'iran';
+    const launchers = s.units.filter((u) => u.typeId === 'asm_launcher' && (seeAll || u.revealed)).length;
+    const facs = s.units.filter((u) => u.typeId === 'fac' && (seeAll || u.revealed)).length;
+    const launcherLabel = seeAll ? `${launchers} × 10%` : `${launchers}+ × 10%`;
+    const facLabel = seeAll ? `${facs} × 5%` : `${facs}+ × 5%`;
     const naval = s.units.filter(
       (u) => (u.faction === 'usa' || u.faction === 'israel') && unitType(u.typeId).category === 'naval',
     ).length;
     const hormuzCalc = `<div class="calc">
-      <div><span>${t('panel.asm')}</span><b>${launchers} × 10%</b></div>
-      <div><span>${t('panel.mines')}</span><b>${s.iran.minesLaid} × 15%</b></div>
-      <div><span>${t('panel.fac')}</span><b>${facs} × 5%</b></div>
+      <div><span>${t('panel.asm')}</span><b>${launcherLabel}</b></div>
+      <div><span>${t('panel.mines')}</span><b>${seeAll ? `${s.iran.minesLaid} × 15%` : `≥ ${Math.max(0, s.iran.minesLaid - 1)} × 15%`}</b></div>
+      <div><span>${t('panel.fac')}</span><b>${facLabel}</b></div>
       <div><span>${t('panel.coalitionNaval')}</span><b>−${naval * 10 + (s.hosts.bahrain?.status !== 'closed' ? 10 : 0)}%</b></div>
       <div class="total"><span>${t('panel.disruption')}</span><b>${Math.round(s.meters.hormuz)}%</b></div>
       <small>${t('panel.above50', { a: s.meters.hormuzTurnsAbove50, b: s.meters.hormuzTurnsAbove70 })}</small>
@@ -760,7 +998,11 @@ export class Ui {
     let factionSection = '';
     if (s.faction === 'usa') {
       const pending = s.reinforcements
-        .map((r) => `<div class="queue-row"><span>${r.label}</span><b>${t('panel.arrives', { n: r.arrivesTurn })}</b></div>`)
+        .map((r) => {
+          const eta = effectiveArrival(r);
+          const late = (r.delayTurns ?? 0) > 0;
+          return `<div class="queue-row"><span>${r.label}${late ? ` <span class="status closed">${t('panel.delayed', { n: r.delayTurns! })}</span>` : ''}</span><b>${t('panel.arrives', { n: eta })}</b></div>`;
+        })
         .join('');
       const packages = REINFORCEMENTS.map(
         (pkg) => `<button class="pkg-row" data-action="reinforce:${pkg.id}">
@@ -793,6 +1035,142 @@ export class Ui {
       </section>`;
     }
 
+    // Phase 2: the domestic-pressure section. The gauge is visible to every
+    // faction (it is public news); the public-address order is US-only.
+    let domesticSection = '';
+    if (s.domestic) {
+      const d = s.domestic;
+      const cfg = domesticCfg(s);
+      const pressureTone = d.pressure >= cfg.collapsePressure ? 'alert' : d.pressure >= 60 ? 'warn' : 'ok';
+      const restrictionLabel =
+        d.restriction === 'restricted'
+          ? t('domestic.restricted')
+          : d.restriction === 'suspended'
+            ? t('domestic.suspended')
+            : t('domestic.none');
+      const pending = d.pending
+        ? `<small>${t('domestic.pending', { n: d.pending.effectiveTurn, level: d.pending.level === 'restricted' ? t('domestic.restricted') : d.pending.level === 'suspended' ? t('domestic.suspended') : t('domestic.none') })}</small>`
+        : '';
+      const onCooldown = d.cooldown > 0;
+      const communicate =
+        s.faction === 'usa'
+          ? `<button class="pkg-row" data-action="communicate" ${onCooldown ? 'disabled' : ''} data-tip="${t('tip.communicate', { cost: cfg.communicate.cost, gain: cfg.communicate.gain, cd: cfg.communicate.cooldown })}">
+              <span><b>${t('btn.communicate')}</b><small>${onCooldown ? t('domestic.cooldown', { n: d.cooldown }) : t('tip.communicate', { cost: cfg.communicate.cost, gain: cfg.communicate.gain, cd: cfg.communicate.cooldown })}</small></span>
+              <span class="pkg-cost">${cfg.communicate.cost}</span>
+            </button>`
+          : '';
+      domesticSection = `<section class="panel-section"><h4>${t('panel.domestic')}</h4>
+        <div class="meter-row"><span>${t('domestic.pressure')}</span><div class="bar"><i style="width:${d.pressure}%;background:var(--${pressureTone})"></i></div><b>${d.pressure}</b></div>
+        <div class="meter-row"><span>${t('gauge.congress')}</span><div class="bar"><i style="width:${Math.round(d.congress)}%;background:var(--info)"></i></div><b>${Math.round(d.congress)}</b></div>
+        <div class="meter-row"><span>${t('gauge.econ')}</span><div class="bar"><i style="width:${Math.round(d.economy)}%;background:var(--warn)"></i></div><b>${Math.round(d.economy)}</b></div>
+        <div class="host-top"><b>${t('domestic.restrictionLabel')}</b><span class="status ${d.restriction === 'none' ? 'open' : 'closed'}">${restrictionLabel}</span></div>
+        ${pending}
+        <small>${t('panel.casualties', { n: d.casualtiesTotal })}</small>
+        ${communicate}
+      </section>`;
+    }
+
+    // Improvement 6: rules-of-engagement presets — a coalition policy choice,
+    // visible to every faction (partners react to it too).
+    let roeSection = '';
+    if (s.roe) {
+      const cfg = roeCfg(s);
+      const current = s.roe.posture;
+      const buttons = ROE_POSTURES.map(
+        (posture) =>
+          `<button class="choice ${current === posture ? 'active' : ''}" data-action="roe:${posture}">${t(`roe.${posture}`)}</button>`,
+      ).join('');
+      roeSection = `<section class="panel-section"><h4>${t('roe.title')}</h4>
+        <div class="host-top"><b>${t('roe.standing')}</b><span class="status ${current === 'aggressive' ? 'closed' : current === 'constrained' ? 'restricted' : 'open'}">${t(`roe.${current}`)}</span></div>
+        ${s.faction === 'usa' || s.faction === 'israel' ? `<div class="choice-row roe">${buttons}</div>` : ''}
+        <small>${t('roe.tip', { dmg: Math.round((cfg[current].damageMultiplier - 1) * 100), esc: cfg[current].escalationMultiplier })}</small>
+      </section>`;
+    }
+
+    // Phase 3: the Israeli initiative track and the Qatari ceasefire talks.
+    let phase3Section = '';
+    const track = s.israelInitiative;
+    const talks = s.ceasefire;
+    if (track || talks) {
+      phase3Section = '<section class="panel-section">';
+      if (track) {
+        const cfg = initiativeCfg(s);
+        const tone = track.level >= cfg.aggressiveThreshold ? 'warn' : 'info';
+        const stanceLabel =
+          track.stance === 'approved'
+            ? t('initiative.approved')
+            : track.stance === 'constrained'
+              ? t('initiative.constrained')
+              : t('initiative.accepted');
+        const stanceButtons =
+          s.faction === 'usa'
+            ? `<div class="choice-row initiative">
+                ${(['approved', 'accepted', 'constrained'] as const)
+                  .map(
+                    (stance) =>
+                      `<button class="choice ${track.stance === stance ? 'active' : ''} ${track.stance === stance && stance !== 'accepted' ? 'current' : ''}" data-action="initiative:${stance}">${t(`initiative.${stance}`)}</button>`,
+                  )
+                  .join('')}
+              </div>`
+            : '';
+        phase3Section += `<h4>${t('initiative.title')}</h4>
+          <div class="meter-row"><span>${t('initiative.level')}</span><div class="bar"><i style="width:${Math.round(track.level)}%;background:var(--${tone})"></i></div><b>${Math.round(track.level)}</b></div>
+          <div class="host-top"><b>${t('initiative.stance')}</b><span class="status ${track.stance === 'constrained' ? 'closed' : 'open'}">${stanceLabel}</span></div>
+          ${stanceButtons}
+          <small>${t('initiative.tip', { threshold: cfg.aggressiveThreshold })}</small>`;
+      }
+      if (talks) {
+        const cfg = talksCfg(s);
+        const stateLabel =
+          talks.state === 'offered'
+            ? t('talks.offered')
+            : talks.state === 'talks'
+              ? t('talks.talks')
+              : talks.state === 'collapsed'
+                ? t('talks.collapsed')
+                : t('talks.none');
+        const bar =
+          talks.state === 'talks'
+            ? `<div class="meter-row"><span>${t('talks.progress')}</span><div class="bar"><i style="width:${talks.progress}%;background:var(--info)"></i></div><b>${Math.round(talks.progress)}/${cfg.agreeProgress}</b></div>`
+            : '';
+        const actions =
+          s.faction !== 'iran' && talks.state === 'offered'
+            ? `<div class="choice-row talks">
+                <button data-action="talks:pursue">${t('talks.pursue')}</button>
+                <button data-action="talks:walk">${t('talks.walk')}</button>
+              </div>`
+            : '';
+        phase3Section += `<h4>${t('talks.title')}</h4>
+          <div class="host-top"><b>${t('talks.state')}</b><span class="status ${talks.state === 'talks' ? 'open' : talks.state === 'offered' ? 'restricted' : 'closed'}">${stateLabel}</span></div>
+          ${bar}${actions}`;
+      }
+      phase3Section += '</section>';
+    }
+
+    // Improvement 1: the escalation ladder and its crossed red lines. Public
+    // news — every faction sees the same world heat.
+    let escalationSection = '';
+    if (s.escalation) {
+      const cfg = escalationCfg(s);
+      const level = s.escalation.level;
+      const max = cfg.levels.length;
+      const tone = level >= 4 ? 'alert' : level >= 2 ? 'warn' : 'info';
+      const fired = s.escalation.fired
+        .map((id) => {
+          const def = cfg.redLines.find((r) => r.id === id);
+          if (!def) return '';
+          const label = getLang() === 'fa' && def.label_fa ? def.label_fa : def.label;
+          return `<div class="host-top"><span class="status closed">${t('escalation.crossed')}</span><b>${label}</b></div>`;
+        })
+        .join('');
+      escalationSection = `<section class="panel-section"><h4>${t('escalation.title')}</h4>
+        <div class="meter-row"><span>${t('escalation.meter')}</span><div class="bar"><i style="width:${Math.round(s.meters.nuclearEscalation)}%;background:var(--${tone})"></i></div><b>${Math.round(s.meters.nuclearEscalation)}</b></div>
+        <div class="meter-row"><span>${t('escalation.ladder')}</span><div class="bar"><i style="width:${(level / max) * 100}%;background:var(--${tone})"></i></div><b>${level}/${max}</b></div>
+        ${fired}
+        <small>${t('escalation.tip', { n: max })}</small>
+      </section>`;
+    }
+
     const baseRows = bases
       .map(
         (base) => `<div class="base-row">
@@ -802,12 +1180,38 @@ export class Ui {
       )
       .join('');
 
+    // Phase 1: live progress for all four Iranian victory paths. Shown to every
+    // faction for now; Phase 4 (fog of war) will gate the Iranian-internal values.
+    let victorySection = '';
+    if (s.victory) {
+      const pathRows = victoryPaths(s, this.game.map)
+        .map((p) => {
+          const tone = p.satisfied ? 'ok' : p.progress > 60 ? 'warn' : 'info';
+          const badge = p.satisfied
+            ? `<span class="status open">${t('path.satisfied')}</span>`
+            : `<span class="status restricted">${t('path.pending')}</span>`;
+          const when = p.decidesAtEnd ? `<span class="status">${t('path.atEnd')}</span>` : '';
+          return `<div class="host-row">
+            <div class="host-top"><b>${t(`path.${p.id}`)}</b>${badge}${when}</div>
+            <div class="meter-row"><span>${p.progress}%</span><div class="bar"><i style="width:${p.progress}%;background:var(--${tone})"></i></div><b></b></div>
+            <small>${t(`path.${p.id}.detail`, p.stats)}</small>
+          </div>`;
+        })
+        .join('');
+      victorySection = `<section class="panel-section"><h4>${t('panel.victoryPaths')}</h4>${pathRows}</section>`;
+    }
+
     return `<header class="panel-head"><h3>${t('panel.strategic')}</h3><button data-action="panel:strategic" aria-label="${t('btn.close')}">✕</button></header>
       <div class="panel-body">
         <section class="panel-section"><h4>${t('panel.basing')}</h4>${baseRows}</section>
         <section class="panel-section"><h4>${t('panel.hosts')}</h4>${hostRows}</section>
         <section class="panel-section"><h4>${t('panel.programme')}</h4>${facilities}</section>
         <section class="panel-section"><h4>${t('panel.hormuz')}</h4>${hormuzCalc}</section>
+        ${victorySection}
+        ${domesticSection}
+        ${roeSection}
+        ${phase3Section}
+        ${escalationSection}
         ${factionSection}
         <section class="panel-section"><h4>${t('panel.warCost')}</h4>
           <div class="meter-row"><span>${t('panel.iranCost')}</span><div class="bar"><i style="width:${(s.meters.iranWarCost / s.meters.iranWarCostThreshold) * 100}%;background:var(--info)"></i></div><b>${Math.round(s.meters.iranWarCost)}/${s.meters.iranWarCostThreshold}</b></div>
@@ -825,7 +1229,8 @@ export class Ui {
         current = entry.turn;
         groups.push(`<h4 class="log-turn">${t('log.turn', { n: entry.turn })}</h4>`);
       }
-      groups.push(`<p class="log-line ${entry.tone}">${entry.text}</p>`);
+      const text = getLang() === 'fa' ? faLog(entry.text) ?? entry.text : entry.text;
+      groups.push(`<p class="log-line ${entry.tone}">${text}</p>`);
     }
     const note = getLang() === 'fa' ? `<p class="log-note">${t('log.englishNote')}</p>` : '';
     return `<header class="panel-head"><h3>${t('panel.log')}</h3><button data-action="panel:log" aria-label="${t('btn.close')}">✕</button></header><div class="panel-body">${note}${groups.join('')}</div>`;
@@ -833,60 +1238,18 @@ export class Ui {
 
   // ------------------------------------------------------------------ targeting
   private strikeTargets(unit: UnitInstance): StrikeTarget[] {
-    const snap = this.game.snap;
-    const map = this.game.map;
-    const def = unitType(unit.typeId);
-    if (def.atk <= 0 || def.rng <= 0) return [];
-    if (unit.magazine <= 0 || unit.cooldown > 0) return [];
     // Iranian launchers fire from a national stockpile, not their magazine.
     if (unit.faction === 'iran' && this.iranStockFor(unit) <= 0) return [];
-    const range = strikeRange(snap, unit);
-    const targets: StrikeTarget[] = [];
-    const nodeHexes = new Set<string>();
-
-    for (const node of map.nodes) {
-      const hex = map.nodeHexOf(node.id);
-      if (!hex) continue;
-      const state = snap.nodes[node.id];
-      if (!state || state.integrity <= 0) continue;
-      const defender = defenderOfNode(node);
-      if (!defender || !hostileTo(unit.faction, defender)) continue;
-      const dist = hexDistance({ col: unit.col, row: unit.row }, hex);
-      if (dist > range) continue;
-      if (!validateStrike(snap, map, unit, hex.col, hex.row, node.id).ok) continue;
-      nodeHexes.add(`${hex.col},${hex.row}`);
-      targets.push({
-        col: hex.col,
-        row: hex.row,
-        nodeId: node.id,
-        label: localName(node),
-        dist,
-        integrity: state.integrity,
-        buried: node.buried,
-        hardened: node.hardened === true,
-        units: false,
-      });
-    }
-
-    const seen = new Set<string>();
-    for (const enemy of snap.units) {
-      if (!hostileTo(unit.faction, enemy.faction) || !enemy.revealed) continue;
-      const key = `${enemy.col},${enemy.row}`;
-      if (nodeHexes.has(key) || seen.has(key)) continue;
-      const dist = hexDistance({ col: unit.col, row: unit.row }, { col: enemy.col, row: enemy.row });
-      if (dist > range) continue;
-      seen.add(key);
-      targets.push({
-        col: enemy.col,
-        row: enemy.row,
-        label: t('target.hex', { col: enemy.col, row: enemy.row }),
-        dist,
-        hardened: false,
-        units: true,
-      });
-    }
-
-    return targets.sort((x, y) => x.dist - y.dist);
+    return strikeTargetsFor(
+      this.game.snap,
+      this.game.map,
+      unit,
+      (nodeId) => {
+        const node = this.game.map.nodeById.get(nodeId);
+        return node ? localName(node) : nodeId;
+      },
+      (col, row) => t('target.hex', { col, row }),
+    );
   }
 
   private selectNextReadyUnit(): void {
@@ -944,6 +1307,10 @@ export class Ui {
 
     this.cinEvents = events.length ? events : [{ text: t('cin.none'), tone: 'info' }];
     this.cinIndex = 0;
+    if (this.reducedMotion) {
+      this.revealAll();
+      return;
+    }
     const skip = this.root.querySelector('#cin-skip') as HTMLButtonElement | null;
     if (skip) {
       skip.disabled = false;
@@ -971,7 +1338,9 @@ export class Ui {
     if (!list) return;
     const line = document.createElement('p');
     line.className = `cin-line ${event.tone}`;
-    line.textContent = event.text;
+    // Phase 6: engine lines render through the Persian template pass when the
+    // interface is Persian; unmatched lines keep the English original.
+    line.textContent = getLang() === 'fa' ? faLog(event.text) ?? event.text : event.text;
     list.appendChild(line);
     list.scrollTop = list.scrollHeight;
   }
@@ -1006,17 +1375,39 @@ export class Ui {
   private openOutcome(): void {
     const s = this.game.snap;
     const won = s.status === 'won';
+    // Improvement 7: the graded multi-axis settlement, when the campaign
+    // ended under the victory-path system.
+    const scorecard = s.scorecard
+      ? `<div class="scorecard">
+          <h4>${t('scorecard.title')}</h4>
+          ${s.scorecard.axes
+            .map((axis) => {
+              const tone = axis.side === 'iran' ? 'ok' : 'info';
+              return `<div class="host-row">
+                <div class="host-top"><b>${t(`axis.${axis.id}` as StringKey)}</b><span class="status ${axis.side === 'iran' ? 'restricted' : ''}">${t(axis.side === 'iran' ? 'scorecard.iran' : 'scorecard.coalition')}</span></div>
+                <div class="meter-row"><span>${axis.score}</span><div class="bar"><i style="width:${axis.score}%;background:var(--${tone})"></i></div><b>×${axis.weight}</b></div>
+              </div>`;
+            })
+            .join('')}
+          <div class="calc">
+            <div><span>${t('scorecard.iran')}</span><b>${s.scorecard.iranTotal}</b></div>
+            <div><span>${t('scorecard.coalition')}</span><b>${s.scorecard.coalitionTotal}</b></div>
+            <div class="total"><span>${t('scorecard.verdict')}</span><b>${t(`verdict.${s.scorecard.verdict}`)}</b></div>
+          </div>
+        </div>`
+      : '';
     this.modalKind = 'outcome';
     this.openModal(`
       <div class="modal-card outcome ${won ? 'won' : 'lost'}">
         <header><h2>${won ? t('outcome.victory') : t('outcome.defeat')}</h2><button data-action="close-modal" aria-label="${t('btn.close')}">✕</button></header>
         <div class="modal-body">
-          <p class="outcome-text">${s.outcome}</p>
+          <p class="outcome-text">${getLang() === 'fa' ? faOutcome(s.outcome) ?? s.outcome : s.outcome}</p>
           <div class="stat-row">
             <div class="stat"><span>${t('outcome.turns')}</span><b>${s.turn}</b></div>
             <div class="stat"><span>${t('outcome.hormuz')}</span><b>${Math.round(s.meters.hormuz)}%</b></div>
             <div class="stat"><span>${t('outcome.iranCost')}</span><b>${Math.round(s.meters.iranWarCost)}</b></div>
           </div>
+          ${scorecard}
           <div class="actions">
             <button class="primary" data-action="menu">${t('outcome.new')}</button>
             <button data-action="close-modal">${t('outcome.inspect')}</button>

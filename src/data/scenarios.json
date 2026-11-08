@@ -4,6 +4,128 @@
     "name": "The Narrow Sea",
     "brief": "The 2026 Gulf war. Choose a faction and fight it out over 30 turns: the US expeditionary campaign, Israel's defensive attrition, or Iran's protracted asymmetric war.",
     "turns": 30,
+    "victory": {
+      "regimeSurvival": { "finalTurns": 10, "nuclearIntegrityThreshold": 40 },
+      "occupation": { "nodesRequired": 4, "turnsRequired": 3 },
+      "oilShock": { "indexThreshold": 130, "consecutiveTurns": 5 },
+      "israeliDegradation": { "capacityThreshold": 30, "byTurn": 25 }
+    },
+    "domestic": {
+      "congressStart": 60,
+      "economyStart": 10,
+      "restrictCongress": 35,
+      "suspendCongress": 20,
+      "liftBuffer": 8,
+      "noticeTurns": 1,
+      "collapsePressure": 85,
+      "collapseTurns": 2,
+      "casualtyCongressDrop": 4,
+      "casualtyDropCap": 20,
+      "escalationCongressStep": 3,
+      "recoveryPerTurn": 2,
+      "communicate": {"cost": 3, "cooldown": 3, "gain": 8},
+      "economyAirliftStep": 25,
+      "economyResupplyStep": 15,
+      "resupplyFloor": 4,
+      "baselineResupply": 12,
+      "baselineAirliftRegen": 5
+    },
+    "initiative": {
+      "aggressiveThreshold": 75,
+      "driftPerTurn": 4,
+      "launchWeight": 0.65,
+      "legitimacyWeight": 0.35,
+      "launchersWeight": 7,
+      "stockDivisor": 10,
+      "approveGain": 8,
+      "constrainDrop": 12,
+      "orderCooldown": 4
+    },
+    "talks": {
+      "offerWarCostShare": 0.6,
+      "offerHormuzTurns": 4,
+      "offerWill": 25,
+      "lapseTurns": 3,
+      "reofferCooldown": 6,
+      "startProgress": 20,
+      "baseProgress": 6,
+      "warCostBonus": 4,
+      "warCostBonusShare": 0.8,
+      "escalationPenalty": 8,
+      "agreeProgress": 100,
+      "favorableWarCostShare": 0.8,
+      "favorableBases": 3
+    },
+    "escalation": {
+      "levels": [
+        { "threshold": 15, "drift": 0.5, "hostThreat": 0 },
+        { "threshold": 30, "drift": 1, "hostThreat": 1 },
+        { "threshold": 50, "drift": 1.5, "hostThreat": 1 },
+        { "threshold": 70, "drift": 2, "hostThreat": 2 },
+        { "threshold": 85, "drift": 3, "hostThreat": 2 }
+      ],
+      "redLines": [
+        {
+          "id": "nuclearUse",
+          "label": "Nuclear weapons used",
+          "label_fa": "استفاده از سلاح هسته‌ای",
+          "nuclearUse": true,
+          "escalationJump": 15,
+          "superpowerJump": 30,
+          "willDrop": 10,
+          "iranMobilization": 0
+        },
+        {
+          "id": "leadershipDecapitation",
+          "label": "Leadership decapitation attempted",
+          "label_fa": "تلاش برای از بین بردن رهبری",
+          "leadershipStrikes": 3,
+          "escalationJump": 10,
+          "superpowerJump": 12,
+          "willDrop": 0,
+          "iranMobilization": 25
+        },
+        {
+          "id": "nuclearComplexDestroyed",
+          "label": "Iranian nuclear complex destroyed",
+          "label_fa": "نابودی مجتمع هسته‌ای ایران",
+          "nuclearSitesDown": true,
+          "escalationJump": 8,
+          "superpowerJump": 10,
+          "willDrop": 0,
+          "iranMobilization": 40
+        },
+        {
+          "id": "hormuzStrangled",
+          "label": "Hormuz strangled for four turns",
+          "label_fa": "چهار نوبت اختلال شدید در هرمز",
+          "hormuzTurnsAbove70": 4,
+          "escalationJump": 8,
+          "superpowerJump": 8,
+          "willDrop": 5,
+          "iranMobilization": 0
+        }
+      ]
+    },
+    "logistics": {
+      "interdictHormuz": 60,
+      "maxDelay": 3
+    },
+    "roe": {
+      "constrained": { "damageMultiplier": 0.9, "escalationMultiplier": 0.5, "urbanBlocked": true, "congressPerTurn": 1, "hostThreatPerTurn": 0 },
+      "standard": { "damageMultiplier": 1, "escalationMultiplier": 1, "urbanBlocked": false, "congressPerTurn": 0, "hostThreatPerTurn": 0 },
+      "aggressive": { "damageMultiplier": 1.15, "escalationMultiplier": 1.5, "urbanBlocked": false, "congressPerTurn": -1, "hostThreatPerTurn": 1 }
+    },
+    "scorecard": {
+      "axes": {
+        "regime": { "side": "iran", "weight": 25 },
+        "nuclearComplex": { "side": "coalition", "weight": 25 },
+        "hormuz": { "side": "iran", "weight": 15 },
+        "israeliAttrition": { "side": "iran", "weight": 15 },
+        "domesticConsensus": { "side": "coalition", "weight": 10 },
+        "gulfBasing": { "side": "coalition", "weight": 10 }
+      }
+    },
     "deploy": {
       "usa": [
         {
@@ -307,6 +429,53 @@
     "brief": "Five turns as the United States. Learn base access, interceptor attrition and the Hormuz clock against a scripted Iranian response.",
     "turns": 5,
     "tutorial": true,
+    "victory": null,
+    "domestic": {
+      "congressStart": 60,
+      "economyStart": 10,
+      "restrictCongress": 35,
+      "suspendCongress": 20,
+      "liftBuffer": 8,
+      "noticeTurns": 1,
+      "collapsePressure": 85,
+      "collapseTurns": 2,
+      "casualtyCongressDrop": 4,
+      "casualtyDropCap": 20,
+      "escalationCongressStep": 3,
+      "recoveryPerTurn": 2,
+      "communicate": {"cost": 3, "cooldown": 3, "gain": 8},
+      "economyAirliftStep": 25,
+      "economyResupplyStep": 15,
+      "resupplyFloor": 4,
+      "baselineResupply": 12,
+      "baselineAirliftRegen": 5
+    },
+    "initiative": {
+      "aggressiveThreshold": 75,
+      "driftPerTurn": 4,
+      "launchWeight": 0.65,
+      "legitimacyWeight": 0.35,
+      "launchersWeight": 7,
+      "stockDivisor": 10,
+      "approveGain": 8,
+      "constrainDrop": 12,
+      "orderCooldown": 4
+    },
+    "talks": {
+      "offerWarCostShare": 0.6,
+      "offerHormuzTurns": 4,
+      "offerWill": 25,
+      "lapseTurns": 3,
+      "reofferCooldown": 6,
+      "startProgress": 20,
+      "baseProgress": 6,
+      "warCostBonus": 4,
+      "warCostBonusShare": 0.8,
+      "escalationPenalty": 8,
+      "agreeProgress": 100,
+      "favorableWarCostShare": 0.8,
+      "favorableBases": 3
+    },
     "deploy": {
       "usa": [
         {

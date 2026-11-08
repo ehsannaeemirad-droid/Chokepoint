@@ -10,6 +10,7 @@ import { clamp, defenderOfNode, nodeState, removeUnit, unitType } from '../core/
 import { hexDistance } from '../map/hex';
 import type { TheaterMap } from '../map/TheaterMap';
 import { resolveIncoming, resolveStrike, strikeRange, validateStrike } from '../combat/combat';
+import { iranLaunchPressure, initiativeCfg, israelPackages } from '../politics/initiative';
 import { addIranWarCost, nodeImpactCount, setHostStatus } from '../politics/politics';
 import { runTree, type ActionNode, type AiContext, type ConditionNode, type TreeNode } from './tree';
 
@@ -360,7 +361,13 @@ function tutorialIran(ctx: AiContext): void {
   );
 }
 
-/** Coalition AI: one strike package per turn at Iran's programme. */
+/**
+ * Coalition AI: strike package(s) per turn at Iran's programme.
+ *
+ * Phase 3: the Israeli tempo is governed by the initiative track — while
+ * Washington constrains Jerusalem, Israel flies no offensive sorties; above
+ * the aggressive threshold (or when approved) it flies a second package.
+ */
 function coalitionAi(ctx: AiContext, faction: 'usa' | 'israel'): boolean {
   const aircraft = ctx.snap.units.filter(
     (u) =>
@@ -371,30 +378,60 @@ function coalitionAi(ctx: AiContext, faction: 'usa' | 'israel'): boolean {
   );
   if (aircraft.length === 0) return false;
 
+  let packages = 1;
+  if (faction === 'israel') {
+    packages = israelPackages(ctx.snap);
+    if (packages <= 0) {
+      ctx.events.push({
+        text: 'Israeli aircraft stand down from offensive missions under the US constraint.',
+        tone: 'info',
+        faction: 'israel',
+      });
+      return false;
+    }
+  }
+
   const targetIds = ['natanz', 'fordow', 'isfahan', 'bandar_abbas']
     .map((id) => ({ id, integrity: nodeState(ctx.snap, id).integrity }))
     .filter((t) => t.integrity > 0)
     .sort((a, b) => b.integrity - a.integrity);
 
-  for (const target of targetIds) {
-    const hex = ctx.map.nodeHexOf(target.id);
-    if (!hex) continue;
-    for (const plane of aircraft) {
-      const check = validateStrike(ctx.snap, ctx.map, plane, hex.col, hex.row, target.id);
-      if (!check.ok) continue;
-      if (hexDistance({ col: plane.col, row: plane.row }, hex) > strikeRange(ctx.snap, plane)) continue;
-      ctx.events.push({
-        text: `${faction === 'usa' ? 'US' : 'Israeli'} aircraft launched against ${ctx.map.nodeById.get(target.id)?.name}.`,
-        tone: 'info',
-        faction,
-        focus: { col: hex.col, row: hex.row },
-      });
-      const result = resolveStrike(ctx.snap, ctx.map, plane, hex.col, hex.row, target.id, ctx.rng);
-      ctx.events.push(...result.events);
-      return true;
+  let flown = 0;
+  for (let attempt = 0; attempt < packages; attempt++) {
+    let struck = false;
+    for (const target of targetIds) {
+      if (struck) break;
+      const hex = ctx.map.nodeHexOf(target.id);
+      if (!hex) continue;
+      for (const plane of aircraft) {
+        if (plane.magazine <= 0 || plane.cooldown > 0) continue;
+        const check = validateStrike(ctx.snap, ctx.map, plane, hex.col, hex.row, target.id);
+        if (!check.ok) continue;
+        if (hexDistance({ col: plane.col, row: plane.row }, hex) > strikeRange(ctx.snap, plane)) continue;
+        ctx.events.push({
+          text: `${faction === 'usa' ? 'US' : 'Israeli'} aircraft launched against ${ctx.map.nodeById.get(target.id)?.name}.`,
+          tone: 'info',
+          faction,
+          focus: { col: hex.col, row: hex.row },
+        });
+        const result = resolveStrike(ctx.snap, ctx.map, plane, hex.col, hex.row, target.id, ctx.rng);
+        ctx.events.push(...result.events);
+        struck = true;
+        flown++;
+        break;
+      }
     }
   }
-  return false;
+  if (packages > 1 && flown > 0) {
+    const cfg = initiativeCfg(ctx.snap);
+    ctx.events.push({
+      text: `Israel flies an expanded strike package under its initiative track (${Math.round(ctx.snap.israelInitiative?.level ?? 0)} ≥ ${cfg.aggressiveThreshold}).`,
+      tone: 'warn',
+      faction: 'israel',
+    });
+  }
+  void iranLaunchPressure;
+  return flown > 0;
 }
 
 function evaluate(_faction: FactionId, ctx: AiContext, treeName: string): void {

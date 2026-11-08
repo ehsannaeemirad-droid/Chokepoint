@@ -1747,3 +1747,140 @@ html[dir='rtl'] .map-controls {
     bottom: 70px;
   }
 }
+
+/* ------------------------------------------------------------ phase 5 nav */
+.minimap-root {
+  position: absolute;
+  right: 58px;
+  bottom: 132px;
+  z-index: 5;
+  padding: 4px;
+  border: 1px solid rgba(51, 59, 69, 0.9);
+  border-radius: 10px;
+  background: rgba(14, 18, 22, 0.88);
+  backdrop-filter: blur(6px);
+}
+
+.minimap-root.hidden {
+  display: none;
+}
+
+.minimap-canvas {
+  display: block;
+  width: 106px;
+  height: auto;
+  border-radius: 6px;
+  cursor: crosshair;
+}
+
+.nav-drawer {
+  position: absolute;
+  right: 8px;
+  top: 58px;
+  bottom: 130px;
+  z-index: 7;
+  width: min(320px, calc(100vw - 70px));
+  overflow: hidden auto;
+  border: 1px solid rgba(51, 59, 69, 0.9);
+  border-radius: 12px;
+  background: rgba(14, 18, 22, 0.96);
+  backdrop-filter: blur(8px);
+  display: none;
+}
+
+.nav-drawer.open {
+  display: block;
+}
+
+.nav-drawer .panel-head {
+  position: sticky;
+  top: 0;
+  background: rgba(14, 18, 22, 0.98);
+}
+
+.nav-drawer input[type='search'] {
+  width: 100%;
+  min-height: 44px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  font-size: 15px;
+  color: var(--text);
+  background: rgba(34, 40, 49, 0.9);
+  border: 1px solid rgba(51, 59, 69, 0.9);
+  border-radius: 10px;
+}
+
+.nav-chips {
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.nav-chips .choice {
+  min-height: 40px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.nav-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 46px;
+  margin-bottom: 4px;
+  padding: 6px 10px;
+  text-align: start;
+  background: rgba(34, 40, 49, 0.55);
+  border: 1px solid rgba(51, 59, 69, 0.6);
+  border-radius: 10px;
+  color: var(--text);
+}
+
+.nav-row:active {
+  background: rgba(60, 141, 188, 0.25);
+}
+
+.nav-row .f-name {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 14px;
+}
+
+.nav-row .f-name small {
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+html[dir='rtl'] .minimap-root {
+  right: auto;
+  left: 58px;
+}
+
+html[dir='rtl'] .nav-drawer {
+  right: auto;
+  left: 8px;
+}
+
+/* Respect the OS reduce-motion preference: kill transitions and animations. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .minimap-root {
+    bottom: 150px;
+  }
+
+  .nav-drawer {
+    bottom: 148px;
+  }
+}

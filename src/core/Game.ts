@@ -7,19 +7,32 @@ import { TheaterMap } from '../map/TheaterMap';
 import { hexId, hexDistance, type HexCoord } from '../map/hex';
 import { saveGame, loadGame, type SlotId } from '../services/save';
 import { BALANCE, FACTION_LABELS } from './config';
-import { runTurn } from './engine';
+import { runTurn, DEFAULT_LOGISTICS_CFG } from './engine';
 import type {
+  DomesticConfig,
+  EscalationConfig,
   FactionId,
   GameSnapshot,
   HostState,
   IranStock,
+  LogisticsConfig,
   NodeState,
   Order,
   PlayableFactionId,
   ResolveEvent,
+  RoeConfig,
+  ScorecardConfig,
   UnitInstance,
+  VictoryThresholds,
 } from './types';
 import { allUnitTypes, unitType } from './world';
+import { DEFAULT_DOMESTIC_CFG, defaultDomesticState } from '../politics/domestic';
+import { DEFAULT_ESCALATION_CFG, defaultEscalationState } from '../politics/escalation';
+import { DEFAULT_ROE_CFG, defaultRoeState } from '../politics/roe';
+import { DEFAULT_SCORECARD_CFG } from '../politics/scorecard';
+import { DEFAULT_INITIATIVE_CFG, defaultIsraelInitiative } from '../politics/initiative';
+import { DEFAULT_TALKS_CFG, defaultCeasefireTalks } from '../politics/talks';
+import type { InitiativeConfig, TalksConfig } from './types';
 
 interface DeployEntry {
   type: string;
@@ -34,6 +47,22 @@ export interface ScenarioDef {
   brief: string;
   turns: number;
   tutorial?: boolean;
+  /** Victory-path thresholds; `null` disables the path system (tutorial). */
+  victory?: VictoryThresholds | null;
+  /** US domestic-pressure thresholds (Phase 2); defaults when absent. */
+  domestic?: DomesticConfig;
+  /** Israeli initiative thresholds (Phase 3); defaults when absent. */
+  initiative?: InitiativeConfig;
+  /** Qatar talks thresholds (Phase 3); defaults when absent. */
+  talks?: TalksConfig;
+  /** Escalation ladder thresholds (improvement 1); defaults when absent. */
+  escalation?: EscalationConfig;
+  /** In-transit logistics thresholds (improvement 2); defaults when absent. */
+  logistics?: LogisticsConfig;
+  /** ROE posture effects (improvement 6); defaults when absent. */
+  roe?: RoeConfig;
+  /** Scorecard axis weights (improvement 7); defaults when absent. */
+  scorecard?: ScorecardConfig;
   deploy: Record<string, DeployEntry[]>;
   hosts: Record<string, number>;
   iran: IranStock;
@@ -120,6 +149,9 @@ export class Game {
     const launchers = units.filter(
       (u) => u.faction === 'iran' && ['asm_launcher', 'fateh110', 'khorramshahr', 'fattah'].includes(u.typeId),
     ).length;
+    const israeliAirAtStart = units.filter(
+      (u) => u.faction === 'israel' && unitType(u.typeId).category === 'air',
+    ).length;
 
     return {
       version: 1,
@@ -130,6 +162,19 @@ export class Game {
       maxTurns: scenario.turns,
       status: 'playing',
       outcome: '',
+      victory: scenario.victory ?? null,
+      domesticCfg: scenario.domestic ?? DEFAULT_DOMESTIC_CFG,
+      domestic: defaultDomesticState(scenario.domestic ?? DEFAULT_DOMESTIC_CFG),
+      initiativeCfg: scenario.initiative ?? DEFAULT_INITIATIVE_CFG,
+      israelInitiative: defaultIsraelInitiative(scenario.initiative ?? DEFAULT_INITIATIVE_CFG),
+      talksCfg: scenario.talks ?? DEFAULT_TALKS_CFG,
+      ceasefire: defaultCeasefireTalks(),
+      escalationCfg: scenario.escalation ?? DEFAULT_ESCALATION_CFG,
+      escalation: defaultEscalationState(),
+      logisticsCfg: scenario.logistics ?? DEFAULT_LOGISTICS_CFG,
+      roeCfg: scenario.roe ?? DEFAULT_ROE_CFG,
+      roe: defaultRoeState(),
+      scorecardCfg: scenario.scorecard ?? DEFAULT_SCORECARD_CFG,
       orders: [],
       units,
       nodes,
@@ -152,9 +197,22 @@ export class Game {
         iranWarCostThreshold: BALANCE.iranWarCostThreshold,
         legitimacy: 60,
         oilPrice: 60,
+        inflation: 0,
+        nuclearEscalation: 0,
+        nuclearStrikes: 0,
         launchersAtStart: launchers,
+        israeliAirAtStart,
+        regimeIntactStreak: 0,
+        occupationStreak: 0,
+        maxOccupationStreak: 0,
+        oilShockStreak: 0,
+        domesticPressureStreak: 0,
       },
       reinforcements: [],
+      superpowers: {
+        russia: { id: 'russia', stance: BALANCE.superpowerStanceStart, tier: 0 },
+        china: { id: 'china', stance: BALANCE.superpowerStanceStart, tier: 0 },
+      },
       pakistanTriggered: false,
       suezClosed: false,
       incirlikOpen: false,

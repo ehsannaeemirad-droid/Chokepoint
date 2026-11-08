@@ -38,6 +38,8 @@ export class MapScene extends Phaser.Scene {
   private lastTapX = 0;
   private lastTapY = 0;
   private lastPointerCount = 0;
+  private longPress: { timer: number; x: number; y: number; hex: HexCoord } | null = null;
+  private camTimer = 0;
 
   constructor() {
     super('map');
@@ -68,6 +70,10 @@ export class MapScene extends Phaser.Scene {
       const next = Phaser.Math.Clamp(this.cam.zoom * factor, ZOOM.min, ZOOM.max);
       this.zoomAt(this.cam.width / 2, this.cam.height / 2, next);
     }) as EventListener);
+    bus.addEventListener('pan', ((event: Event) => {
+      const { dx, dy } = (event as CustomEvent<{ dx: number; dy: number }>).detail;
+      this.panBy(dx, dy);
+    }) as EventListener);
 
     this.scale.on('resize', () => this.cam.setSize(this.scale.width, this.scale.height));
     this.chunkRenderer.update(this.cam);
@@ -82,12 +88,27 @@ export class MapScene extends Phaser.Scene {
     };
   }
 
-  override update(_time: number, delta: number): void {
+  override update(time: number, delta: number): void {
     perf.sample(delta);
     this.chunkRenderer.update(this.cam);
     this.markers.update(this.cam);
     // Keep the camera inside the map after pinch/wheel zoom.
     this.cam.setScroll(this.cam.scrollX, this.cam.scrollY);
+    // Broadcast a low-frequency camera snapshot for the DOM minimap.
+    this.camTimer -= delta;
+    if (this.camTimer <= 0) {
+      this.camTimer = 160;
+      const view = this.cam.worldView;
+      bus.dispatchEvent(
+        new CustomEvent('camera', { detail: { x: view.x, y: view.y, w: view.width, h: view.height } }),
+      );
+      void time;
+    }
+  }
+
+  /** Screen-space pan used by the keyboard controls. */
+  panBy(dx: number, dy: number): void {
+    this.cam.setScroll(this.cam.scrollX + dx / this.cam.zoom, this.cam.scrollY + dy / this.cam.zoom);
   }
 
   stats(): Record<string, number> {
@@ -111,14 +132,19 @@ export class MapScene extends Phaser.Scene {
         return;
       }
       this.drag = { active: true, moved: false, lastX: pointer.x, lastY: pointer.y };
+      this.beginLongPress(pointer);
     });
 
     this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
       if (this.pointersDown.size >= 2 && this.pinch) {
+        this.cancelLongPress();
         this.updatePinch();
         return;
       }
       if (!this.drag.active || !this.pointersDown.has(pointer.id)) return;
+      if (this.longPress && Math.hypot(pointer.x - this.longPress.x, pointer.y - this.longPress.y) > 10) {
+        this.cancelLongPress();
+      }
       const dx = pointer.x - this.drag.lastX;
       const dy = pointer.y - this.drag.lastY;
       if (Math.abs(dx) + Math.abs(dy) > 1) this.drag.moved = true;
@@ -130,6 +156,7 @@ export class MapScene extends Phaser.Scene {
 
     this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
       this.pointersDown.delete(pointer.id);
+      this.cancelLongPress();
       if (this.pointersDown.size < 2) this.pinch = null;
       const wasTap = this.drag.active && !this.drag.moved && this.lastPointerCount === 1;
       this.drag.active = false;
@@ -141,6 +168,28 @@ export class MapScene extends Phaser.Scene {
       const next = Phaser.Math.Clamp(this.cam.zoom * (dy > 0 ? 0.9 : 1.1), ZOOM.min, ZOOM.max);
       this.zoomAt(pointer.x, pointer.y, next);
     });
+  }
+
+  /**
+   * Phase 5: long-press (450 ms, less than 10 px of drift) opens the hex
+   * information card without waiting for the tap gesture — the spec's
+   * "long-press for hex info".
+   */
+  private beginLongPress(pointer: Phaser.Input.Pointer): void {
+    const world = this.screenToWorld(pointer.x, pointer.y);
+    const hex = worldToHex(world.x, world.y);
+    if (!hex) return;
+    this.cancelLongPress();
+    this.longPress = { timer: window.setTimeout(() => {
+      this.longPress = null;
+      game.selectHex(hex.col, hex.row);
+    }, 450), x: pointer.x, y: pointer.y, hex };
+  }
+
+  private cancelLongPress(): void {
+    if (!this.longPress) return;
+    window.clearTimeout(this.longPress.timer);
+    this.longPress = null;
   }
 
   private beginPinch(): void {
