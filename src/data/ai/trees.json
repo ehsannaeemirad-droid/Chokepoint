@@ -1,0 +1,148 @@
+{
+  "qatar": {
+    "type": "selector",
+    "children": [
+      {
+        "type": "sequence",
+        "children": [
+          { "type": "condition", "check": "hostThreatAbove", "host": "qatar", "value": 90 },
+          { "type": "action", "do": "closeHost", "host": "qatar", "turns": 5 }
+        ]
+      },
+      {
+        "type": "sequence",
+        "children": [
+          { "type": "condition", "check": "hostThreatAbove", "host": "qatar", "value": 70 },
+          { "type": "action", "do": "restrictHost", "host": "qatar" }
+        ]
+      },
+      { "type": "action", "do": "openHost", "host": "qatar" }
+    ]
+  },
+  "uae": {
+    "type": "selector",
+    "children": [
+      {
+        "type": "sequence",
+        "children": [
+          { "type": "condition", "check": "hostThreatAbove", "host": "uae", "value": 90 },
+          { "type": "action", "do": "closeHost", "host": "uae", "turns": 5 }
+        ]
+      },
+      {
+        "type": "sequence",
+        "children": [
+          { "type": "condition", "check": "hostThreatAbove", "host": "uae", "value": 70 },
+          { "type": "action", "do": "withdrawSupport", "host": "uae" }
+        ]
+      },
+      { "type": "action", "do": "openHost", "host": "uae" }
+    ]
+  },
+  "kuwait": {
+    "type": "selector",
+    "children": [
+      {
+        "type": "sequence",
+        "children": [
+          { "type": "condition", "check": "hostThreatAbove", "host": "kuwait", "value": 85 },
+          { "type": "action", "do": "closeHost", "host": "kuwait", "turns": 5 }
+        ]
+      },
+      {
+        "type": "sequence",
+        "children": [
+          { "type": "condition", "check": "hostThreatAbove", "host": "kuwait", "value": 60 },
+          { "type": "action", "do": "restrictHost", "host": "kuwait" }
+        ]
+      },
+      { "type": "action", "do": "openHost", "host": "kuwait" }
+    ]
+  },
+  "bahrain": {
+    "type": "selector",
+    "children": [
+      {
+        "type": "sequence",
+        "children": [
+          { "type": "condition", "check": "hostThreatAbove", "host": "bahrain", "value": 90 },
+          { "type": "action", "do": "closeHost", "host": "bahrain", "turns": 5 }
+        ]
+      },
+      {
+        "type": "sequence",
+        "children": [
+          { "type": "condition", "check": "hostThreatAbove", "host": "bahrain", "value": 70 },
+          { "type": "action", "do": "restrictHost", "host": "bahrain" }
+        ]
+      },
+      { "type": "action", "do": "openHost", "host": "bahrain" }
+    ]
+  },
+  "saudi": {
+    "type": "selector",
+    "children": [
+      {
+        "type": "sequence",
+        "children": [
+          { "type": "condition", "check": "hostThreatAbove", "host": "saudi", "value": 80 },
+          { "type": "action", "do": "closeAirspace", "host": "saudi" }
+        ]
+      },
+      {
+        "type": "sequence",
+        "children": [
+          { "type": "condition", "check": "oilDamaged", "value": 50 },
+          { "type": "action", "do": "counterHouthi", "faction": "saudi" }
+        ]
+      },
+      { "type": "action", "do": "openHost", "host": "saudi" }
+    ]
+  },
+  "turkey": {
+    "type": "selector",
+    "children": [
+      {
+        "type": "sequence",
+        "children": [
+          { "type": "condition", "check": "incirlikAllowed" },
+          { "type": "action", "do": "openHost", "host": "turkey" }
+        ]
+      },
+      { "type": "action", "do": "restrictHost", "host": "turkey" }
+    ]
+  },
+  "houthi": {
+    "type": "selector",
+    "children": [
+      {
+        "type": "sequence",
+        "children": [
+          { "type": "condition", "check": "nodeIntegrityBelow", "node": "sanaa", "value": 20 },
+          { "type": "action", "do": "regroup" }
+        ]
+      },
+      {
+        "type": "sequence",
+        "children": [
+          { "type": "condition", "check": "turnAbove", "value": 0 },
+          { "type": "action", "do": "houthiAttack" }
+        ]
+      }
+    ]
+  },
+  "iranMilitary": {
+    "type": "selector",
+    "children": [
+      {
+        "type": "sequence",
+        "children": [
+          { "type": "condition", "check": "hasStock" },
+          { "type": "action", "do": "iranSalvo" }
+        ]
+      },
+      { "type": "action", "do": "iranProduce" },
+      { "type": "action", "do": "iranReposition" }
+    ]
+  }
+}

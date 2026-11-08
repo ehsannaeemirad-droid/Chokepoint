@@ -1,0 +1,427 @@
+{
+  "campaign": {
+    "id": "campaign",
+    "name": "The Narrow Sea",
+    "brief": "The 2026 Gulf war. Choose a faction and fight it out over 30 turns: the US expeditionary campaign, Israel's defensive attrition, or Iran's protracted asymmetric war.",
+    "turns": 30,
+    "deploy": {
+      "usa": [
+        {
+          "type": "f35a",
+          "lon": 54.55,
+          "lat": 24.25,
+          "count": 2
+        },
+        {
+          "type": "f15e",
+          "lon": 51.31,
+          "lat": 25.11,
+          "count": 2
+        },
+        {
+          "type": "b52",
+          "lon": 51.31,
+          "lat": 25.11,
+          "count": 1
+        },
+        {
+          "type": "b2",
+          "lon": 51.31,
+          "lat": 25.11,
+          "count": 1
+        },
+        {
+          "type": "csg",
+          "lon": 51.9,
+          "lat": 26.4,
+          "count": 1
+        },
+        {
+          "type": "patriot",
+          "lon": 51.31,
+          "lat": 25.11,
+          "count": 1
+        },
+        {
+          "type": "patriot",
+          "lon": 47.72,
+          "lat": 29.35,
+          "count": 1
+        },
+        {
+          "type": "thaad",
+          "lon": 54.55,
+          "lat": 24.25,
+          "count": 1
+        },
+        {
+          "type": "patriot",
+          "lon": 54.55,
+          "lat": 24.25,
+          "count": 1
+        },
+        {
+          "type": "mq9",
+          "lon": 54.55,
+          "lat": 24.25,
+          "count": 2
+        },
+        {
+          "type": "sof",
+          "lon": 51.31,
+          "lat": 25.11,
+          "count": 1
+        }
+      ],
+      "israel": [
+        {
+          "type": "iron_dome",
+          "lon": 34.78,
+          "lat": 32.08,
+          "count": 1
+        },
+        {
+          "type": "iron_dome",
+          "lon": 35.21,
+          "lat": 31.77,
+          "count": 1
+        },
+        {
+          "type": "davids_sling",
+          "lon": 34.99,
+          "lat": 32.82,
+          "count": 1
+        },
+        {
+          "type": "arrow2",
+          "lon": 35.01,
+          "lat": 31.21,
+          "count": 1
+        },
+        {
+          "type": "arrow3",
+          "lon": 34.66,
+          "lat": 31.23,
+          "count": 1
+        },
+        {
+          "type": "iron_beam",
+          "lon": 34.78,
+          "lat": 32.08,
+          "count": 1
+        },
+        {
+          "type": "f15i",
+          "lon": 34.66,
+          "lat": 31.23,
+          "count": 1
+        },
+        {
+          "type": "f35i",
+          "lon": 35.01,
+          "lat": 31.21,
+          "count": 1
+        },
+        {
+          "type": "merkava",
+          "lon": 35.4,
+          "lat": 32.6,
+          "count": 1
+        },
+        {
+          "type": "merkava",
+          "lon": 34.9,
+          "lat": 31.4,
+          "count": 1
+        },
+        {
+          "type": "unit8200",
+          "lon": 34.78,
+          "lat": 32.08,
+          "count": 1
+        }
+      ],
+      "iran": [
+        {
+          "type": "shahed136",
+          "lon": 48.9,
+          "lat": 32.3,
+          "count": 2
+        },
+        {
+          "type": "shahed136",
+          "lon": 51.5,
+          "lat": 31.0,
+          "count": 2
+        },
+        {
+          "type": "shahed136",
+          "lon": 55.0,
+          "lat": 30.5,
+          "count": 1
+        },
+        {
+          "type": "shahed136",
+          "lon": 58.0,
+          "lat": 29.0,
+          "count": 1
+        },
+        {
+          "type": "fateh110",
+          "lon": 47.5,
+          "lat": 31.5,
+          "count": 1
+        },
+        {
+          "type": "fateh110",
+          "lon": 50.5,
+          "lat": 30.0,
+          "count": 1
+        },
+        {
+          "type": "fateh110",
+          "lon": 53.0,
+          "lat": 29.0,
+          "count": 1
+        },
+        {
+          "type": "khorramshahr",
+          "lon": 51.0,
+          "lat": 33.5,
+          "count": 1
+        },
+        {
+          "type": "khorramshahr",
+          "lon": 54.0,
+          "lat": 32.0,
+          "count": 1
+        },
+        {
+          "type": "khorramshahr",
+          "lon": 48.0,
+          "lat": 34.0,
+          "count": 1
+        },
+        {
+          "type": "fattah",
+          "lon": 51.8,
+          "lat": 34.5,
+          "count": 1
+        },
+        {
+          "type": "asm_launcher",
+          "lon": 56.0,
+          "lat": 26.9,
+          "count": 1
+        },
+        {
+          "type": "asm_launcher",
+          "lon": 55.5,
+          "lat": 26.8,
+          "count": 1
+        },
+        {
+          "type": "asm_launcher",
+          "lon": 50.7,
+          "lat": 29.0,
+          "count": 1
+        },
+        {
+          "type": "mine_layer",
+          "lon": 56.3,
+          "lat": 26.6,
+          "count": 1
+        },
+        {
+          "type": "mine_layer",
+          "lon": 55.0,
+          "lat": 26.2,
+          "count": 1
+        },
+        {
+          "type": "fac",
+          "lon": 56.2,
+          "lat": 26.4,
+          "count": 1
+        },
+        {
+          "type": "fac",
+          "lon": 55.8,
+          "lat": 26.7,
+          "count": 1
+        },
+        {
+          "type": "fac",
+          "lon": 50.0,
+          "lat": 29.0,
+          "count": 1
+        }
+      ],
+      "houthi": [
+        {
+          "type": "houthi_drone",
+          "lon": 44.5,
+          "lat": 15.0,
+          "count": 2
+        },
+        {
+          "type": "houthi_missile",
+          "lon": 45.0,
+          "lat": 14.5,
+          "count": 2
+        },
+        {
+          "type": "houthi_asm",
+          "lon": 43.6,
+          "lat": 13.2,
+          "count": 1
+        }
+      ]
+    },
+    "hosts": {
+      "qatar": 22,
+      "uae": 15,
+      "kuwait": 30,
+      "bahrain": 18,
+      "saudi": 28,
+      "turkey": 45,
+      "jordan": 20,
+      "egypt": 25
+    },
+    "iran": {
+      "resources": 140,
+      "drones": 56,
+      "fateh": 28,
+      "khorramshahr": 12,
+      "fattah": 5,
+      "asm": 9,
+      "mines": 3,
+      "minesLaid": 0,
+      "fac": 3
+    },
+    "initialHormuz": 30
+  },
+  "tutorial": {
+    "id": "tutorial",
+    "name": "First Strike (Tutorial)",
+    "brief": "Five turns as the United States. Learn base access, interceptor attrition and the Hormuz clock against a scripted Iranian response.",
+    "turns": 5,
+    "tutorial": true,
+    "deploy": {
+      "usa": [
+        {
+          "type": "f35a",
+          "lon": 54.55,
+          "lat": 24.25,
+          "count": 2
+        },
+        {
+          "type": "f15e",
+          "lon": 51.31,
+          "lat": 25.11,
+          "count": 2
+        },
+        {
+          "type": "b52",
+          "lon": 51.31,
+          "lat": 25.11,
+          "count": 1
+        },
+        {
+          "type": "patriot",
+          "lon": 51.31,
+          "lat": 25.11,
+          "count": 2
+        },
+        {
+          "type": "thaad",
+          "lon": 54.55,
+          "lat": 24.25,
+          "count": 1
+        },
+        {
+          "type": "mq9",
+          "lon": 54.55,
+          "lat": 24.25,
+          "count": 1
+        }
+      ],
+      "israel": [
+        {
+          "type": "iron_dome",
+          "lon": 34.78,
+          "lat": 32.08,
+          "count": 1
+        },
+        {
+          "type": "arrow2",
+          "lon": 35.01,
+          "lat": 31.21,
+          "count": 1
+        },
+        {
+          "type": "f35i",
+          "lon": 35.01,
+          "lat": 31.21,
+          "count": 1
+        }
+      ],
+      "iran": [
+        {
+          "type": "shahed136",
+          "lon": 48.9,
+          "lat": 32.3,
+          "count": 2
+        },
+        {
+          "type": "fateh110",
+          "lon": 50.5,
+          "lat": 30.0,
+          "count": 2
+        },
+        {
+          "type": "asm_launcher",
+          "lon": 56.0,
+          "lat": 26.9,
+          "count": 2
+        },
+        {
+          "type": "mine_layer",
+          "lon": 56.3,
+          "lat": 26.6,
+          "count": 1
+        }
+      ],
+      "houthi": [
+        {
+          "type": "houthi_drone",
+          "lon": 44.5,
+          "lat": 15.0,
+          "count": 1
+        }
+      ]
+    },
+    "hosts": {
+      "qatar": 20,
+      "uae": 14,
+      "kuwait": 28,
+      "bahrain": 16,
+      "saudi": 26,
+      "turkey": 44,
+      "jordan": 20,
+      "egypt": 24
+    },
+    "iran": {
+      "resources": 40,
+      "drones": 12,
+      "fateh": 8,
+      "khorramshahr": 0,
+      "fattah": 0,
+      "asm": 2,
+      "mines": 2,
+      "minesLaid": 0,
+      "fac": 2
+    },
+    "initialHormuz": 25
+  }
+}
