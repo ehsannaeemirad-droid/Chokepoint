@@ -8,6 +8,7 @@ import { factionRng } from '../core/rng';
 import type { FactionId, GameSnapshot, ResolveEvent, SalvoSpecLike } from '../core/types';
 import { clamp, defenderOfNode, nodeState, removeUnit, unitType } from '../core/world';
 import { hexDistance } from '../map/hex';
+import { productionSites } from '../core/production';
 import type { TheaterMap } from '../map/TheaterMap';
 import { resolveIncoming, resolveStrike, strikeRange, validateStrike } from '../combat/combat';
 import { iranLaunchPressure, initiativeCfg, israelPackages } from '../politics/initiative';
@@ -287,18 +288,16 @@ function iranProduce(ctx: AiContext): boolean {
   const stock = ctx.snap.iran;
   stock.resources += 10;
   let produced = 0;
-  const facilities: Array<[string, number, number]> = [
-    ['natanz', 2, 1],
-    ['isfahan', 0, 1],
-    ['fordow', 0, 1],
-  ];
-  for (const [id, drones, missiles] of facilities) {
-    const integrity = nodeState(ctx.snap, id).integrity;
-    if (integrity <= 0) continue;
-    const scale = integrity < 50 ? 0.5 : 1;
-    stock.drones += Math.round(drones * scale);
-    stock.fateh += Math.round(missiles * scale * 0.6);
-    stock.khorramshahr += Math.round(missiles * scale * 0.4);
+  // Facility data decides who produces: intact missile and drone lines only.
+  for (const site of productionSites(ctx.map.nodes, ctx.snap, 'missile')) {
+    const scale = site.integrity < 50 ? 0.5 : 1;
+    stock.fateh += Math.round(scale * 0.6);
+    stock.khorramshahr += Math.round(scale * 0.4);
+    produced += 1;
+  }
+  for (const site of productionSites(ctx.map.nodes, ctx.snap, 'drone')) {
+    const scale = site.integrity < 50 ? 0.5 : 1;
+    stock.drones += Math.round(2 * scale);
     produced += 1;
   }
   while (stock.resources >= 20 && produced < 6) {

@@ -30,7 +30,36 @@ export type TerrainKind =
   | 'urban'
   | 'hardened';
 
-export type NodeKind = 'airbase' | 'naval' | 'chokepoint' | 'oil' | 'urban' | 'nuclear' | 'port';
+export type NodeKind =
+  | 'airbase'
+  | 'naval'
+  | 'chokepoint'
+  | 'oil'
+  | 'urban'
+  | 'nuclear'
+  | 'missile-industry'
+  | 'port';
+
+/** Munition lines a facility can build. */
+export type ProductionLine = 'missile' | 'drone';
+
+/**
+ * Facility taxonomy (Phase 1a). A node's `kind` is what the map shows; the
+ * facility category is what the site actually does. Nuclear sites enrich,
+ * convert or store — they never assemble munitions.
+ */
+export type FacilityCategory =
+  | 'nuclear-enrichment'
+  | 'nuclear-conversion'
+  | 'nuclear-storage'
+  | 'missile-production'
+  | 'drone-production'
+  | 'defence-industry'
+  | 'weapons-storage'
+  | 'command'
+  | 'radar'
+  | 'naval-facility'
+  | 'port-logistics';
 
 export interface MapNodeDef {
   id: string;
@@ -51,7 +80,14 @@ export interface MapNodeDef {
   strategic?: boolean;
   maxIntegrity?: number;
   terrain?: TerrainKind;
-  production?: 'drone' | 'missile' | 'both';
+  /** Munition lines the site can build; absent means no production. */
+  productionLines?: ProductionLine[];
+  /** Taxonomy role of the facility. */
+  facility?: FacilityCategory;
+  /** Labelled abstraction: stocks regenerated underground each turn. */
+  undergroundRegen?: { drones?: number; missiles?: number };
+  /** Evidence note for sites added from open-source reporting (Phase 1c). */
+  provenance?: string;
 }
 
 export type UnitCategory =

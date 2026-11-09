@@ -48,24 +48,22 @@ export function readyReserves(snap: GameSnapshot, events: ResolveEvent[]): void 
 }
 
 /** Underground production nodes regenerate stocks slowly when intact. */
-export function regenerateUnderground(snap: GameSnapshot, _map: unknown, events: ResolveEvent[]): void {
-  const sites: Array<{ id: string; kind: 'drone' | 'missile' | 'both'; perTurn: number }> = [
-    { id: 'khojir', kind: 'both', perTurn: 2 },
-    { id: 'parchin', kind: 'missile', perTurn: 1 },
-    { id: 'shahroud', kind: 'missile', perTurn: 1 },
-    { id: 'bandar_abbas_underground', kind: 'drone', perTurn: 3 },
-    { id: 'tabriz_complex', kind: 'both', perTurn: 1 },
-  ];
+export function regenerateUnderground(snap: GameSnapshot, map: unknown, events: ResolveEvent[]): void {
+  // Regeneration is a labelled abstraction driven by facility data, not by a
+  // hardcoded id list: a site regenerates only the lines it declares.
+  const nodes =
+    (map as { nodes?: Array<{ id: string; undergroundRegen?: { drones?: number; missiles?: number } }> }
+      | undefined)?.nodes ?? [];
   let drones = 0;
   let missiles = 0;
-  for (const site of sites) {
+  for (const site of nodes) {
+    const regen = site.undergroundRegen;
+    if (!regen) continue;
     const node = snap.nodes[site.id];
     if (!node || node.integrity <= 20) continue;
     const factor = node.integrity / 100;
-    const amt = Math.max(0, Math.round(site.perTurn * factor));
-    if (amt <= 0) continue;
-    if (site.kind === 'drone' || site.kind === 'both') drones += amt;
-    if (site.kind === 'missile' || site.kind === 'both') missiles += amt;
+    if (regen.drones) drones += Math.max(0, Math.round(regen.drones * factor));
+    if (regen.missiles) missiles += Math.max(0, Math.round(regen.missiles * factor));
   }
   if (drones > 0) {
     snap.iran.drones += drones;

@@ -18,6 +18,7 @@ const NODE_COLORS: Record<NodeKind, string> = {
   oil: '#C9A227',
   urban: '#BDBDBD',
   nuclear: '#E05A5A',
+  'missile-industry': '#E0A05A',
   port: '#8FD3C0',
 };
 
@@ -192,6 +193,10 @@ export class MapMarkers {
       case 'oil':
         this.g.fillStyle(hexToNumber(NODE_COLORS.oil), 1);
         this.g.fillRect(x - r * 0.7, y - r * 0.7, r * 1.4, r * 1.4);
+        break;
+      case 'missile-industry':
+        this.g.fillStyle(hexToNumber(NODE_COLORS['missile-industry']), 1);
+        this.g.fillTriangle(x, y - r, x + r * 0.9, y + r * 0.6, x - r * 0.9, y + r * 0.6);
         break;
       case 'nuclear':
         this.g.fillStyle(hexToNumber(NODE_COLORS.nuclear), 1);

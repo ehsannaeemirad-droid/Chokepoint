@@ -10,9 +10,28 @@ import { hexDistance } from '../map/hex';
 import type { TheaterMap } from '../map/TheaterMap';
 
 /** Drawer filter groups. `all` disables the filter. */
-export type NavKind = 'all' | 'airbase' | 'nuclear' | 'oil' | 'urban' | 'naval' | 'port' | 'chokepoint';
+export type NavKind =
+  | 'all'
+  | 'airbase'
+  | 'nuclear'
+  | 'missile-industry'
+  | 'oil'
+  | 'urban'
+  | 'naval'
+  | 'port'
+  | 'chokepoint';
 
-export const NAV_KINDS: NavKind[] = ['all', 'airbase', 'nuclear', 'oil', 'urban', 'naval', 'port', 'chokepoint'];
+export const NAV_KINDS: NavKind[] = [
+  'all',
+  'airbase',
+  'nuclear',
+  'missile-industry',
+  'oil',
+  'urban',
+  'naval',
+  'port',
+  'chokepoint',
+];
 
 export interface NavEntry {
   id: string;

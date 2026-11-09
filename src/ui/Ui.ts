@@ -72,7 +72,23 @@ const KIND_FA: Record<string, string> = {
   oil: 'نفت',
   urban: 'شهری',
   nuclear: 'هسته‌ای',
+  'missile-industry': 'صنایع موشکی',
   port: 'بندر',
+};
+
+/** Facility taxonomy labels (Phase 1a): what the site does, not what it looks like. */
+const FACILITY_LABELS: Record<string, { en: string; fa: string }> = {
+  'nuclear-enrichment': { en: 'Enrichment', fa: 'غنی‌سازی' },
+  'nuclear-conversion': { en: 'Conversion', fa: 'تبدیل' },
+  'nuclear-storage': { en: 'Nuclear storage', fa: 'انبار هسته‌ای' },
+  'missile-production': { en: 'Missile production', fa: 'تولید موشک' },
+  'drone-production': { en: 'Drone production', fa: 'تولید پهپاد' },
+  'defence-industry': { en: 'Defence industry', fa: 'صنایع دفاعی' },
+  'weapons-storage': { en: 'Weapons storage', fa: 'انبار سلاح' },
+  command: { en: 'Command', fa: 'فرماندهی' },
+  radar: { en: 'Radar', fa: 'رادار' },
+  'naval-facility': { en: 'Naval facility', fa: 'تأسیسات دریایی' },
+  'port-logistics': { en: 'Port logistics', fa: 'لجستیک بندری' },
 };
 
 const FACTION_FA: Record<string, string> = {
@@ -903,7 +919,7 @@ export class Ui {
       return `
         <div class="sheet-head">
           <span class="node-glyph ${node.kind}"></span>
-          <div class="u-title"><b>${localName(node)}</b><span>${nodeKindLabel(node.kind)} · ${factionLabel(node.host)}</span></div>
+          <div class="u-title"><b>${localName(node)}</b><span>${nodeKindLabel(node.kind)}${node.facility ? ` · ${facilityLabel(node.facility)}` : ''} · ${factionLabel(node.host)}</span></div>
           <button class="x" data-action="clear-selection" aria-label="${t('btn.close')}">✕</button>
         </div>
         <div class="meter-row"${fogEst ? ` data-tip="${t('tip.fog')}"` : ''}><span>${t('sheet.integrity')}</span><div class="bar"><i style="width:${integrityBar}%;background:${integrityBar > 60 ? 'var(--ok)' : integrityBar > 25 ? 'var(--warn)' : 'var(--alert)'}"></i></div><b>${integrityText}</b></div>
@@ -1681,6 +1697,12 @@ function categoryLabel(category: string): string {
 
 function nodeKindLabel(kind: string): string {
   return getLang() === 'fa' ? KIND_FA[kind] ?? kind : kind.toUpperCase();
+}
+
+function facilityLabel(facility: string): string {
+  const labels = FACILITY_LABELS[facility];
+  if (!labels) return facility;
+  return getLang() === 'fa' ? labels.fa : labels.en;
 }
 
 function factionLabel(id: string): string {

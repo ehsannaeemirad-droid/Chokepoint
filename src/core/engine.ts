@@ -13,8 +13,9 @@ import { maybeStartWar, readyReserves, regenerateUnderground } from './prewar';
 import { resolveCyber, resolveSabotage, resolveStrike, validateStrike } from '../combat/combat';
 import logisticsData from '../data/logistics.json';
 import { hexDistance } from '../map/hex';
+import { hasProductionCapacity, lineForMunition, productionCapacity, productionSites } from './production';
 import type { TheaterMap } from '../map/TheaterMap';
-import {
+import {
   thirdPartyPhase,
   updateChokepoints,
   updateHosts,
@@ -132,6 +133,10 @@ export function validateOrder(snap: GameSnapshot, map: TheaterMap, order: Order)
       const cost = productionCost(order.unitTypeId);
       if (cost <= 0) return { ok: false, reason: 'Unknown production line' };
       if (snap.iran.resources < cost * order.count) return { ok: false, reason: 'Not enough war resources' };
+      const line = lineForMunition(order.unitTypeId);
+      if (!hasProductionCapacity(map.nodes, snap, line)) {
+        return { ok: false, reason: `No intact ${line} production line` };
+      }
       return { ok: true };
     }
     case 'diplomacy': {
@@ -325,13 +330,25 @@ export function applyOrder(
     }
     case 'produce': {
       const cost = productionCost(order.unitTypeId);
+      const line = lineForMunition(order.unitTypeId);
+      const sites = productionSites(map.nodes, snap, line);
+      if (sites.length === 0) {
+        events.push({
+          text: `Iran has no intact ${line} production line left.`,
+          tone: 'bad',
+          faction: 'iran',
+        });
+        return;
+      }
       snap.iran.resources -= cost * order.count;
-      if (order.unitTypeId === 'shahed136') snap.iran.drones += order.count;
-      if (order.unitTypeId === 'fateh110') snap.iran.fateh += order.count;
-      if (order.unitTypeId === 'khorramshahr') snap.iran.khorramshahr += order.count;
-      if (order.unitTypeId === 'fattah') snap.iran.fattah += order.count;
+      // Output tracks the average condition of the surviving facilities.
+      const output = Math.max(1, Math.round(order.count * productionCapacity(map.nodes, snap, line)));
+      if (order.unitTypeId === 'shahed136') snap.iran.drones += output;
+      if (order.unitTypeId === 'fateh110') snap.iran.fateh += output;
+      if (order.unitTypeId === 'khorramshahr') snap.iran.khorramshahr += output;
+      if (order.unitTypeId === 'fattah') snap.iran.fattah += output;
       events.push({
-        text: `Iran's production lines added ${order.count} ${unitType(order.unitTypeId).name} to the stockpile.`,
+        text: `Iran's production lines added ${output} ${unitType(order.unitTypeId).name} to the stockpile.`,
         tone: 'good',
         faction: 'iran',
       });
