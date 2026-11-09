@@ -1,1 +1,52 @@
-PLACEHOLDER
+name: Build and deploy Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: corepack enable && pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Commit dist if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -f dist/index.html ]; then
+            cp dist/index.html index.html
+            sed -i 's|src="./assets/|src="./dist/assets/|g; s|href="./assets/|href="./dist/assets/|g; s|href="./manifest|href="./dist/manifest|g; s|href="./icon-|href="./dist/icon-|g' index.html || true
+          fi
+          git add -A dist index.html
+          if git diff --staged --quiet; then
+            echo "No dist changes"
+          else
+            git commit -m "chore: rebuild dist [skip ci]"
+            git push
+          fi
