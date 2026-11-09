@@ -17,27 +17,19 @@ import {
   nodeState,
   unitType,
 } from '../core/world';
-import { hexDistance } from '../map/hex';
 import type { TheaterMap } from '../map/TheaterMap';
+import { detectMinefields, maritimeThreat } from '../core/maritime';
 
 const HOST_ORDER: FactionId[] = ['qatar', 'uae', 'kuwait', 'bahrain', 'saudi', 'turkey'];
 
-/** Interceptor range of an anti-ship battery, in hexes. */
-const ASM_RANGE = 8;
-const FAC_RANGE = 6;
 
 export function calcHormuz(snap: GameSnapshot, map: TheaterMap): number {
   const hormuz = map.nodeHexOf('hormuz');
   if (!hormuz) return 0;
 
-  let score = 0;
-  for (const unit of snap.units) {
-    const dist = hexDistance(hormuz, { col: unit.col, row: unit.row });
-    if (unit.typeId === 'asm_launcher' && dist <= ASM_RANGE) score += 10;
-    if (unit.typeId === 'fac' && dist <= FAC_RANGE) score += 5;
-    if (unit.typeId === 'houthi_asm' && dist <= 12) score += 5;
-  }
-  score += snap.iran.minesLaid * 15;
+  // Minefields are per-hex state now; the global minesLaid counter is only a
+  // historical tally. Escort coverage is applied inside maritimeThreat.
+  let score = maritimeThreat(snap, map);
 
   // Coalition naval presence suppresses disruption: one CSG-equivalent per group.
   const coalitionNaval = snap.units.filter((u) => {
@@ -194,7 +186,9 @@ export function updateSuperpowers(snap: GameSnapshot, events: ResolveEvent[]): v
 
 /** Recompute Hormuz and the two "sustained pressure" clocks. */
 export function updateChokepoints(snap: GameSnapshot, map: TheaterMap): void {
+  detectMinefields(snap, map);
   snap.meters.hormuz = calcHormuz(snap, map);
+  snap.escortCoverage = Math.max(0, (snap.escortCoverage ?? 0) - 1);
   if (snap.meters.hormuz > 50) snap.meters.hormuzTurnsAbove50 += 1;
   if (snap.meters.hormuz > 70) snap.meters.hormuzTurnsAbove70 += 1;
   snap.meters.oilPrice = clamp(

@@ -13,6 +13,7 @@ import { runAiPhase, runHostPostures } from '../ai/ai';
 import { maybeStartWar, readyReserves, regenerateUnderground } from './prewar';
 import { resolveCyber, resolveSabotage, resolveStrike, validateStrike } from '../combat/combat';
 import { canPlayerOrder } from './permissions';
+import { addEscortCoverage, clearMines, isSeaHex, layMines, minefields, hexKey, MINE_SORTIE_MAX } from './maritime';
 import logisticsData from '../data/logistics.json';
 import { hexDistance } from '../map/hex';
 import { hasProductionCapacity, lineForMunition, productionCapacity, productionSites } from './production';
@@ -115,6 +116,7 @@ export interface OrderReservations {
   politicalWill: number;
   iranResources: number;
   airlift: number;
+  mines: number;
   rounds: Record<DeliveryClass, number>;
   sorties: Record<'drone' | 'ballistic', number>;
 }
@@ -125,6 +127,7 @@ export function emptyReservations(): OrderReservations {
     politicalWill: 0,
     iranResources: 0,
     airlift: 0,
+    mines: 0,
     rounds: { drone: 0, fateh: 0, khorramshahr: 0, fattah: 0, asm: 0 },
     sorties: { drone: 0, ballistic: 0 },
   };
@@ -151,6 +154,14 @@ export function reserveOrder(snap: GameSnapshot, reserved: OrderReservations, or
     case 'cyber':
       reserved.units.add(order.unitUid);
       reserved.politicalWill += CYBER_WILL_COST;
+      return;
+    case 'mine':
+      reserved.units.add(order.unitUid);
+      reserved.mines += order.count;
+      return;
+    case 'clear':
+    case 'escort':
+      reserved.units.add(order.unitUid);
       return;
     case 'produce':
       reserved.iranResources += productionCost(order.unitTypeId) * order.count;
@@ -236,6 +247,34 @@ export function validateOrder(
         }
       }
       return validateStrike(snap, map, unit, order.col, order.row, order.nodeId);
+    }
+    case 'mine': {
+      const unit = findUnit(snap, order.unitUid);
+      if (!unit) return { ok: false, reason: 'Select a mine warfare group' };
+      if (reserved.units.has(unit.uid)) return { ok: false, reason: 'That group has already been tasked this turn' };
+      if (!isSeaHex(map, order.col, order.row)) return { ok: false, reason: 'Mines can only be laid in water' };
+      const count = Math.max(1, Math.min(MINE_SORTIE_MAX, Math.floor(order.count)));
+      const dist = hexDistance({ col: unit.col, row: unit.row }, { col: order.col, row: order.row });
+      if (dist > unitType(unit.typeId).rng) return { ok: false, reason: 'Lay point out of range' };
+      if (snap.iran.mines - reserved.mines < count) return { ok: false, reason: 'Not enough mines in the stockpile' };
+      return { ok: true };
+    }
+    case 'clear': {
+      const unit = findUnit(snap, order.unitUid);
+      if (!unit) return { ok: false, reason: 'Select a naval unit' };
+      if (reserved.units.has(unit.uid)) return { ok: false, reason: 'That ship has already been tasked this turn' };
+      if (!isSeaHex(map, order.col, order.row)) return { ok: false, reason: 'Clearance happens at sea' };
+      const field = minefields(snap)[hexKey(order.col, order.row)];
+      if (!field || field.mines <= 0) return { ok: false, reason: 'No minefield in that hex' };
+      if (!field.detected) return { ok: false, reason: 'That minefield has not been located' };
+      return { ok: true };
+    }
+    case 'escort': {
+      const unit = findUnit(snap, order.unitUid);
+      if (!unit) return { ok: false, reason: 'Select a naval unit' };
+      if (reserved.units.has(unit.uid)) return { ok: false, reason: 'That ship has already been tasked this turn' };
+      if ((snap.escortCoverage ?? 0) >= 3) return { ok: false, reason: 'Escort coverage is already at its limit' };
+      return { ok: true };
     }
     case 'produce': {
       if (snap.faction !== 'iran') return { ok: false, reason: 'Only Iran produces munitions' };
@@ -430,6 +469,47 @@ export function applyOrder(
       const result = resolveStrike(snap, map, unit, order.col, order.row, order.nodeId, rng);
       events.push(...result.events);
       if (def.id === 'b2') unit.cooldown = 4;
+      return;
+    }
+    case 'mine': {
+      const unit = findUnit(snap, order.unitUid);
+      if (!unit) return;
+      const laid = layMines(snap, map, order.col, order.row, order.count);
+      events.push({
+        text:
+          laid > 0
+            ? `${unit.name} laid ${laid} mine${laid === 1 ? '' : 's'} at ${order.col},${order.row}.`
+            : 'No mines were laid.',
+        tone: laid > 0 ? 'warn' : 'info',
+        faction: 'iran',
+        focus: { col: order.col, row: order.row },
+      });
+      return;
+    }
+    case 'clear': {
+      const unit = findUnit(snap, order.unitUid);
+      if (!unit) return;
+      const swept = clearMines(snap, order.col, order.row);
+      events.push({
+        text:
+          swept > 0
+            ? `${unit.name} swept ${swept} mine${swept === 1 ? '' : 's'} at ${order.col},${order.row}.`
+            : 'Clearance found no mines to sweep.',
+        tone: swept > 0 ? 'good' : 'info',
+        faction: unit.faction,
+        focus: { col: order.col, row: order.row },
+      });
+      return;
+    }
+    case 'escort': {
+      const unit = findUnit(snap, order.unitUid);
+      if (!unit) return;
+      const coverage = addEscortCoverage(snap);
+      events.push({
+        text: `${unit.name} is escorting shipping (coverage ${coverage}/3) — Hormuz risk falls while it holds station.`,
+        tone: 'good',
+        faction: unit.faction,
+      });
       return;
     }
     case 'produce': {

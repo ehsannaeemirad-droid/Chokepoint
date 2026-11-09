@@ -260,6 +260,9 @@ export type Order =
   | { kind: 'airlift' }
   | { kind: 'special'; unitUid: string; col: number; row: number }
   | { kind: 'cyber'; unitUid: string; col: number; row: number }
+  | { kind: 'mine'; unitUid: string; col: number; row: number; count: number }
+  | { kind: 'clear'; unitUid: string; col: number; row: number }
+  | { kind: 'escort'; unitUid: string }
   | { kind: 'nuclear'; nodeId: string }
   | { kind: 'hold'; unitUid: string }
   | { kind: 'communicate' }
@@ -500,6 +503,10 @@ export interface GameSnapshot {
   nodeImpacts: Record<string, number>;
   /** Radar/airbase nodes degraded by SEAD, keyed by node id, valued by turn. */
   adSuppression?: Record<string, number>;
+  /** Per-hex minefields; unknown until a coalition warship locates them. */
+  minefields?: Record<string, { mines: number; detected: boolean; laidTurn: number }>;
+  /** Escort sorties currently covering shipping; decays one per turn. */
+  escortCoverage?: number;
   indiaPressureApplied: boolean;
   qatarMediationTurn: number;
   orderLog: Array<{ turn: number; orders: Order[] }>;

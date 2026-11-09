@@ -27,6 +27,9 @@ const SCOPE: Record<Order['kind'], 'unit' | 'iran' | 'usa' | 'player' | 'coaliti
   strike: 'unit',
   special: 'unit',
   cyber: 'unit',
+  mine: 'unit',
+  clear: 'unit',
+  escort: 'unit',
   hold: 'unit',
   produce: 'iran',
   nuclear: 'iran',
@@ -81,6 +84,12 @@ export function canPlayerOrder(snap: GameSnapshot, map: TheaterMap, order: Order
         reason: 'No geolocated Iranian launcher to disable',
       };
     }
+  }
+  if (order.kind === 'mine' && unit.typeId !== 'mine_layer') {
+    return { ok: false, code: 'wrong-unit-category', reason: 'Only a mine warfare group can lay mines' };
+  }
+  if ((order.kind === 'clear' || order.kind === 'escort') && category !== 'naval') {
+    return { ok: false, code: 'wrong-unit-category', reason: 'Only a naval unit can do that' };
   }
   if (order.kind === 'special' && category !== 'specops') {
     return { ok: false, code: 'wrong-unit-category', reason: 'Not a special operations unit' };

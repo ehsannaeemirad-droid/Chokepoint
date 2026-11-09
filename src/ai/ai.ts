@@ -15,6 +15,7 @@ import { resolveIncoming, resolveStrike, strikeRange, validateStrike } from '../
 import { iranLaunchPressure, initiativeCfg, israelPackages } from '../politics/initiative';
 import { addIranWarCost, nodeImpactCount, setHostStatus } from '../politics/politics';
 import { runTree, type ActionNode, type AiContext, type ConditionNode, type TreeNode } from './tree';
+import { applyOrder, validateOrder } from '../core/engine';
 
 const TREES = treeData as unknown as Record<string, TreeNode>;
 
@@ -249,15 +250,23 @@ function iranSalvo(ctx: AiContext): boolean {
       const count = spendIranRounds(ctx.snap, 'fattah', 1);
       if (count > 0) salvos.push({ threat: 'hypersonic', damage: 10, count, label: 'Fattah hypersonic missile' });
     }
-    if (ctx.snap.iran.mines > 0 && ctx.rng() < 0.2) {
-      ctx.snap.iran.mines -= 1;
-      ctx.snap.iran.minesLaid += 1;
-      ctx.events.push({
-        text: 'IRGC-N laid another minefield near Hormuz (+15% disruption).',
-        tone: 'warn',
-        faction: 'iran',
-        focus: ctx.map.nodeHexOf('hormuz'),
-      });
+    // Mine-laying now goes through the same order pipeline the player uses:
+    // validate, then apply. No hidden stock decrement.
+    if (ctx.snap.iran.mines > 0 && ctx.rng() < 0.35) {
+      const miner = ctx.snap.units.find((u) => u.faction === 'iran' && u.typeId === 'mine_layer');
+      const hormuz = ctx.map.nodeHexOf('hormuz');
+      if (miner && hormuz) {
+        const order = {
+          kind: 'mine' as const,
+          unitUid: miner.uid,
+          col: hormuz.col,
+          row: hormuz.row,
+          count: 1,
+        };
+        if (validateOrder(ctx.snap, ctx.map, order).ok) {
+          applyOrder(ctx.snap, ctx.map, order, ctx.rng, ctx.events);
+        }
+      }
     }
     if (salvos.length === 0) continue;
 
