@@ -454,3 +454,31 @@ and reconnaissance drones. No cruise or recon-drone unit exists in `units.json`,
 so no stock class was invented for them; adding those units is data work that
 belongs with the scenario expansion in Phase 5. Iranian production stays the
 documented facility/capacity abstraction (§19 conversion documented in Phase 1).
+
+## 12. Phase 2 item 6 — maritime orders
+
+Commit: `feat: add maritime mine, clearance and escort orders`.
+
+- `src/core/maritime.ts`: per-hex `Minefield` state (`mines`, `detected`,
+  `laidTurn`), `layMines`, `detectMinefields`, `clearMines`, escort coverage
+  (cap 3, decays one per turn), and `maritimeThreat` for Hormuz.
+- Orders `mine`, `clear`, `escort` are in the `Order` union, classified in the
+  permission `SCOPE` map, validated and reserved by the engine, and resolved in
+  `applyOrder`. Mining consumes `iran.mines` per mine (max 3 per sortie) and only
+  in sea hexes; clearance requires a located field; each ship acts once per turn.
+- Hormuz disruption now comes from minefields within four hexes of the strait
+  (with pipeline/reroute resilience) instead of `minesLaid × 15%`. Escort coverage
+  subtracts risk. The global counter remains a historical tally only.
+- `src/ai/ai.ts`: the hidden mine decrement is deleted. The AI validates and
+  applies the same `mine` order, so it consumes the same stock and obeys the same
+  sea-hex/range rules.
+- Tests: `src/core/maritime.test.ts` (6) cover laying, land/wrong-unit/empty-stock
+  rejection, detection by a coalition warship, clearance of located fields,
+  refusal of unlocated ones, minefield effect on the index, and escort cap/risk.
+
+Verification: `tsc` exit 0, 26 files / 224 tests passed, `build` exit 0.
+
+Known gap, recorded: the unit action sheet does not yet expose mine/clear/escort
+buttons, so the orders are engine- and AI-usable but not yet clickable. That is a
+UI slice for Phase 4; the engine rules are the acceptance-critical half and are
+covered by tests.
