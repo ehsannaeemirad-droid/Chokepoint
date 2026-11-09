@@ -418,52 +418,34 @@ export function resolveStrike(
   return { events, attackerLost };
 }
 
-/** Special operations sabotage. */
-export function resolveSabotage(
-  snap: GameSnapshot,
-  map: TheaterMap,
-  unit: UnitInstance,
-  nodeId: string,
-  rng: Rng,
-): ResolveEvent[] {
-  const node = map.nodeById.get(nodeId);
-  if (!node) return [];
-  const success = rng() < 0.4;
-  if (success) {
-    const state = snap.nodes[nodeId]!;
-    state.integrity = clamp(state.integrity - 30, 0, state.maxIntegrity);
-    if (node.host === 'iran') addIranWarCost(snap, 8);
-    return [
-      {
-        text: `Special operations sabotaged ${node.name}: integrity now ${Math.round(state.integrity)}%.`,
-        tone: 'good',
-        faction: unit.faction,
-        focus: map.nodeHexOf(nodeId),
-      },
-    ];
-  }
-  snap.meters.legitimacy = clamp(snap.meters.legitimacy - 5, 0, 100);
-  return [
-    {
-      text: `Special operations against ${node.name} failed; the team was lost and legitimacy fell by 5.`,
-      tone: 'bad',
-      faction: unit.faction,
-      focus: map.nodeHexOf(nodeId),
-    },
-  ];
+/** Special operations live in their own module (Phase 2 item 3). */
+export {
+  SPECIAL_OUTCOMES,
+  resolveSabotage,
+  type SpecialOperationResult,
+  type SpecialOutcome,
+} from './specialOps';
+
+/** Iranian launchers Unit 8200 can geolocate — only revealed ones are valid targets. */
+export const CYBER_TARGET_IDS = ['fateh110', 'khorramshahr', 'asm_launcher'];
+
+export function cyberTargets(snap: GameSnapshot): UnitInstance[] {
+  return snap.units.filter(
+    (u) => u.faction === 'iran' && CYBER_TARGET_IDS.includes(u.typeId) && u.revealed,
+  );
 }
 
-/** Unit 8200 / cyber: locate and disable one Iranian launcher. */
-export function resolveCyber(
-  snap: GameSnapshot,
-  unit: UnitInstance,
-  rng: Rng,
-): ResolveEvent[] {
-  const launchers = snap.units.filter(
-    (u) => u.faction === 'iran' && (u.typeId === 'fateh110' || u.typeId === 'khorramshahr' || u.typeId === 'asm_launcher'),
-  );
+/** Unit 8200 / cyber: locate and disable one revealed Iranian launcher. */
+export function resolveCyber(snap: GameSnapshot, unit: UnitInstance, rng: Rng): ResolveEvent[] {
+  const launchers = cyberTargets(snap);
   if (launchers.length === 0) {
-    return [{ text: 'Unit 8200 found no Iranian launcher to disable.', tone: 'info', faction: unit.faction }];
+    return [
+      {
+        text: 'Unit 8200 found no geolocated Iranian launcher to disable.',
+        tone: 'info',
+        faction: unit.faction,
+      },
+    ];
   }
   const target = launchers[Math.floor(rng() * launchers.length)]!;
   if (rng() < 0.7) {
@@ -473,11 +455,17 @@ export function resolveCyber(
       {
         text: `Unit 8200 geolocated and disabled an Iranian ${unitType(target.typeId).name}.`,
         tone: 'good',
-        faction: 'israel',
+        faction: unit.faction,
         focus: { col: target.col, row: target.row },
       },
     ];
   }
   unit.cooldown = 3;
-  return [{ text: 'Unit 8200 ran a cyber operation but the launcher moved before the strike.', tone: 'info', faction: 'israel' }];
+  return [
+    {
+      text: 'Unit 8200 ran a cyber operation but the launcher moved before the strike.',
+      tone: 'info',
+      faction: unit.faction,
+    },
+  ];
 }

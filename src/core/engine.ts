@@ -12,6 +12,7 @@ import type { DeliveryClass } from './types';
 import { runAiPhase, runHostPostures } from '../ai/ai';
 import { maybeStartWar, readyReserves, regenerateUnderground } from './prewar';
 import { resolveCyber, resolveSabotage, resolveStrike, validateStrike } from '../combat/combat';
+import { canPlayerOrder } from './permissions';
 import logisticsData from '../data/logistics.json';
 import { hexDistance } from '../map/hex';
 import { hasProductionCapacity, lineForMunition, productionCapacity, productionSites } from './production';
@@ -106,6 +107,9 @@ export function effectiveArrival(r: Reinforcement): number {
  * fit can together overdraw the same stock. Reservations are derived from the
  * queue on every check and never stored, so removing an order releases its claim.
  */
+/** Political will a cyber operation costs (Phase 2 items 2-3). */
+export const CYBER_WILL_COST = 2;
+
 export interface OrderReservations {
   units: Set<string>;
   politicalWill: number;
@@ -143,6 +147,10 @@ export function reserveOrder(snap: GameSnapshot, reserved: OrderReservations, or
     }
     case 'special':
       reserved.units.add(order.unitUid);
+      return;
+    case 'cyber':
+      reserved.units.add(order.unitUid);
+      reserved.politicalWill += CYBER_WILL_COST;
       return;
     case 'produce':
       reserved.iranResources += productionCost(order.unitTypeId) * order.count;
@@ -185,14 +193,15 @@ export function validateOrder(
   order: Order,
   reserved: OrderReservations = emptyReservations(),
 ): OrderCheck {
-  const isPlayer = (u: UnitInstance) => u.faction === snap.faction;
+  const permission = canPlayerOrder(snap, map, order);
+  if (!permission.ok) return { ok: false, reason: permission.reason };
 
   switch (order.kind) {
     case 'hold':
       return { ok: true };
     case 'move': {
       const unit = findUnit(snap, order.unitUid);
-      if (!unit || !isPlayer(unit)) return { ok: false, reason: 'Select one of your units' };
+      if (!unit) return { ok: false, reason: 'Select one of your units' };
       const def = unitType(unit.typeId);
       const dist = hexDistance({ col: unit.col, row: unit.row }, { col: order.col, row: order.row });
       if (dist > def.mov) return { ok: false, reason: `Too far: ${dist}/${def.mov} hexes` };
@@ -208,7 +217,7 @@ export function validateOrder(
     }
     case 'strike': {
       const unit = findUnit(snap, order.unitUid);
-      if (!unit || !isPlayer(unit)) return { ok: false, reason: 'Select one of your units' };
+      if (!unit) return { ok: false, reason: 'Select one of your units' };
       if (reserved.units.has(unit.uid)) {
         return { ok: false, reason: 'That unit has already been tasked this turn' };
       }
@@ -301,7 +310,7 @@ export function validateOrder(
     }
     case 'special': {
       const unit = findUnit(snap, order.unitUid);
-      if (!unit || !isPlayer(unit)) return { ok: false, reason: 'Select a special operations team' };
+      if (!unit) return { ok: false, reason: 'Select a special operations team' };
       if (reserved.units.has(unit.uid)) {
         return { ok: false, reason: 'That team has already been tasked this turn' };
       }
@@ -315,8 +324,14 @@ export function validateOrder(
     }
     case 'cyber': {
       const unit = findUnit(snap, order.unitUid);
-      if (!unit || unit.faction !== 'israel') return { ok: false, reason: 'Only Unit 8200 can run this operation' };
+      if (!unit) return { ok: false, reason: 'Select a cyber unit' };
       if (unit.cooldown > 0) return { ok: false, reason: `Cyber team rearming (${unit.cooldown} turns)` };
+      if (reserved.units.has(unit.uid)) {
+        return { ok: false, reason: 'That cyber team has already been tasked this turn' };
+      }
+      if (snap.resources.politicalWill - reserved.politicalWill < CYBER_WILL_COST) {
+        return { ok: false, reason: `Needs ${CYBER_WILL_COST} political will` };
+      }
       return { ok: true };
     }
     default:
@@ -531,12 +546,14 @@ export function applyOrder(
       if (!unit) return;
       const nodeId = map.hexToNode.get(`${order.col},${order.row}`);
       if (!nodeId) return;
-      events.push(...resolveSabotage(snap, map, unit, nodeId, rng));
+      const result = resolveSabotage(snap, map, unit, nodeId, rng);
+      events.push(...result.events);
       return;
     }
     case 'cyber': {
       const unit = findUnit(snap, order.unitUid);
       if (!unit) return;
+      snap.resources.politicalWill = clamp(snap.resources.politicalWill - CYBER_WILL_COST, 0, 100);
       events.push(...resolveCyber(snap, unit, rng));
       return;
     }
