@@ -47,26 +47,21 @@ export interface ScenarioDef {
   brief: string;
   turns: number;
   tutorial?: boolean;
-  /** Victory-path thresholds; `null` disables the path system (tutorial). */
   victory?: VictoryThresholds | null;
-  /** US domestic-pressure thresholds (Phase 2); defaults when absent. */
   domestic?: DomesticConfig;
-  /** Israeli initiative thresholds (Phase 3); defaults when absent. */
   initiative?: InitiativeConfig;
-  /** Qatar talks thresholds (Phase 3); defaults when absent. */
   talks?: TalksConfig;
-  /** Escalation ladder thresholds (improvement 1); defaults when absent. */
   escalation?: EscalationConfig;
-  /** In-transit logistics thresholds (improvement 2); defaults when absent. */
   logistics?: LogisticsConfig;
-  /** ROE posture effects (improvement 6); defaults when absent. */
   roe?: RoeConfig;
-  /** Scorecard axis weights (improvement 7); defaults when absent. */
   scorecard?: ScorecardConfig;
   deploy: Record<string, DeployEntry[]>;
   hosts: Record<string, number>;
   iran: IranStock;
   initialHormuz: number;
+  startDate?: string;
+  warStarted?: boolean;
+  phase?: 'prewar' | 'war';
 }
 
 export const SCENARIOS = scenarioData as unknown as Record<string, ScenarioDef>;
@@ -162,6 +157,9 @@ export class Game {
       maxTurns: scenario.turns,
       status: 'playing',
       outcome: '',
+      warStarted: scenario.warStarted !== false && scenario.phase !== 'prewar',
+      startDate: scenario.startDate,
+      phase: scenario.phase ?? (scenario.warStarted === false ? 'prewar' : 'war'),
       victory: scenario.victory ?? null,
       domesticCfg: scenario.domestic ?? DEFAULT_DOMESTIC_CFG,
       domestic: defaultDomesticState(scenario.domestic ?? DEFAULT_DOMESTIC_CFG),
@@ -180,8 +178,10 @@ export class Game {
       nodes,
       hosts,
       resources: {
-        interceptorsUSA: BALANCE.interceptorsUSAStart,
-        interceptorsIsrael: BALANCE.interceptorsIsraelStart,
+        interceptorsUSA: Math.round(BALANCE.interceptorsUSAStart * 0.7),
+        interceptorsIsrael: Math.round(BALANCE.interceptorsIsraelStart * 0.7),
+        interceptorsUSAReserve: Math.round(BALANCE.interceptorsUSAStart * 0.3),
+        interceptorsIsraelReserve: Math.round(BALANCE.interceptorsIsraelStart * 0.3),
         politicalWill: BALANCE.politicalWillStart,
         tankerSorties: 6,
         airlift: BALANCE.sharedAirliftCapacity,
@@ -234,7 +234,6 @@ export class Game {
     };
   }
 
-  /** Nearest hex of the right type to a geographic anchor. */
   private placeHex(lon: number, lat: number, water: boolean): HexCoord {
     const estimate = this.map.estimateHex(lon, lat);
     let best: HexCoord = estimate;
@@ -258,7 +257,6 @@ export class Game {
     return best;
   }
 
-  // ---------------------------------------------------------------- reactivity
   subscribe(listener: () => void): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
@@ -268,15 +266,10 @@ export class Game {
     for (const listener of this.listeners) listener();
   }
 
-  // ------------------------------------------------------------------ selection
   selectHex(col: number, row: number): void {
     const id = hexId(col, row);
     const units = this.unitsAt(col, row).filter((u) => u.faction === this.snap.faction);
-    this.selection = {
-      hexId: id,
-      unitUid: units[0]?.uid ?? null,
-      mode: 'idle',
-    };
+    this.selection = { hexId: id, unitUid: units[0]?.uid ?? null, mode: 'idle' };
     this.emit();
   }
 
@@ -319,7 +312,6 @@ export class Game {
     return { col: col!, row: row! };
   }
 
-  // -------------------------------------------------------------------- orders
   queueOrder(order: Order): { ok: boolean; reason?: string } {
     if (this.snap.status !== 'playing') return { ok: false, reason: 'The campaign is over' };
     const check = validateOrderSafe(this, order);
@@ -339,7 +331,6 @@ export class Game {
     this.emit();
   }
 
-  /** Resolve the turn and record it in the log. */
   endTurn(): { events: ResolveEvent[]; resolvedTurn: number } {
     if (this.snap.status !== 'playing') return { events: [], resolvedTurn: this.snap.turn };
     const resolvedTurn = this.snap.turn;
@@ -357,7 +348,6 @@ export class Game {
     return { events: result.events, resolvedTurn };
   }
 
-  // ------------------------------------------------------------------- persistence
   save(slot: SlotId): boolean {
     return saveGame(slot, this.snap);
   }
