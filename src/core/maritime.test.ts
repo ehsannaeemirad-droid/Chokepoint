@@ -125,6 +125,19 @@ describe('shipping risk and escort', () => {
     expect(maritimeThreat(game.snap, game.map)).toBeLessThan(minedThreat);
   });
 
+  it('Houthi launches consume their own magazine and never go negative', () => {
+    const game = new Game();
+    game.start('campaign', 'usa', 17);
+    game.snap.warStarted = true;
+    game.snap.phase = 'war';
+    const magazines = () => game.snap.units.filter((u) => u.faction === 'houthi').map((u) => u.magazine);
+    const before = magazines();
+    for (let turn = 0; turn < 6 && game.snap.status === 'playing'; turn++) game.endTurn();
+    const after = magazines();
+    expect(after.every((m) => m >= 0)).toBe(true);
+    expect(after.reduce((s, m) => s + m, 0)).toBeLessThanOrEqual(before.reduce((s, m) => s + m, 0));
+  });
+
   it('caps escort coverage and tasks each ship once', () => {
     const game = usaGame();
     const csg = game.snap.units.find((u) => u.typeId === 'csg')!;

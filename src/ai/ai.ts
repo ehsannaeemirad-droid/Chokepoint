@@ -111,6 +111,8 @@ function houthiAttack(ctx: AiContext): boolean {
   for (let i = 0; i < tempo; i++) {
     const unit = pick(units, ctx.rng);
     if (!unit) break;
+    // A Houthi launch costs the same kind of ammunition an Iranian launch does.
+    if (unit.magazine <= 0) continue;
     const def = unitType(unit.typeId);
     const candidates: Array<{ col: number; row: number; nodeId?: string; weight: number }> = [];
     for (const [id, weight] of [
@@ -132,6 +134,7 @@ function houthiAttack(ctx: AiContext): boolean {
     }
     const total = candidates.reduce((sum, c) => sum + c.weight, 0);
     if (total === 0) {
+      unit.magazine -= 1;
       ctx.snap.meters.oilPrice = clamp(ctx.snap.meters.oilPrice + 2, 40, 220);
       ctx.events.push({
         text: 'Houthi anti-ship attacks closed the Bab al-Mandeb shipping lane for a day; insurance costs rose.',
@@ -150,6 +153,7 @@ function houthiAttack(ctx: AiContext): boolean {
         break;
       }
     }
+    unit.magazine -= 1;
     const isDrone = unit.typeId === 'houthi_drone';
     const salvo: SalvoSpecLike = isDrone
       ? { threat: 'drone', damage: 3, count: 2 + Math.floor(ctx.rng() * 3), label: 'Houthi drones' }
