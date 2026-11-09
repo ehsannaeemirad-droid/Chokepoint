@@ -458,3 +458,89 @@ tier-3 threshold (great-power stance 85, the old file used 45 and passed vacuous
     their base ETA with `delayTurns: 0`). The replay payload semantics are
     unchanged — seed + order log — so v1/v2 replays remain valid. Migration
     notes live in this file and the README.
+
+### Phase 1e — victory assumptions (design only, no implementation)
+
+This section fixes the vocabulary that Phase 2 item 12 will implement. It is
+explicitly **not** code: nothing here changes `checkOutcome`, the scorecard, or
+any threshold. Current behaviour is documented in "Path semantics" above.
+
+#### The outcome is multi-dimensional
+
+A campaign is judged on eight dimensions, each scored independently and never
+collapsed into one number until the final verdict:
+
+| Dimension | What it measures | Who it favours |
+|---|---|---|
+| Capability | surviving Iranian missile/drone production and launch capacity | Iran when intact |
+| Government stability | regime control of Tehran, leadership continuity, internal coercion | Iran when intact |
+| Economic resilience | Iranian war cost, revenue, inflation, sanctions exposure | Iran when low |
+| Regional position | Hormuz leverage, host access, proxy network, coalition basing | Iran when the Gulf is constrained |
+| Political settlement | armistice terms actually signed, not battlefield claims | whoever signs on better terms |
+| Infrastructure security | nuclear complex, power, ports, oil terminals | Iran when intact; coalition when destroyed |
+| Sustainability | sorties, interceptors, airframes, stock left for another month | whoever can continue |
+| Legitimacy | domestic and allied consent for the war | coalition when high |
+
+No dimension is a proxy for another. A state can hold Tehran, keep enriching and
+still lose the war politically; it can also destroy the nuclear complex while
+losing the Gulf basing network.
+
+#### Outcome states
+
+The terminal vocabulary is a closed set, grouped by what ended the campaign:
+
+- **Decisive coalition** — Iran's capability and infrastructure are broken and
+  the regime accepts terms.
+- **Clear coalition** — the coalition achieves its objectives at a cost that
+  still leaves the government and the alliance intact.
+- **Narrow coalition** — objectives met on points with a divided alliance and an
+  ambiguous settlement.
+- **Stalemate** — neither side achieves its objectives; the war ends unresolved.
+- **Narrow Iranian advantage** — Iran holds most dimensions at the close without
+  a coalition collapse.
+- **Clear Iranian advantage** — Iran keeps the regime, the programme and the
+  strait, and the coalition's domestic consensus fractures.
+- **Decisive Iranian survival** — the coalition withdraws; the regime and the
+  programme survive intact.
+- **Regime collapse** — the government falls or loses control of the capital.
+- **Nuclear release** — the first use since 1945; the campaign ends in a global
+  crisis rather than a victory for anyone.
+- **Armistice, favourable or costly** — the war ends at the table; the tier
+  records who conceded what, independent of the battlefield score.
+
+These attach to the existing scorecard verdicts (`decisive`/`clear`/`narrow` per
+side, or `stalemate`) rather than replacing them; the scorecard remains the
+quantitative record, the outcome state is the narrative conclusion.
+
+#### Faction objectives
+
+**United States.** Deny Iran a usable nuclear weapons capability, keep Hormuz
+open, preserve the Gulf basing network, keep the war legally and politically
+sustainable at home, and avoid a regional war that draws in Russia or China.
+Success is a settlement that holds without occupying Iran.
+
+**Israel.** Degrade Iran's launch force and production base, keep Israeli cities
+and airfields intact, preserve freedom of action (initiative), and prevent a
+nuclear breakout. Success does not require an American occupation of Iran.
+
+**Iran.** Survive as a regime, keep the nuclear programme viable, impose costs
+that break the coalition's domestic consensus, retain Hormuz leverage, and split
+the coalition diplomatically. Success is outlasting the coalition, not defeating
+it on the battlefield.
+
+#### What is explicitly not a victory condition
+
+- Occupation of Iranian territory. The US roster has no ground formations; "no
+  occupation" is an Iranian path, not a coalition win condition.
+- Any single statistic, including `politicalWill ≤ 0`, arriving at zero as an
+  instant win for the other side. Domestic collapse ends *that* side's campaign;
+  it does not by itself validate every enemy objective.
+- A pure threshold clock. Reaching turn 30 satisfies nothing on its own; the
+  dimensions decide.
+- Kill counts, casualty ratios, or "most targets destroyed".
+- Nuclear use as a win. It is a terminal crisis state.
+- Signing a ceasefire as an automatic win for whoever proposed it; the tier
+  decides who conceded.
+
+Phase 2 item 12 implements this model against the existing scorecard axes;
+until then the current path-based outcomes remain authoritative.
