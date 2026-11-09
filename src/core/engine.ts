@@ -1,3 +1,4 @@
+import type { DeliveryClass } from './types';
 /**
  * The turn pipeline:
  *   1. player orders resolve
@@ -14,7 +15,14 @@ import { resolveCyber, resolveSabotage, resolveStrike, validateStrike } from '..
 import logisticsData from '../data/logistics.json';
 import { hexDistance } from '../map/hex';
 import { hasProductionCapacity, lineForMunition, productionCapacity, productionSites } from './production';
-import { deliverMatedRounds, deliveryClassFor, resetLauncherSorties, spendIranRounds } from './inventory';
+import {
+  DELIVERY_CLASS_INFO,
+  deliverMatedRounds,
+  deliveryClassFor,
+  launcherSortiesLeft,
+  resetLauncherSorties,
+  spendIranRounds,
+} from './inventory';
 import type { TheaterMap } from '../map/TheaterMap';
 import {
   thirdPartyPhase,
@@ -90,12 +98,93 @@ export function effectiveArrival(r: Reinforcement): number {
   return r.arrivesTurn + (r.delayTurns ?? 0);
 }
 
+
+/**
+ * Projected-state reservations (Phase 2 item 1).
+ *
+ * Validation must not ignore the orders already queued, or two orders that each
+ * fit can together overdraw the same stock. Reservations are derived from the
+ * queue on every check and never stored, so removing an order releases its claim.
+ */
+export interface OrderReservations {
+  units: Set<string>;
+  politicalWill: number;
+  iranResources: number;
+  airlift: number;
+  rounds: Record<DeliveryClass, number>;
+  sorties: Record<'drone' | 'ballistic', number>;
+}
+
+export function emptyReservations(): OrderReservations {
+  return {
+    units: new Set(),
+    politicalWill: 0,
+    iranResources: 0,
+    airlift: 0,
+    rounds: { drone: 0, fateh: 0, khorramshahr: 0, fattah: 0, asm: 0 },
+    sorties: { drone: 0, ballistic: 0 },
+  };
+}
+
+/** Add one order's claim to the reservation set; the snapshot is not mutated. */
+export function reserveOrder(snap: GameSnapshot, reserved: OrderReservations, order: Order): void {
+  switch (order.kind) {
+    case 'strike': {
+      reserved.units.add(order.unitUid);
+      if (snap.faction === 'iran') {
+        const unit = findUnit(snap, order.unitUid);
+        const cls = unit ? deliveryClassFor(unit.typeId) : null;
+        if (cls) {
+          reserved.rounds[cls] += 1;
+          reserved.sorties[DELIVERY_CLASS_INFO[cls].launcherPool] += 1;
+        }
+      }
+      return;
+    }
+    case 'special':
+      reserved.units.add(order.unitUid);
+      return;
+    case 'produce':
+      reserved.iranResources += productionCost(order.unitTypeId) * order.count;
+      return;
+    case 'reinforce': {
+      const pkg = REINFORCEMENTS.find((r) => r.id === order.packageId);
+      if (pkg) reserved.politicalWill += pkg.cost;
+      return;
+    }
+    case 'airlift':
+      reserved.politicalWill += ISRAEL_AIRLIFT.cost;
+      reserved.airlift += 5;
+      return;
+    case 'diplomacy':
+      reserved.politicalWill += 2;
+      return;
+    case 'communicate':
+      reserved.politicalWill += domesticCfg(snap).communicate.cost;
+      return;
+    default:
+      return;
+  }
+}
+
+/** Reservations implied by everything already queued. */
+export function orderReservations(snap: GameSnapshot): OrderReservations {
+  const reserved = emptyReservations();
+  for (const order of snap.orders) reserveOrder(snap, reserved, order);
+  return reserved;
+}
+
 export interface OrderCheck {
   ok: boolean;
   reason?: string;
 }
 
-export function validateOrder(snap: GameSnapshot, map: TheaterMap, order: Order): OrderCheck {
+export function validateOrder(
+  snap: GameSnapshot,
+  map: TheaterMap,
+  order: Order,
+  reserved: OrderReservations = emptyReservations(),
+): OrderCheck {
   const isPlayer = (u: UnitInstance) => u.faction === snap.faction;
 
   switch (order.kind) {
@@ -120,12 +209,22 @@ export function validateOrder(snap: GameSnapshot, map: TheaterMap, order: Order)
     case 'strike': {
       const unit = findUnit(snap, order.unitUid);
       if (!unit || !isPlayer(unit)) return { ok: false, reason: 'Select one of your units' };
-      if (taskedThisTurn(snap, unit.uid)) {
+      if (reserved.units.has(unit.uid)) {
         return { ok: false, reason: 'That unit has already been tasked this turn' };
       }
       if (snap.faction === 'iran') {
-        const stock = iranStockFor(snap, unit);
-        if (stock <= 0) return { ok: false, reason: 'No munitions of that type remain' };
+        const cls = deliveryClassFor(unit.typeId);
+        if (cls) {
+          if (snap.iran.rounds[cls] - reserved.rounds[cls] <= 0) {
+            return { ok: false, reason: 'No munitions of that type remain' };
+          }
+          const pool = DELIVERY_CLASS_INFO[cls].launcherPool;
+          if (launcherSortiesLeft(snap.iran, pool) - reserved.sorties[pool] <= 0) {
+            return { ok: false, reason: 'No launcher sorties remain this turn' };
+          }
+        } else if (iranStockFor(snap, unit) <= 0) {
+          return { ok: false, reason: 'No munitions of that type remain' };
+        }
       }
       return validateStrike(snap, map, unit, order.col, order.row, order.nodeId);
     }
@@ -133,7 +232,9 @@ export function validateOrder(snap: GameSnapshot, map: TheaterMap, order: Order)
       if (snap.faction !== 'iran') return { ok: false, reason: 'Only Iran produces munitions' };
       const cost = productionCost(order.unitTypeId);
       if (cost <= 0) return { ok: false, reason: 'Unknown production line' };
-      if (snap.iran.resources < cost * order.count) return { ok: false, reason: 'Not enough war resources' };
+      if (snap.iran.resources - reserved.iranResources < cost * order.count) {
+        return { ok: false, reason: 'Not enough war resources for that order' };
+      }
       const line = lineForMunition(order.unitTypeId);
       if (!hasProductionCapacity(map.nodes, snap, line)) {
         return { ok: false, reason: `No intact ${line} production line` };
@@ -142,7 +243,9 @@ export function validateOrder(snap: GameSnapshot, map: TheaterMap, order: Order)
     }
     case 'diplomacy': {
       if (snap.faction !== 'usa') return { ok: false, reason: 'Only Washington can run this signalling campaign' };
-      if (snap.resources.politicalWill < 2) return { ok: false, reason: 'Not enough political will' };
+      if (snap.resources.politicalWill - reserved.politicalWill < 2) {
+        return { ok: false, reason: 'Not enough political will' };
+      }
       const host = snap.hosts[order.host];
       if (!host) return { ok: false, reason: 'Not a host nation' };
       if (host.status === 'closed') return { ok: false, reason: 'The base is already closed' };
@@ -152,13 +255,19 @@ export function validateOrder(snap: GameSnapshot, map: TheaterMap, order: Order)
       if (snap.faction !== 'usa') return { ok: false, reason: 'Only the US can request CONUS reinforcements' };
       const pkg = REINFORCEMENTS.find((r) => r.id === order.packageId);
       if (!pkg) return { ok: false, reason: 'Unknown package' };
-      if (snap.resources.politicalWill < pkg.cost) return { ok: false, reason: `Needs ${pkg.cost} political will` };
+      if (snap.resources.politicalWill - reserved.politicalWill < pkg.cost) {
+        return { ok: false, reason: `Needs ${pkg.cost} political will` };
+      }
       if (snap.reinforcements.some((r) => r.id === pkg.id)) return { ok: false, reason: 'That package is already in transit' };
       return { ok: true };
     }
     case 'airlift': {
-      if (snap.resources.airlift < 5) return { ok: false, reason: 'No airlift capacity left this turn' };
-      if (snap.resources.politicalWill < ISRAEL_AIRLIFT.cost) return { ok: false, reason: 'Not enough political will' };
+      if (snap.resources.airlift - reserved.airlift < 5) {
+        return { ok: false, reason: 'No airlift capacity left this turn' };
+      }
+      if (snap.resources.politicalWill - reserved.politicalWill < ISRAEL_AIRLIFT.cost) {
+        return { ok: false, reason: 'Not enough political will' };
+      }
       return { ok: true };
     }
     case 'communicate': {
@@ -167,7 +276,9 @@ export function validateOrder(snap: GameSnapshot, map: TheaterMap, order: Order)
       if (snap.domestic && snap.domestic.cooldown > 0) {
         return { ok: false, reason: `Public address recharging (${snap.domestic.cooldown} turns)` };
       }
-      if (snap.resources.politicalWill < cost) return { ok: false, reason: `Needs ${cost} political will` };
+      if (snap.resources.politicalWill - reserved.politicalWill < cost) {
+        return { ok: false, reason: `Needs ${cost} political will` };
+      }
       return { ok: true };
     }
     case 'israel-initiative': {
@@ -191,7 +302,7 @@ export function validateOrder(snap: GameSnapshot, map: TheaterMap, order: Order)
     case 'special': {
       const unit = findUnit(snap, order.unitUid);
       if (!unit || !isPlayer(unit)) return { ok: false, reason: 'Select a special operations team' };
-      if (taskedThisTurn(snap, unit.uid)) {
+      if (reserved.units.has(unit.uid)) {
         return { ok: false, reason: 'That team has already been tasked this turn' };
       }
       if (unitType(unit.typeId).category !== 'specops') return { ok: false, reason: 'Not a special operations unit' };
@@ -211,12 +322,6 @@ export function validateOrder(snap: GameSnapshot, map: TheaterMap, order: Order)
     default:
       return { ok: false, reason: 'Unknown order' };
   }
-}
-
-function taskedThisTurn(snap: GameSnapshot, unitUid: string): boolean {
-  return snap.orders.some(
-    (o) => (o.kind === 'strike' || o.kind === 'special') && o.unitUid === unitUid,
-  );
 }
 
 function productionCost(unitTypeId: string): number {
@@ -568,6 +673,24 @@ export function runTurn(snap: GameSnapshot, map: TheaterMap): TurnResult {
   const events: ResolveEvent[] = [];
   applyPendingDomestic(snap, events);
   const orderRng = factionRng(snap.seed, snap.turn, 'orders');
+  // Re-validate the queue against the live snapshot before resolving. An order
+  // that no longer holds is dropped with a logged reason, never silently applied.
+  const accepted: Order[] = [];
+  const reserved = emptyReservations();
+  for (const order of snap.orders) {
+    const check = validateOrder(snap, map, order, reserved);
+    if (check.ok) {
+      accepted.push(order);
+      reserveOrder(snap, reserved, order);
+    } else {
+      events.push({
+        text: `Order dropped: ${check.reason ?? 'invalid'}.`,
+        tone: 'warn',
+        faction: snap.faction,
+      });
+    }
+  }
+  snap.orders = accepted;
   for (const order of snap.orders) applyOrder(snap, map, order, orderRng, events);
 
   maybeStartWar(snap, events);

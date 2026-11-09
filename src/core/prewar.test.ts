@@ -29,8 +29,9 @@ describe('pre-war start', () => {
     game.start('campaign', 'usa', 7);
     const striker = game.snap.units.find((u) => u.faction === 'usa' && u.typeId === 'f35a');
     expect(striker).toBeTruthy();
+    const natanz = game.map.nodeHexOf('natanz')!;
     game.snap.orders = [
-      { kind: 'strike', unitUid: striker!.uid, col: striker!.col, row: striker!.row },
+      { kind: 'strike', unitUid: striker!.uid, col: natanz.col, row: natanz.row, nodeId: 'natanz' },
     ];
     runTurn(game.snap, game.map);
     expect(game.snap.warStarted).toBe(true);

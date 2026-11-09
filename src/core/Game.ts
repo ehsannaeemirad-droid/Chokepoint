@@ -7,7 +7,7 @@ import { TheaterMap } from '../map/TheaterMap';
 import { hexId, hexDistance, type HexCoord } from '../map/hex';
 import { saveGame, loadGame, type SlotId } from '../services/save';
 import { BALANCE, FACTION_LABELS } from './config';
-import { runTurn, DEFAULT_LOGISTICS_CFG } from './engine';
+import { DEFAULT_LOGISTICS_CFG, orderReservations, runTurn } from './engine';
 import type {
   DomesticConfig,
   EscalationConfig,
@@ -379,7 +379,7 @@ export class Game {
 import { validateOrder } from './engine';
 
 function validateOrderSafe(game: Game, order: Order) {
-  return validateOrder(game.snap, game.map, order);
+  return validateOrder(game.snap, game.map, order, orderReservations(game.snap));
 }
 
 function clone<T>(value: T): T {
