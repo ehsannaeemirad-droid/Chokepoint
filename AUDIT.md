@@ -102,7 +102,53 @@ Code:
   are well-formed, munitions map to the right line, capacity follows integrity,
   and a production order is rejected once the line is destroyed.
 
-## 3. Decisions
+## 3. Phase 1b — Iranian inventory split (commit `HEAD`)
+
+The flat counters (`drones`, `fateh`, `khorramshahr`, `fattah`, `asm`) conflated
+four different things. `IranStock` is now a typed arsenal:
+
+| Field | Meaning |
+|---|---|
+| `rounds` | mated rounds by delivery class — what a launcher fires |
+| `airframes` | airframes built and awaiting a warhead, by production line |
+| `warheads.conventional` | conventional warheads awaiting an airframe |
+| `launchers` | drone/ballistic launch platforms per turn, plus this turn's usage |
+| `nuclearMaterial` | warhead-grade material in warhead equivalents; never a round |
+| `mines`, `minesLaid`, `fac`, `resources` | unchanged naval, industrial and economic state |
+
+Code:
+
+- `src/core/inventory.ts` (new): `deliveryClassFor`, `spendIranRounds`,
+  `mateRounds`, `deliverMatedRounds`, `totalRounds`, `launcherSortiesLeft`,
+  `resetLauncherSorties`, and `arsenalRows` with `ARSENAL_UNCERTAINTY_PCT`.
+- `src/core/engine.ts`: every `strike` by an Iranian unit spends one mated round
+  **and** one launcher sortie, and reports whether the failure was rounds or
+  sorties. `produce` and underground regeneration deliver through the same
+  airframe + warhead → mated-round path. The launcher budget resets when the
+  turn advances.
+- `src/ai/ai.ts`: salvos draw on the same stock and the same launcher budget; the
+  logged salvo count is what was actually fired. AI production mates through
+  `deliverMatedRounds`.
+- `src/politics/initiative.ts`: launch pressure uses `totalRounds`.
+- `src/ui/Ui.ts`: gauges, the production list and the enemy stock helper read
+  mated rounds; the panel shows launcher sorties left, unmated airframes and
+  warheads, and nuclear material as a separate programme.
+- `src/data/scenarios.json`: both scenarios carry the split arsenal; campaign has
+  12 drone / 9 ballistic launch platforms, the tutorial 6 / 4.
+- `src/core/Game.ts`: `structuredClone(scenario.iran)`. **Bug found:** the shallow
+  spread shared the nested arsenal objects between the scenario definition and
+  every game started from it, so one campaign's spending changed the next
+  campaign's starting stock. The older flat counters were copied by value, which
+  is why this never surfaced before.
+- `src/core/inventory.test.ts` (new, 9 tests): start state is split; nuclear and
+  non-mated stock never count as launchable; mating consumes both halves; a
+  sortie is spent per round and the budget caps the salvo; the budget resets each
+  turn; a player strike is rejected when sorties are gone; every row is labelled
+  `assessed` with a percentage band.
+- `prewar.test.ts`, `domestic.test.ts`, `phase3.test.ts`: updated to zero or read
+  mated rounds instead of the removed flat fields.
+
+## 4. Decisions
 
 - **Reserve split over the old 100/60 baseline.** The magazine total is unchanged
   (120 US, 70 Israel) and the test asserts the total as well as the split, so the
@@ -116,38 +162,50 @@ Code:
 - **Regeneration stays a labelled abstraction.** It is still a per-site stock
   trickle, but the values now live in data and are named `undergroundRegen`,
   rather than pretending to be production capacity.
+- **Rounds, not "missiles".** A launcher fires a mated round; airframes and
+  warheads are only stock halves. Nothing in the game can convert nuclear
+  material into a round, and no code path adds to `nuclearMaterial`.
+- **Launchers are a real budget, not decoration.** They cap how many rounds a turn
+  can leave the force, are shared by player and AI, and are therefore enforced in
+  both the validator and the AI salvo builder.
+- **Every displayed arsenal number is an estimate.** `arsenalRows` attaches
+  `assessed` confidence and a ± band per class; the UI shows the band label
+  instead of implying a precise count.
 
-## 4. Verification log
+## 5. Verification log
 
 | Command | Result |
 |---|---|
 | `corepack pnpm exec tsc --noEmit` | exit 0 |
-| `corepack pnpm exec vitest run` | 17 files, 160 tests passed, exit 0 |
-| `corepack pnpm run build` | exit 0; `dist/index.html` 1.03 kB, CSS 25.60 kB, app 254.71 kB, phaser 1367.07 kB |
+| `corepack pnpm exec vitest run` | 18 files, 170 tests passed, exit 0 |
+| `corepack pnpm run build` | exit 0; `dist/index.html` ~1.0 kB, CSS 25.6 kB, app ~258 kB, phaser 1367 kB |
 
-The recovery baseline before Phase 1a was 16 files / 152 tests passing.
+Baselines: 16 files / 152 tests before Phase 1a; 17 files / 160 tests before
+Phase 1b.
 
 Not verified:
 
 - GitHub Actions CI and the Pages workflow were never executed: no runner has
   run them and nothing has been pushed.
-- The built game was not opened in a browser. Rendering, the new marker shape and
-  the Persian facility label are therefore compile- and test-checked only.
+- The built game was not opened in a browser. The new arsenal panel, the
+  `missile-industry` marker and the Persian labels are compile- and
+  test-checked only.
 - `mdf.md` is not in the repository, so the brief's exact acceptance wording for
   later phases cannot be re-read from the tree.
 
-## 5. Open issues
+## 6. Open issues
 
-- Balance: Iranian AI output per turn now follows facility count (four missile
-  sites, two drone sites) rather than three fixed sites. Campaign tests still
-  pass, but the win distribution needs the Phase 3 harness.
-- Nine of the eleven facility categories are defined but unused by data; only
-  conversion, enrichment, missile production, weapons storage and defence
-  industry are assigned. Radar and command sites should be classified in 1b/1c.
+- Balance: Iranian output and salvo size now depend on facility count and the
+  launcher budget. Campaign tests pass, but win distribution needs the Phase 3
+  harness.
+- Nine of the eleven facility categories are defined but unused by data; radar
+  and command sites should be classified in Phase 1c.
 - Provenance is a single unqualified note per site; Phase 1c must attach evidence
   and confidence rather than a generic sentence.
+- `nuclearMaterial` is modelled and displayed but nothing produces it yet; that
+  belongs to the escalation/nuclear rules, not to inventory bookkeeping.
 
-## 6. Next phase
+## 7. Next phase
 
-Phase 1b (inventory): separate warhead, airframe, launcher and interceptor
-inventories, label every estimate, and keep nuclear and missile stocks disjoint.
+Phase 1c (provenance): attach evidence, date and confidence to every facility and
+stock estimate, and replace the generic provenance sentence.
