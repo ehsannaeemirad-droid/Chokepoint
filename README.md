@@ -253,3 +253,5 @@ src/i18n/log.test.ts       Persian named-variable templates and outcome coverage
   scorecard weights) are first-pass values pending a playtest pass on real hardware.
 - Pointer/gesture handling is driven manually in desktop Chromium at 390 × 844 (menu → unit →
   target-list strike → END TURN → report skip/close); mobile touch was not tested on a real device.
+
+Governing specification: `SPEC.md`.

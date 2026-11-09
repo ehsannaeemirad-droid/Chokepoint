@@ -1,5 +1,7 @@
 # Chokepoint — Audit and Phase Log
 
+Governing specification: `SPEC.md`.
+
 Append-only record of what was changed, how it was verified, and what remains
 open. Every check below was executed locally on the canonical checkout; a check
 that was not run is stated as not run.
