@@ -65,9 +65,10 @@ export const GRID = {
 } as const;
 
 export const BALANCE = {
-  // Interceptor economy
-  interceptorsUSAStart: 100,
-  interceptorsIsraelStart: 60,
+  // Interceptor economy (game-scale abstraction of pre-war ~2,300 Patriot + THAAD stocks;
+  // see src/data/orderOfBattle.json for real-order magnitudes).
+  interceptorsUSAStart: 120,
+  interceptorsIsraelStart: 70,
   airliftResupplyUSATurns: 2,
   airliftResupplyUSAAmount: 12,
   airliftResupplyIsraelTurns: 4,
