@@ -186,7 +186,7 @@ export class Game {
         tankerSorties: 6,
         airlift: BALANCE.sharedAirliftCapacity,
       },
-      iran: { ...scenario.iran },
+      iran: structuredClone(scenario.iran),
       meters: {
         hormuz: scenario.initialHormuz,
         hormuzTurnsAbove50: 0,

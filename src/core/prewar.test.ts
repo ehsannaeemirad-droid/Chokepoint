@@ -13,8 +13,8 @@ describe('pre-war start', () => {
     expect(s.startDate).toBe('2026-02-27');
     expect(s.resources.interceptorsUSAReserve ?? 0).toBeGreaterThan(0);
     expect(s.resources.interceptorsUSA).toBeGreaterThan(0);
-    expect(s.iran.drones).toBeGreaterThanOrEqual(56);
-    expect(s.iran.fateh).toBeGreaterThanOrEqual(28);
+    expect(s.iran.rounds.drone).toBeGreaterThanOrEqual(56);
+    expect(s.iran.rounds.fateh).toBeGreaterThanOrEqual(28);
   });
 
   it('first end-turn without hostile orders does not open war', () => {

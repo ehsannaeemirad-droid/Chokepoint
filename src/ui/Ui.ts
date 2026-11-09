@@ -8,6 +8,7 @@
 import { strikeTargetsFor, type StrikeTarget } from '../combat/targets';
 import { FACTION_COLORS } from '../core/config';
 import { ISRAEL_AIRLIFT, REINFORCEMENTS, effectiveArrival } from '../core/engine';
+import { ARSENAL_UNCERTAINTY_PCT, arsenalRows, deliveryClassFor } from '../core/inventory';
 import { game, SCENARIOS, type Game, type InteractionMode } from '../core/Game';
 import type { FactionId, Order, ResolveEvent, UnitInstance } from '../core/types';
 import { unitType } from '../core/world';
@@ -697,10 +698,10 @@ export class Ui {
       pills.push([t('gauge.tank'), `${Math.round(s.resources.tankerSorties)}`, t('tip.tank')]);
       pills.push([t('gauge.will'), `${Math.round(s.resources.politicalWill)}`, t('tip.willIL')]);
     } else {
-      pills.push([t('gauge.drone'), `${Math.round(s.iran.drones)}`, t('tip.drone')]);
+      pills.push([t('gauge.drone'), `${Math.round(s.iran.rounds.drone)}`, t('tip.drone')]);
       pills.push([
         t('gauge.ball'),
-        `${Math.round(s.iran.fateh + s.iran.khorramshahr + s.iran.fattah)}`,
+        `${Math.round(s.iran.rounds.fateh + s.iran.rounds.khorramshahr + s.iran.rounds.fattah)}`,
         t('tip.ball'),
       ]);
       pills.push([t('gauge.res'), `${Math.round(s.iran.resources)}`, t('tip.res')]);
@@ -1060,11 +1061,21 @@ export class Ui {
       ];
       factionSection += `<section class="panel-section"><h4>${t('panel.production', { n: Math.round(s.iran.resources) })}</h4>
         ${lines
-          .map(
-            ([id, label, cost]) =>
-              `<button class="pkg-row" data-action="produce:${id}"><span><b>${label}</b><small>${t('panel.inStock', { n: s.iran.drones + s.iran.fateh + s.iran.khorramshahr + s.iran.fattah })}</small></span><span class="pkg-cost">${cost}</span></button>`,
-          )
+          .map(([id, label, cost]) => {
+            const cls = deliveryClassFor(id);
+            const rounds = cls ? s.iran.rounds[cls] : 0;
+            const pct = cls ? ARSENAL_UNCERTAINTY_PCT[cls] : 0;
+            return `<button class="pkg-row" data-action="produce:${id}"><span><b>${label}</b><small>${t('panel.inStock', { n: rounds })} · ${t('panel.assessed', { pct })}</small></span><span class="pkg-cost">${cost}</span></button>`;
+          })
           .join('')}
+      </section>
+      <section class="panel-section"><h4>${t('panel.arsenal')}</h4>
+        ${arsenalRows(s.iran)
+          .map((row) => `<div class="queue-row"><span>${row.label}</span><b>${t('panel.assessed', { pct: row.uncertaintyPct })}</b></div>`)
+          .join('')}
+        <small>${t('panel.launchers', { d: s.iran.launchers.drone - s.iran.launchers.usedDrone, b: s.iran.launchers.ballistic - s.iran.launchers.usedBallistic })}</small>
+        <small>${t('panel.unmated', { a: s.iran.airframes.drone + s.iran.airframes.missile, w: s.iran.warheads.conventional })}</small>
+        <small>${t('panel.nuclearMaterial', { n: s.iran.nuclearMaterial })}</small>
       </section>`;
     }
 
@@ -1549,22 +1560,9 @@ export class Ui {
   // ------------------------------------------------------------------- helpers
   private iranStockFor(unit: UnitInstance): number {
     const s = this.game.snap.iran;
-    switch (unit.typeId) {
-      case 'shahed136':
-        return s.drones;
-      case 'fateh110':
-        return s.fateh;
-      case 'khorramshahr':
-        return s.khorramshahr;
-      case 'fattah':
-        return s.fattah;
-      case 'asm_launcher':
-        return s.asm;
-      case 'mine_layer':
-        return s.mines;
-      default:
-        return unit.magazine;
-    }
+    if (unit.typeId === 'mine_layer') return s.mines;
+    const cls = deliveryClassFor(unit.typeId);
+    return cls ? s.rounds[cls] : unit.magazine;
   }
 
   private showToast(message: string, tone: string): void {

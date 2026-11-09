@@ -14,6 +14,7 @@ import { resolveCyber, resolveSabotage, resolveStrike, validateStrike } from '..
 import logisticsData from '../data/logistics.json';
 import { hexDistance } from '../map/hex';
 import { hasProductionCapacity, lineForMunition, productionCapacity, productionSites } from './production';
+import { deliverMatedRounds, deliveryClassFor, resetLauncherSorties, spendIranRounds } from './inventory';
 import type { TheaterMap } from '../map/TheaterMap';
 import {
   thirdPartyPhase,
@@ -234,54 +235,34 @@ function productionCost(unitTypeId: string): number {
 }
 
 function iranStockFor(snap: GameSnapshot, unit: UnitInstance): number {
-  switch (unit.typeId) {
-    case 'shahed136':
-      return snap.iran.drones;
-    case 'fateh110':
-      return snap.iran.fateh;
-    case 'khorramshahr':
-      return snap.iran.khorramshahr;
-    case 'fattah':
-      return snap.iran.fattah;
-    case 'asm_launcher':
-      return snap.iran.asm;
-    case 'mine_layer':
-      return snap.iran.mines;
-    default:
-      return 0;
-  }
+  if (unit.typeId === 'mine_layer') return snap.iran.mines;
+  const cls = deliveryClassFor(unit.typeId);
+  return cls ? snap.iran.rounds[cls] : 0;
 }
 
-function spendIranStock(snap: GameSnapshot, unit: UnitInstance): boolean {
-  switch (unit.typeId) {
-    case 'shahed136':
-      if (snap.iran.drones <= 0) return false;
-      snap.iran.drones -= 1;
-      return true;
-    case 'fateh110':
-      if (snap.iran.fateh <= 0) return false;
-      snap.iran.fateh -= 1;
-      return true;
-    case 'khorramshahr':
-      if (snap.iran.khorramshahr <= 0) return false;
-      snap.iran.khorramshahr -= 1;
-      return true;
-    case 'fattah':
-      if (snap.iran.fattah <= 0) return false;
-      snap.iran.fattah -= 1;
-      return true;
-    case 'asm_launcher':
-      if (snap.iran.asm <= 0) return false;
-      snap.iran.asm -= 1;
-      return true;
-    case 'mine_layer':
-      if (snap.iran.mines <= 0) return false;
-      snap.iran.mines -= 1;
-      snap.iran.minesLaid += 1;
-      return true;
-    default:
-      return true;
+interface StockSpend {
+  ok: boolean;
+  reason?: string;
+}
+
+/**
+ * Spend one round for a firing unit. The stock and the launcher budget are both
+ * consumed here, so the player and the AI follow the same rule.
+ */
+function spendIranStock(snap: GameSnapshot, unit: UnitInstance): StockSpend {
+  if (unit.typeId === 'mine_layer') {
+    if (snap.iran.mines <= 0) return { ok: false, reason: 'No munitions of that type remain.' };
+    snap.iran.mines -= 1;
+    snap.iran.minesLaid += 1;
+    return { ok: true };
   }
+  const cls = deliveryClassFor(unit.typeId);
+  if (!cls) return { ok: true };
+  if (snap.iran.rounds[cls] <= 0) return { ok: false, reason: 'No munitions of that type remain.' };
+  if (spendIranRounds(snap, cls, 1) === 0) {
+    return { ok: false, reason: 'No launcher sorties remain this turn.' };
+  }
+  return { ok: true };
 }
 
 export function applyOrder(
@@ -310,9 +291,12 @@ export function applyOrder(
     case 'strike': {
       const unit = findUnit(snap, order.unitUid);
       if (!unit) return;
-      if (snap.faction === 'iran' && !spendIranStock(snap, unit)) {
-        events.push({ text: 'No munitions of that type remain.', tone: 'warn' });
-        return;
+      if (snap.faction === 'iran') {
+        const spent = spendIranStock(snap, unit);
+        if (!spent.ok) {
+          events.push({ text: spent.reason ?? 'No munitions of that type remain.', tone: 'warn' });
+          return;
+        }
       }
       const def = unitType(unit.typeId);
       if (snap.faction === 'usa' && def.politicalCost) {
@@ -343,10 +327,9 @@ export function applyOrder(
       snap.iran.resources -= cost * order.count;
       // Output tracks the average condition of the surviving facilities.
       const output = Math.max(1, Math.round(order.count * productionCapacity(map.nodes, snap, line)));
-      if (order.unitTypeId === 'shahed136') snap.iran.drones += output;
-      if (order.unitTypeId === 'fateh110') snap.iran.fateh += output;
-      if (order.unitTypeId === 'khorramshahr') snap.iran.khorramshahr += output;
-      if (order.unitTypeId === 'fattah') snap.iran.fattah += output;
+      // Production builds airframes and warheads separately, then mates them.
+      const cls = deliveryClassFor(order.unitTypeId);
+      if (cls) deliverMatedRounds(snap, cls, output);
       events.push({
         text: `Iran's production lines added ${output} ${unitType(order.unitTypeId).name} to the stockpile.`,
         tone: 'good',
@@ -625,7 +608,10 @@ export function runTurn(snap: GameSnapshot, map: TheaterMap): TurnResult {
       : 'Tutorial failed: too many Gulf bases were knocked out.';
   }
 
-  if (snap.status === 'playing') snap.turn += 1;
+  if (snap.status === 'playing') {
+    snap.turn += 1;
+    resetLauncherSorties(snap);
+  }
   snap.orders = [];
   return { events, status: snap.status, outcome: snap.outcome };
 }

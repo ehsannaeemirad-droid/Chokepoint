@@ -3,6 +3,7 @@
  * Pure helpers used by the turn pipeline; no RNG.
  */
 import type { GameSnapshot, ResolveEvent } from './types';
+import { deliverMatedRounds } from './inventory';
 
 /** Orders that open hostilities from a pre-war posture. */
 const HOSTILE_ORDER_KINDS = new Set(['strike', 'special', 'cyber', 'nuclear', 'produce']);
@@ -66,11 +67,11 @@ export function regenerateUnderground(snap: GameSnapshot, map: unknown, events: 
     if (regen.missiles) missiles += Math.max(0, Math.round(regen.missiles * factor));
   }
   if (drones > 0) {
-    snap.iran.drones += drones;
+    deliverMatedRounds(snap, 'drone', drones);
     events.push({ text: `Underground production delivered +${drones} drones.`, tone: 'info', faction: 'iran' });
   }
   if (missiles > 0) {
-    snap.iran.fateh += missiles;
+    deliverMatedRounds(snap, 'fateh', missiles);
     events.push({
       text: `Underground production delivered +${missiles} short-range missiles (Fateh class).`,
       tone: 'info',

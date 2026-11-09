@@ -36,11 +36,7 @@ function silenceOpposition(game: Game): void {
   // only reliable silence is to remove every offensive launcher unit.
   const OFFENSIVE = ['shahed136', 'fateh110', 'khorramshahr', 'fattah', 'asm_launcher', 'mine_layer'];
   snap.units = snap.units.filter((u) => u.faction !== 'houthi' && !OFFENSIVE.includes(u.typeId));
-  snap.iran.drones = 0;
-  snap.iran.fateh = 0;
-  snap.iran.khorramshahr = 0;
-  snap.iran.fattah = 0;
-  snap.iran.asm = 0;
+  for (const cls of ['drone', 'fateh', 'khorramshahr', 'fattah', 'asm'] as const) snap.iran.rounds[cls] = 0;
   snap.iran.mines = 0;
 }
 

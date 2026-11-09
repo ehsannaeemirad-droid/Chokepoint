@@ -1,3 +1,4 @@
+import { totalRounds } from '../core/inventory';
 /**
  * Phase 3: the Israeli AI initiative track.
  *
@@ -48,7 +49,7 @@ export function defaultIsraelInitiative(_cfg: InitiativeConfig = DEFAULT_INITIAT
 export function iranLaunchPressure(snap: GameSnapshot): number {
   const launcherTypes = ['fateh110', 'khorramshahr', 'fattah', 'asm_launcher'];
   const launchers = snap.units.filter((u) => u.faction === 'iran' && launcherTypes.includes(u.typeId)).length;
-  const stock = snap.iran.drones + snap.iran.fateh + snap.iran.khorramshahr + snap.iran.fattah;
+  const stock = totalRounds(snap.iran);
   const cfg = initiativeCfg(snap);
   return clamp(Math.round(launchers * cfg.launchersWeight + stock / cfg.stockDivisor), 0, 100);
 }

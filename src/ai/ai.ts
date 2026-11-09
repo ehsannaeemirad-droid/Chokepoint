@@ -9,6 +9,7 @@ import type { FactionId, GameSnapshot, ResolveEvent, SalvoSpecLike } from '../co
 import { clamp, defenderOfNode, nodeState, removeUnit, unitType } from '../core/world';
 import { hexDistance } from '../map/hex';
 import { productionSites } from '../core/production';
+import { deliverMatedRounds, spendIranRounds, totalRounds } from '../core/inventory';
 import type { TheaterMap } from '../map/TheaterMap';
 import { resolveIncoming, resolveStrike, strikeRange, validateStrike } from '../combat/combat';
 import { iranLaunchPressure, initiativeCfg, israelPackages } from '../politics/initiative';
@@ -34,7 +35,7 @@ const checks: Record<string, Check> = {
   turnAbove: (ctx, node) => ctx.snap.turn > (node.value ?? 0),
   incirlikAllowed: (ctx) => ctx.snap.incirlikOpen,
   hasStock: (ctx) =>
-    ctx.snap.iran.drones + ctx.snap.iran.fateh + ctx.snap.iran.khorramshahr + ctx.snap.iran.fattah > 0,
+    totalRounds(ctx.snap.iran) > 0,
 };
 
 const actions: Record<string, Action> = {
@@ -227,24 +228,26 @@ function iranSalvo(ctx: AiContext): boolean {
       }
     }
 
+    // Salvos draw on the same mated-round stock and launcher budget the player
+    // uses; the logged count is what was actually fired, not what was wanted.
     const salvos: SalvoSpecLike[] = [];
-    if (ctx.snap.iran.drones > 0) {
-      const count = Math.min(ctx.snap.iran.drones, 3 + Math.floor(ctx.rng() * 4));
-      ctx.snap.iran.drones -= count;
-      salvos.push({ threat: 'drone', damage: 3, count, label: 'Shahed one-way attack drones' });
+    if (ctx.snap.iran.rounds.drone > 0) {
+      const want = Math.min(ctx.snap.iran.rounds.drone, 3 + Math.floor(ctx.rng() * 4));
+      const count = spendIranRounds(ctx.snap, 'drone', want);
+      if (count > 0) salvos.push({ threat: 'drone', damage: 3, count, label: 'Shahed one-way attack drones' });
     }
-    if (ctx.snap.iran.khorramshahr > 0 && ctx.rng() < 0.55) {
-      const count = Math.min(ctx.snap.iran.khorramshahr, 1 + Math.floor(ctx.rng() * 2));
-      ctx.snap.iran.khorramshahr -= count;
-      salvos.push({ threat: 'ballistic', damage: 8, count, label: 'Khorramshahr ballistic missiles' });
-    } else if (ctx.snap.iran.fateh > 0) {
-      const count = Math.min(ctx.snap.iran.fateh, 2 + Math.floor(ctx.rng() * 2));
-      ctx.snap.iran.fateh -= count;
-      salvos.push({ threat: 'ballistic', damage: 5, count, label: 'Fateh-110 ballistic missiles' });
+    if (ctx.snap.iran.rounds.khorramshahr > 0 && ctx.rng() < 0.55) {
+      const want = Math.min(ctx.snap.iran.rounds.khorramshahr, 1 + Math.floor(ctx.rng() * 2));
+      const count = spendIranRounds(ctx.snap, 'khorramshahr', want);
+      if (count > 0) salvos.push({ threat: 'ballistic', damage: 8, count, label: 'Khorramshahr ballistic missiles' });
+    } else if (ctx.snap.iran.rounds.fateh > 0) {
+      const want = Math.min(ctx.snap.iran.rounds.fateh, 2 + Math.floor(ctx.rng() * 2));
+      const count = spendIranRounds(ctx.snap, 'fateh', want);
+      if (count > 0) salvos.push({ threat: 'ballistic', damage: 5, count, label: 'Fateh-110 ballistic missiles' });
     }
-    if (ctx.snap.iran.fattah > 0 && ctx.rng() < 0.18) {
-      ctx.snap.iran.fattah -= 1;
-      salvos.push({ threat: 'hypersonic', damage: 10, count: 1, label: 'Fattah hypersonic missile' });
+    if (ctx.snap.iran.rounds.fattah > 0 && ctx.rng() < 0.18) {
+      const count = spendIranRounds(ctx.snap, 'fattah', 1);
+      if (count > 0) salvos.push({ threat: 'hypersonic', damage: 10, count, label: 'Fattah hypersonic missile' });
     }
     if (ctx.snap.iran.mines > 0 && ctx.rng() < 0.2) {
       ctx.snap.iran.mines -= 1;
@@ -291,23 +294,23 @@ function iranProduce(ctx: AiContext): boolean {
   // Facility data decides who produces: intact missile and drone lines only.
   for (const site of productionSites(ctx.map.nodes, ctx.snap, 'missile')) {
     const scale = site.integrity < 50 ? 0.5 : 1;
-    stock.fateh += Math.round(scale * 0.6);
-    stock.khorramshahr += Math.round(scale * 0.4);
+    deliverMatedRounds(ctx.snap, 'fateh', Math.round(scale * 0.6));
+    deliverMatedRounds(ctx.snap, 'khorramshahr', Math.round(scale * 0.4));
     produced += 1;
   }
   for (const site of productionSites(ctx.map.nodes, ctx.snap, 'drone')) {
     const scale = site.integrity < 50 ? 0.5 : 1;
-    stock.drones += Math.round(2 * scale);
+    deliverMatedRounds(ctx.snap, 'drone', Math.round(2 * scale));
     produced += 1;
   }
   while (stock.resources >= 20 && produced < 6) {
     stock.resources -= 5;
-    stock.drones += 4;
+    deliverMatedRounds(ctx.snap, 'drone', 4);
     produced++;
   }
   if (produced > 0) {
     ctx.events.push({
-      text: `Iran's underground lines produced ${stock.drones > 0 ? 'drones and missiles' : 'munitions'}; stock now ${stock.drones} drones, ${stock.fateh + stock.khorramshahr} ballistic missiles.`,
+      text: `Iran's underground lines produced ${stock.rounds.drone > 0 ? 'drones and missiles' : 'munitions'}; stock now ${stock.rounds.drone} drones, ${stock.rounds.fateh + stock.rounds.khorramshahr} ballistic missiles.`,
       tone: 'info',
       faction: 'iran',
     });

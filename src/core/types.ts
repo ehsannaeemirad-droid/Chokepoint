@@ -218,13 +218,30 @@ export interface Scorecard {
     | 'decisive-coalition';
 }
 
+/** Delivery class of an Iranian munition: the airframe family it belongs to. */
+export type DeliveryClass = 'drone' | 'fateh' | 'khorramshahr' | 'fattah' | 'asm';
+
+/**
+ * The Iranian arsenal (Phase 1b). The four stock domains are deliberately
+ * separate so no number is silently reused for two things:
+ *
+ * - `rounds` is a mated round (airframe + conventional warhead) a launcher fires;
+ * - `airframes` and `warheads` are the two halves that production builds;
+ * - `launchers` is the delivery platform budget per turn;
+ * - `nuclearMaterial` is warhead-grade material and never feeds `rounds`.
+ */
 export interface IranStock {
   resources: number;
-  drones: number;
-  fateh: number;
-  khorramshahr: number;
-  fattah: number;
-  asm: number;
+  /** Mated rounds by delivery class — what a launcher actually fires. */
+  rounds: Record<DeliveryClass, number>;
+  /** Airframes built and awaiting a warhead, by production line. */
+  airframes: Record<ProductionLine, number>;
+  /** Conventional warheads awaiting an airframe. Never nuclear. */
+  warheads: { conventional: number };
+  /** Launch platforms per turn, plus this turn's usage. */
+  launchers: { drone: number; ballistic: number; usedDrone: number; usedBallistic: number };
+  /** Warhead-grade material, in warhead equivalents; disjoint from `rounds`. */
+  nuclearMaterial: number;
   mines: number;
   minesLaid: number;
   fac: number;
