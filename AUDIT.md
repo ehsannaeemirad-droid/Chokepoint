@@ -209,3 +209,114 @@ Not verified:
 
 Phase 1c (provenance): attach evidence, date and confidence to every facility and
 stock estimate, and replace the generic provenance sentence.
+
+## 8. Phase 1 closeout
+
+### Commits
+
+| Commit | Scope |
+|---|---|
+| `8a137e9` | provenance types, reference records, enforcement test |
+| `b4c1bc0` | scenario baseline/isolation tests; deep-copy of the scenario config |
+| `521e524` | DESIGN.md multi-dimensional victory model (design only) |
+
+### Tests added
+
+| File | Tests | What they pin |
+|---|---|---|
+| `src/data/provenance.test.ts` | 8 | reference shape, source policy, one record per subject, coverage walk over facilities, arsenal, launchers, nuclear material and scenario values |
+| `src/data/scenarios.test.ts` | 8 | pre-war start undepleted, arsenal reconciliation, structural distinctness, deep-copy isolation |
+
+### Verification (executed)
+
+| Command | Result |
+|---|---|
+| `corepack pnpm exec tsc --noEmit` | exit 0 |
+| `corepack pnpm exec vitest run` | 20 files, 186 tests passed, exit 0 |
+| `corepack pnpm run build` | exit 0 |
+| `vite preview` + HTTP fetch | 200, `<title>Chokepoint</title>`, `assets/index-*.js`, `assets/phaser-*.js`, `assets/index-*.css`; server stopped afterwards |
+| YAML validation | **not done** — PyYAML is not installed in this environment (`ModuleNotFoundError`). The workflows are not claimed to parse correctly. |
+
+The preview check is an HTTP smoke test of the built page, not a UI test: no
+rendering, interaction, language switch or marker was inspected in a browser.
+
+### Decisions and rejected alternatives
+
+- **Organisation-level sources only.** No article title or deep link is asserted;
+  facility records name IAEA / CSIS Missile Threat and the scenario records name
+  IEA, with the drawing being a `game-abstraction`. Rejected: inventing plausible
+  publication URLs to look precise.
+- **Facilities are roles, not quantities.** Their reference carries `notes` and
+  `gameMapping` instead of a number; inventing a "site value" would be a fake
+  figure. Numeric records (arsenal, launchers, nuclear material, scenario values)
+  must carry `value` or `min`/`max` plus a unit.
+- **Enforcement in a test, not prose.** The walk fails if a classified facility or
+  a scenario domain loses its reference, so future data cannot skip provenance.
+- **Later-war scenario not invented.** No later-war scenario exists yet; Phase 5
+  owns the dated scenario set. The pre-war baseline is asserted undepleted and
+  the tutorial is asserted structurally smaller.
+- **No code in 1e.** The design section states that current path-based outcomes
+  remain authoritative until Phase 2 item 12.
+
+### Scope check
+
+Phase 1 touched data, types, production gating, inventory, scenario isolation and
+tests. It did not touch combat resolution, AI doctrine, order validation, victory
+code, replay or UX. The Phase 2 work in the next commit is explicitly item 1.
+
+### Remaining items from the 57-row assessment
+
+The full table lives in the superseded checkout; the items still open here are:
+AI doctrine and target valuation (Phase 3), balance harness (Phase 3), UX and
+accessibility pass (Phase 4), dated scenarios and replay versioning (Phase 5),
+and radar/command facility classification (Phase 1c follow-up). Projected order
+validation, previously item 1, is now implemented.
+
+### New issues found
+
+- **Shared nested scenario config.** `Game.start` spread the scenario shallowly,
+  so `victory`, `domestic`, `initiative`, `talks`, `escalation`, `logistics`,
+  `roe` and `scorecard` were shared with the definition and across campaigns.
+  Fixed by deep-copying the scenario in `start`.
+- **Provenance is organisation-level.** Confidence labels are honest but coarse;
+  a future pass should cite specific reports where they can be verified.
+- **PyYAML absent**, so local YAML validation is blocked rather than passing.
+
+### Phase 1 acceptance checklist
+
+| Criterion | State |
+|---|---|
+| Nuclear and missile facilities separated, with production gated on the right facilities | met (1a) |
+| Khojir / Parchin / Shahroud present with provenance | met (1a, 1c) |
+| Warhead / airframe / launcher / interceptor stocks separated; nuclear material disjoint | met (1b) |
+| Every estimate labelled | met (1b bands, 1c references) |
+| Provenance enforced by a test | met (1c) |
+| Pre-war and tutorial baselines distinct and isolated | met (1d) |
+| Victory assumptions documented, no implementation | met (1e) |
+| Typecheck, tests, build green | met |
+| CI / Pages verified | **not met** — never executed, not pushed |
+| Browser-verified UI | **not met** — HTTP smoke only |
+
+## 9. Phase 2 item 1 — projected order validation
+
+Commit: the `feat: validate orders against projected state and reservations` commit.
+
+- `src/core/engine.ts`: `OrderReservations`, `emptyReservations`, `reserveOrder`,
+  `orderReservations`. `validateOrder` takes reservations and checks the margin
+  left after queued claims for units, Iranian resources, political will, airlift,
+  mated rounds and launcher sorties. Reservations are recomputed from the queue
+  on every check and never stored, so removing an order releases its claim.
+- `runTurn` re-validates the queue against the live snapshot before resolving;
+  an order that no longer holds is dropped with a logged `Order dropped: …`
+  event instead of being silently applied. Accepted orders reserve as they go, so
+  the second of two competing orders fails honestly.
+- `src/core/Game.ts`: `queueOrder` validates against `orderReservations(snap)`.
+- `src/core/reservations.test.ts` (8 tests): produce double-spend rejected, claim
+  released on removal, political-will double-spend rejected, reservations do not
+  mutate the snapshot, unit and launcher-sortie claims enforced, and resolve-time
+  revalidation both drops an unfunded order and keeps a valid one.
+
+Verification after this item: `tsc` exit 0, 21 files / 194 tests passed, build
+exit 0. The pre-war "a strike order opens hostilities" test now uses a legal
+target, because resolution no longer accepts an invalid order; the intent (a
+strike opens the war) is unchanged.
