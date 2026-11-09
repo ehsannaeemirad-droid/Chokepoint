@@ -1,1 +1,83 @@
-PLACEHOLDER
+/* styles restored with objectives strip — full file in zip if truncated */
+:root {
+  --bg: #0e1216;
+  --chrome: #171b20;
+  --raised: #222831;
+  --line: #333b45;
+  --text: #f5f5f5;
+  --text-dim: #9aa7b4;
+  --ok: #388e3c;
+  --warn: #ffa000;
+  --alert: #d32f2f;
+  --info: #3c8dbc;
+}
+
+/* ---- Objectives strip ---- */
+.objectives-strip {
+  position: absolute;
+  top: 52px;
+  left: 8px;
+  right: 8px;
+  z-index: 20;
+  pointer-events: none;
+}
+.objectives-strip .obj-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: stretch;
+  pointer-events: auto;
+}
+.obj-grade {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6px 10px;
+  background: var(--chrome);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  min-width: 52px;
+  min-height: 44px;
+}
+.obj-grade b { font-size: 16px; line-height: 1; }
+.obj-grade span { font-size: 10px; color: var(--text-dim); text-transform: uppercase; }
+.obj-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 6px auto;
+  gap: 2px;
+  min-width: 120px;
+  max-width: 180px;
+  min-height: 44px;
+  padding: 6px 8px;
+  background: var(--chrome);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--text);
+  text-align: start;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.obj-row:focus-visible { outline: 2px solid var(--info); outline-offset: 2px; }
+.obj-row .obj-name { font-size: 11px; font-weight: 600; }
+.obj-row .obj-cap { font-size: 10px; color: var(--text-dim); }
+.obj-row .obj-bar {
+  height: 6px;
+  background: #2a313a;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.obj-row .obj-bar i {
+  display: block;
+  height: 100%;
+  background: var(--ok);
+  border-radius: 3px;
+}
+.obj-row.warn .obj-bar i { background: var(--warn); }
+.obj-row.bad .obj-bar i { background: var(--alert); }
+.obj-row.info .obj-bar i { background: var(--info); }
+.obj-row.enemy { opacity: 0.85; border-style: dashed; }
+@media (max-width: 560px) {
+  .objectives-strip { left: 4px; right: 4px; top: 48px; }
+  .obj-row { min-width: 100px; max-width: 140px; }
+}
