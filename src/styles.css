@@ -1,4 +1,3 @@
-/* styles restored with objectives strip — full file in zip if truncated */
 :root {
   --bg: #0e1216;
   --chrome: #171b20;
@@ -12,7 +11,60 @@
   --info: #3c8dbc;
 }
 
-/* ---- Objectives strip ---- */
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  overflow: hidden;
+  height: 100%;
+}
+
+#game {
+  position: fixed;
+  inset: 0;
+}
+
+#ui-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+#ui-root * {
+  pointer-events: auto;
+}
+
+.topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: linear-gradient(to bottom, rgba(14,18,22,0.95), rgba(14,18,22,0.7));
+  min-height: 44px;
+  z-index: 30;
+}
+
+.order-strip {
+  position: absolute;
+  bottom: 88px;
+  left: 8px;
+  right: 8px;
+  z-index: 25;
+}
+
+.order-strip-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .objectives-strip {
   position: absolute;
   top: 52px;
@@ -56,9 +108,7 @@
   color: var(--text);
   text-align: start;
   cursor: pointer;
-  pointer-events: auto;
 }
-.obj-row:focus-visible { outline: 2px solid var(--info); outline-offset: 2px; }
 .obj-row .obj-name { font-size: 11px; font-weight: 600; }
 .obj-row .obj-cap { font-size: 10px; color: var(--text-dim); }
 .obj-row .obj-bar {
@@ -77,6 +127,38 @@
 .obj-row.bad .obj-bar i { background: var(--alert); }
 .obj-row.info .obj-bar i { background: var(--info); }
 .obj-row.enemy { opacity: 0.85; border-style: dashed; }
+
+.slide-panel {
+  position: absolute;
+  top: 52px;
+  bottom: 140px;
+  width: min(360px, 92vw);
+  background: var(--chrome);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: auto;
+  z-index: 40;
+  display: none;
+}
+.slide-panel.left { left: 8px; }
+.slide-panel.right { right: 8px; }
+.slide-panel.open { display: block; }
+
+.log-drawer {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 140px;
+  max-height: 40vh;
+  background: var(--chrome);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: auto;
+  z-index: 35;
+  display: none;
+}
+.log-drawer.open { display: block; }
+
 @media (max-width: 560px) {
   .objectives-strip { left: 4px; right: 4px; top: 48px; }
   .obj-row { min-width: 100px; max-width: 140px; }
