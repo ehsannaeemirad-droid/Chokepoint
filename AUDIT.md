@@ -431,3 +431,26 @@ Files changed for these items: `src/core/permissions.ts`, `src/core/engine.ts`,
 `src/combat/combat.ts`, `src/data/units.json`, and three test files
 (`permissions`, `special`, `layered`). No AI doctrine, UX, i18n, replay or turn
 duration change. Working tree clean after the docs commit.
+
+## 11. Phase 2 item 5 — missile and drone stock classes
+
+Commit: `feat: label iranian stock classes against the weapon taxonomy`.
+
+- `DeliveryClassInfo` now carries the §18 taxonomy name and a `contested` flag;
+  Fattah is marked contested, matching its wider uncertainty band (§18 warns
+  against treating marketing claims about its hypersonic performance as fact).
+- Class isolation is pinned by `src/core/stockClasses.test.ts` (5 tests): firing
+  Fateh leaves Khorramshahr, Fattah and ASM stock untouched; the drone and
+  ballistic launcher pools do not lend to each other; ASM draws its own rounds on
+  the ballistic pool; `deliverMatedRounds` mates only the built class.
+- Existing behaviour preserved: one authoritative rounds record, production
+  gated on facilities/condition/capacity/resources, launcher sorties shared by
+  player and AI, Fattah's ±40% band already wider than Khorramshahr's.
+
+Verification: `tsc` exit 0, 25 files / 218 tests passed, `build` exit 0.
+
+Remaining item 5 gap, recorded rather than faked: §18 also lists cruise missiles
+and reconnaissance drones. No cruise or recon-drone unit exists in `units.json`,
+so no stock class was invented for them; adding those units is data work that
+belongs with the scenario expansion in Phase 5. Iranian production stays the
+documented facility/capacity abstraction (§19 conversion documented in Phase 1).
