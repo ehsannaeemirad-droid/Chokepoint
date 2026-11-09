@@ -482,3 +482,9 @@ Known gap, recorded: the unit action sheet does not yet expose mine/clear/escort
 buttons, so the orders are engine- and AI-usable but not yet clickable. That is a
 UI slice for Phase 4; the engine rules are the acceptance-critical half and are
 covered by tests.
+
+Item 6 follow-up (`fix: consume Houthi ammunition on every launch`): Houthi
+attacks previously bypassed ammunition entirely. Each launch now spends one
+magazine point from the firing unit and an empty launcher cannot fire, matching
+§20's "other maritime actors" rule. Test added: six resolved turns leave no
+Houthi magazine negative and never increase the total.
