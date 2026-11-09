@@ -93,7 +93,7 @@ export class Game {
   start(scenarioId: string, faction: PlayableFactionId, seed = 20260101): void {
     const scenario = SCENARIOS[scenarioId] ?? SCENARIOS.campaign!;
     this.uidCounter = 0;
-    this.snap = this.buildSnapshot(scenario, faction, seed);
+    this.snap = this.buildSnapshot(structuredClone(scenario), faction, seed);
     this.selection = { hexId: null, unitUid: null, mode: 'idle' };
     this.lastEvents = [];
     this.emit();
