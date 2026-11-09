@@ -24,14 +24,18 @@ export interface DeliveryClassInfo {
   labelFa: string;
   line: ProductionLine;
   launcherPool: 'drone' | 'ballistic';
+  /** mdf.md §18 weapon class this stock belongs to. */
+  taxonomy: string;
+  /** True where the public capability claim is contested (mdf.md §18, Fattah). */
+  contested?: boolean;
 }
 
 export const DELIVERY_CLASS_INFO: Record<DeliveryClass, DeliveryClassInfo> = {
-  drone: { label: 'Shahed-136', labelFa: 'شاهد-۱۳۶', line: 'drone', launcherPool: 'drone' },
-  fateh: { label: 'Fateh-110', labelFa: 'فاتح-۱۱۰', line: 'missile', launcherPool: 'ballistic' },
-  khorramshahr: { label: 'Khorramshahr', labelFa: 'خرّمشهر', line: 'missile', launcherPool: 'ballistic' },
-  fattah: { label: 'Fattah', labelFa: 'فتاح', line: 'missile', launcherPool: 'ballistic' },
-  asm: { label: 'Anti-ship rounds', labelFa: 'موشک ضدکشتی', line: 'missile', launcherPool: 'ballistic' },
+  drone: { label: 'Shahed-136', labelFa: 'شاهد-۱۳۶', line: 'drone', launcherPool: 'drone', taxonomy: 'one-way attack drone' },
+  fateh: { label: 'Fateh-110', labelFa: 'فاتح-۱۱۰', line: 'missile', launcherPool: 'ballistic', taxonomy: 'short-range ballistic missile' },
+  khorramshahr: { label: 'Khorramshahr', labelFa: 'خرّمشهر', line: 'missile', launcherPool: 'ballistic', taxonomy: 'medium-range ballistic missile' },
+  fattah: { label: 'Fattah', labelFa: 'فتاح', line: 'missile', launcherPool: 'ballistic', taxonomy: 'long-range ballistic missile', contested: true },
+  asm: { label: 'Anti-ship rounds', labelFa: 'موشک ضدکشتی', line: 'missile', launcherPool: 'ballistic', taxonomy: 'anti-ship missile' },
 };
 
 /** Which delivery class a producible unit type belongs to; null for mines etc. */
