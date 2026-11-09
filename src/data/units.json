@@ -79,7 +79,8 @@
         "cruise"
       ],
       "name_fa": "گروه ضربت ناوبر",
-      "penetration": 1
+      "penetration": 1,
+      "adLayer": "long"
     },
     {
       "id": "patriot",
@@ -100,7 +101,8 @@
         "cruise"
       ],
       "note": "Base defence. Interceptors come from a shared stockpile.",
-      "name_fa": "پاتریوت PAC-3"
+      "name_fa": "پاتریوت PAC-3",
+      "adLayer": "medium"
     },
     {
       "id": "thaad",
@@ -119,7 +121,8 @@
         "ballistic"
       ],
       "note": "Terminal high-altitude defence: the best US answer to ballistic missiles.",
-      "name_fa": "سامانه تاد"
+      "name_fa": "سامانه تاد",
+      "adLayer": "long"
     },
     {
       "id": "mq9",
@@ -168,7 +171,8 @@
         "cruise"
       ],
       "note": "Short-range interceptor: 1 interceptor per rocket, 3-hex coverage.",
-      "name_fa": "گنبد آهنین"
+      "name_fa": "گنبد آهنین",
+      "adLayer": "point"
     },
     {
       "id": "davids_sling",
@@ -188,7 +192,8 @@
         "ballistic"
       ],
       "note": "Medium-range: 2 interceptors per missile.",
-      "name_fa": "فلاخن داوود"
+      "name_fa": "فلاخن داوود",
+      "adLayer": "medium"
     },
     {
       "id": "arrow2",
@@ -207,7 +212,8 @@
         "ballistic"
       ],
       "note": "Ballistic missile defence: 3 interceptors per missile.",
-      "name_fa": "ارو-2"
+      "name_fa": "ارو-2",
+      "adLayer": "long"
     },
     {
       "id": "arrow3",
@@ -228,7 +234,8 @@
       ],
       "hypersonicIntercept": 0.4,
       "note": "Exo-atmospheric interceptor. Only system with a chance against Fattah.",
-      "name_fa": "ارو-3"
+      "name_fa": "ارو-3",
+      "adLayer": "long"
     },
     {
       "id": "iron_beam",
@@ -247,7 +254,8 @@
         "drone"
       ],
       "note": "Laser: free interceptors, but only 2 shots per turn and only against short-range threats.",
-      "name_fa": "پرتو آهنین"
+      "name_fa": "پرتو آهنین",
+      "adLayer": "point"
     },
     {
       "id": "f15i",

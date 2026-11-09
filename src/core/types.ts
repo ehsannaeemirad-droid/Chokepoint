@@ -118,6 +118,8 @@ export interface UnitTypeDef {
   interceptCost?: number;
   coverage?: number;
   engages?: ThreatClass[];
+  /** Layered air-defence role; absent means the unit does not engage. */
+  adLayer?: 'long' | 'medium' | 'point';
   stealth?: number;
   bunkerBuster?: boolean;
   penetration?: number;
@@ -137,6 +139,8 @@ export interface UnitInstance {
   magazine: number;
   cooldown: number;
   revealed: boolean;
+  /** Turn until which SEAD suppresses this unit; absent means never suppressed. */
+  suppressedUntilTurn?: number;
   name: string;
 }
 
@@ -494,6 +498,8 @@ export interface GameSnapshot {
   decisions: DecisionRecord[];
   oilFacilitiesDown: string[];
   nodeImpacts: Record<string, number>;
+  /** Radar/airbase nodes degraded by SEAD, keyed by node id, valued by turn. */
+  adSuppression?: Record<string, number>;
   indiaPressureApplied: boolean;
   qatarMediationTurn: number;
   orderLog: Array<{ turn: number; orders: Order[] }>;

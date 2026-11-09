@@ -9,13 +9,13 @@ import { clamp, defenderOfNode, removeUnit, unitsAt, unitType } from '../core/wo
 import { hexDistance } from '../map/hex';
 import type { TheaterMap } from '../map/TheaterMap';
 import { BALANCE } from '../core/config';
+import { attackerLossChance, defenceLayers, detectRaid, engageOnce, suppressAfterImpact } from './airdefence';
 import { addCasualties, restrictionBlocksStrike } from '../politics/domestic';
 import { roeBlocksStrike, roeDamageMultiplier } from '../politics/roe';
 import {
   addIranWarCost,
   maxSuperpowerTier,
   noFlyZoneActive,
-  purchaseCostOfInterceptors,
   recordImpact,
   strikeRangeModifier,
 } from '../politics/politics';
@@ -94,11 +94,6 @@ export function bestDefence(
   return best;
 }
 
-function payInterception(snap: GameSnapshot, defender: FactionId, option: DefenseOption): void {
-  if (option.cost > 0) purchaseCostOfInterceptors(snap, defender, option.cost);
-  if (option.unit && unitType(option.unit.typeId).id === 'iron_beam') option.unit.magazine -= 1;
-}
-
 export function defenderAtHex(snap: GameSnapshot, col: number, row: number, attacker: FactionId): FactionId | null {
   const defenders = unitsAt(snap, col, row).filter((u) => hostileTo(attacker, u.faction));
   return defenders[0]?.faction ?? null;
@@ -143,12 +138,19 @@ export function resolveIncoming(
     let intercepted = 0;
     let impacts = 0;
     let lastSystem = '';
+    const detected = defender
+      ? detectRaid(snap, map, attack.col, attack.row, defender, salvo.threat, 0, rng).detected
+      : false;
     for (let i = 0; i < salvo.count; i++) {
-      const option = bestDefence(snap, map, attack.col, attack.row, defender, salvo.threat, node?.hardened ?? false);
-      if (option && rng() < Math.max(0, option.probability - saturation)) {
-        payInterception(snap, defender!, option);
+      const layers =
+        detected && defender ? defenceLayers(snap, map, attack.col, attack.row, defender, salvo.threat) : [];
+      const engagement =
+        detected && defender
+          ? engageOnce(snap, defender, layers, 0, node?.hardened ?? false, saturation, rng)
+          : { intercepted: false as const };
+      if (engagement.intercepted) {
         intercepted++;
-        lastSystem = option.label;
+        lastSystem = engagement.system ?? lastSystem;
       } else {
         impacts++;
         applyImpact(snap, map, attack, node?.id, salvo.damage, rng, events);
@@ -327,18 +329,32 @@ export function resolveStrike(
   // Improvement 6: the ROE posture colours coalition firepower. Iranian
   // strikes are untouched (multiplier 1 for non-coalition attackers).
   const damage = def.atk * roeDamageMultiplier(snap, unit.faction);
+  const stealth = def.stealth ?? 0;
+  const dist = hexDistance({ col: unit.col, row: unit.row }, { col, row });
+  const escort = snap.units.some(
+    (u) =>
+      u.uid !== unit.uid &&
+      u.faction === unit.faction &&
+      unitType(u.typeId).category === 'air' &&
+      hexDistance({ col: u.col, row: u.row }, { col, row }) <= 6,
+  );
+  const detection = defender
+    ? detectRaid(snap, map, col, row, defender, threatClass, stealth, rng)
+    : { detected: false, chance: 0, sources: [] };
   let hits = 0;
   let intercepted = 0;
   let surfaceOnly = false;
+  const systems = new Set<string>();
 
   for (let r = 0; r < rounds; r++) {
-    const option = bestDefence(snap, map, col, row, defender, threatClass, node?.hardened ?? false);
-    const stealth = def.stealth ?? 0;
-    const engagement = 1 - stealth;
-    if (option && rng() < option.probability * engagement) {
-      payInterception(snap, defender!, option);
-      intercepted++;
-      continue;
+    if (defender && detection.detected) {
+      const layers = defenceLayers(snap, map, col, row, defender, threatClass);
+      const engagement = engageOnce(snap, defender, layers, stealth, node?.hardened ?? false, 0, rng);
+      if (engagement.intercepted) {
+        intercepted++;
+        if (engagement.system) systems.add(engagement.system);
+        continue;
+      }
     }
     hits++;
     if (node) {
@@ -373,10 +389,14 @@ export function resolveStrike(
     }
   }
 
+  // SEAD: a hit on a radar, airbase or naval node, or on an AD unit, degrades
+  // that part of the picture for the rest of this turn.
+  if (hits > 0) suppressAfterImpact(snap, map, col, row, defender, node?.id);
+
   if (intercepted > 0) {
-    const option = bestDefence(snap, map, col, row, defender, threatClass, node?.hardened ?? false);
+    const systemsText = [...systems].join(', ');
     events.push({
-      text: `Air defences intercepted ${intercepted} of ${rounds} munition${rounds === 1 ? '' : 's'} from ${unit.name}${option?.unit ? ` (${option.unit.name})` : ''}.`,
+      text: `Air defences (${systemsText}) intercepted ${intercepted} of ${rounds} munition${rounds === 1 ? '' : 's'} from ${unit.name}.`,
       tone: 'warn',
       focus: { col, row },
     });
@@ -397,12 +417,21 @@ export function resolveStrike(
     }
   }
 
-  // Deep strikes into Iran carry real loss risk; losses are not replaced.
+  // Loss risk comes from the defensive state the aircraft actually met, not a
+  // flat chance. An undetected raid meets nothing.
   let attackerLost = false;
   if (def.category === 'air' && (defender === 'iran' || defender === 'houthi')) {
-    const depth = node?.hardened ? 0.08 : 0.04;
-    const lossChance = Math.max(0.01, 0.05 + depth - (def.stealth ?? 0) * 0.08);
-    if (rng() < lossChance) {
+    const liveLayers =
+      detection.detected && defender ? defenceLayers(snap, map, col, row, defender, threatClass) : [];
+    const risk = attackerLossChance({
+      layers: liveLayers,
+      stealth,
+      depth: dist,
+      range: strikeRange(snap, unit),
+      escort,
+      hardenedTarget: node?.hardened ?? false,
+    });
+    if (rng() < risk) {
       attackerLost = true;
       removeUnit(snap, unit.uid);
       // Losing a US aircrew over Iran is the heaviest domestic casualty event.
