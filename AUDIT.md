@@ -320,3 +320,112 @@ Verification after this item: `tsc` exit 0, 21 files / 194 tests passed, build
 exit 0. The pre-war "a strike order opens hostilities" test now uses a legal
 target, because resolution no longer accepts an invalid order; the intent (a
 strike opens the war) is unchanged.
+
+## 10. Phase 2 items 2-4
+
+### Commits
+
+| Commit | Item | Content |
+|---|---|---|
+| `ff3eda0` | 2 and 3 | `src/core/permissions.ts`, engine authorisation gate, `src/combat/specialOps.ts`, enumerated special outcomes, cyber intel/cost, tests |
+| `581c625` | 4 | `src/combat/airdefence.ts`, layered engagement in strike/salvo resolution, detection, SEAD suppression, data-driven `adLayer`, tests |
+
+Items 2 and 3 share one commit deliberately. Their engine changes live in the
+same `validateOrder` cyber branch and the same test file; splitting them would
+have produced an intermediate commit with failing tests, which is worse than one
+coherent commit that closes both. Item 4 is separate and self-contained.
+
+### Verification
+
+| Command | Result |
+|---|---|
+| `tsc --noEmit` | exit 0 |
+| `vitest run` | 24 files, 213 tests passed, exit 0 (was 194) |
+| `pnpm run build` | exit 0 |
+| YAML | **parsed**: `npx --yes js-yaml .github/workflows/ci.yml` exit 0. `js-yaml` and `yaml` are not installed locally; the earlier PyYAML gap is closed by this run. CI itself is still not executed. |
+| Preview smoke | not rerun for these items; the last HTTP check was at Phase 1 closeout |
+
+### Item 2 decisions
+
+- `canPlayerOrder` is the single authority and is called at the top of
+  `validateOrder`; per-case ownership and faction checks were removed from the
+  engine so there is one answer. Range, resources and target rules remain in the
+  per-kind branches.
+- `SCOPE` is `Record<Order['kind'], …>`, so adding an order kind fails
+  compilation until its permission class exists. No unused `mine` kind was added:
+  typing it now would let an unimplemented action into the union.
+- Rejected: matching on unit-id strings in the UI. The UI keeps its affordances,
+  but they are no longer the enforcement point; the tests call the engine.
+
+### Item 3 decisions
+
+- Five outcomes: success, partial, failure-survived, failure-lost, abort. Abort
+  covers a missing or already-destroyed facility, consumes no roll and changes
+  nothing. Success -30 integrity, partial -12 and -2 legitimacy, failures -5
+  legitimacy, and only failure-lost removes the team. The report text is derived
+  from the outcome, so the log and the snapshot cannot disagree.
+- Chosen mechanic for the old bug: a failed op normally survives the team; only
+  the explicit worst roll loses it and removes it. The previous text claimed a
+  loss without a removal.
+- Cyber now requires a geolocated (revealed) Iranian launcher and costs 2
+  political will through reservations. This makes cyber weaker early and stronger
+  after Iranian launches reveal launchers, which is the intended intel loop.
+
+### Item 4 decisions
+
+- Layering is data-driven: `adLayer` on eight AD units plus existing `intercept`,
+  `coverage`, `interceptCost`, `engages` and `magazine`. Engagement tries long,
+  then medium, then point; each munition can be intercepted once and spends one
+  interceptor. A missing layer is a weaker site, not a relabelled percentage.
+- Detection is per raid, before engagement. Sensors come from AD units, airbases,
+  naval nodes and radar nodes, restricted to the defender's own facilities;
+  terrain, signature class and stealth modify the odds. Undetected raids never
+  engage and never cause interceptor expenditure.
+- SEAD is turn-scoped suppression: a hit on a radar/airbase/naval node or an AD
+  unit suppresses that node or nearby AD for the rest of the turn, so a second
+  strike in the same turn sees the opened hole.
+- Loss risk derives from the surviving layers, depth/range, stealth, escort and
+  hardened target, clamped to 0.5-35%, and uses the seeded RNG.
+- Both the player and the AI call the same `resolveStrike`; Iranian salvos use the
+  same layered path through `resolveIncoming`. No AI-only branch exists in combat.
+- Kept: one magazine point per strike, `atk × armour`, buried-depth penetration,
+  repair cycle, ROE damage multiplier. `bestDefence` remains exported for
+  compatibility but resolution no longer calls it.
+- Rejected: multiple interceptors per munition (the brief says one launch consumes
+  one interceptor); theater-wide air superiority (it is local to the engaged hex);
+  separate player orders for SEAD/BDA (item 4 only requires them to be represented
+  in resolution).
+
+### New issues found
+
+- **No radar nodes in map data.** `facility: 'radar'` exists in the taxonomy but
+  no map node uses it, so radar-range detection and node-level SEAD are currently
+  exercised only by airbases/naval nodes and unit suppression. Severity: medium;
+  relevant to item 8 (intelligence) and Phase 3 balance.
+- **Cyber is unavailable until a launcher fires** because only revealed launchers
+  are valid targets. Intended, but it needs a UI hint; UX is Phase 4.
+- **`bestDefence` is now unused by resolution.** Dead path kept for compatibility;
+  remove it when no test imports it.
+- **Iranian AD remains an intrinsic abstraction** (0.18/0.22/0.12 layers plus the
+  superpower shield), not unit-based, because Iran has no interceptor economy in
+  the inventory model. Documented rather than silently changed.
+
+### 57-row movement
+
+Closed: projected order validation (item 1), engine-level permission enforcement
+including US/Israeli cyber separation (item 2), special-operations outcome/state
+consistency (item 3).
+Partially closed: air-defence layering and radar/detection (item 4). Staging is
+represented inside strike resolution (SEAD suppression, local superiority, BDA via
+integrity state), but there are no separate staging orders; attacker loss now
+depends on the defensive state. Full closure needs item 8 detection decay.
+Open: item 5 onwards. `mdf.md` is not in the repository, so item 5's exact
+definition is not available here; nothing was invented for it.
+
+### Scope check
+
+Files changed for these items: `src/core/permissions.ts`, `src/core/engine.ts`,
+`src/core/types.ts`, `src/combat/airdefence.ts`, `src/combat/specialOps.ts`,
+`src/combat/combat.ts`, `src/data/units.json`, and three test files
+(`permissions`, `special`, `layered`). No AI doctrine, UX, i18n, replay or turn
+duration change. Working tree clean after the docs commit.
