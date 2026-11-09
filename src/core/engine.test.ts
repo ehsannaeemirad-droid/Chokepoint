@@ -3,6 +3,7 @@ import { hexDistance } from '../map/hex';
 import { runTurn } from './engine';
 import { Game } from './Game';
 import { unitType } from './world';
+import { BALANCE } from './config';
 
 describe('campaign engine', () => {
   it('sets up a campaign with real force posture', () => {
@@ -12,8 +13,16 @@ describe('campaign engine', () => {
     expect(game.snap.units.length).toBeGreaterThan(30);
     expect(game.map.nodes.length).toBeGreaterThan(30);
     expect(game.snap.nodes.natanz.integrity).toBe(100);
-    expect(game.snap.resources.interceptorsUSA).toBe(100);
-    expect(game.snap.resources.interceptorsIsrael).toBe(60);
+    // The pre-war posture holds part of each magazine in reserve; the total is
+    // still the scenario baseline, so assert both the split and the sum.
+    expect(game.snap.resources.interceptorsUSA).toBe(Math.round(BALANCE.interceptorsUSAStart * 0.7));
+    expect(game.snap.resources.interceptorsIsrael).toBe(Math.round(BALANCE.interceptorsIsraelStart * 0.7));
+    expect(
+      game.snap.resources.interceptorsUSA + (game.snap.resources.interceptorsUSAReserve ?? 0),
+    ).toBe(BALANCE.interceptorsUSAStart);
+    expect(
+      game.snap.resources.interceptorsIsrael + (game.snap.resources.interceptorsIsraelReserve ?? 0),
+    ).toBe(BALANCE.interceptorsIsraelStart);
   });
 
   it('rejects an out-of-range strike and accepts a valid one', () => {

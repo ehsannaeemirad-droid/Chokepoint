@@ -14,8 +14,7 @@ import { resolveCyber, resolveSabotage, resolveStrike, validateStrike } from '..
 import logisticsData from '../data/logistics.json';
 import { hexDistance } from '../map/hex';
 import type { TheaterMap } from '../map/TheaterMap';
-import {
-  addIranWarCost,
+import {
   thirdPartyPhase,
   updateChokepoints,
   updateHosts,
@@ -504,7 +503,15 @@ function attritionPhase(
   const cfg = logisticsCfg(snap);
   if (snap.meters.hormuz > cfg.interdictHormuz) {
     for (const r of snap.reinforcements) {
-      r.delayTurns = Math.min(cfg.maxDelay, (r.delayTurns ?? 0) + 1);
+      const before = r.delayTurns ?? 0;
+      r.delayTurns = Math.min(cfg.maxDelay, before + 1);
+      if (r.delayTurns > before) {
+        events.push({
+          text: `Strait risk delays ${r.label}: ETA slips to turn ${effectiveArrival(r)}.`,
+          tone: 'warn',
+          faction: 'usa',
+        });
+      }
     }
   }
 
@@ -543,15 +550,15 @@ function attritionPhase(
   }
 
   updateHosts(snap, map, events);
-  updateChokepoints(snap, map, events);
+  updateChokepoints(snap, map);
   updateSuperpowers(snap, events);
-  updateEscalation(snap, map, events);
+  updateEscalation(snap, events);
   updateDomestic(snap, events);
   updateIsraelInitiative(snap, events);
-  updateTalks(snap, map, events);
+  updateTalks(snap, events);
   updateRoe(snap, events);
   runHostPostures(snap, map, events);
-  thirdPartyPhase(snap, map, events);
+  thirdPartyPhase(snap, map, rng, events);
 
   snap.resources.interceptorsUSA = clamp(snap.resources.interceptorsUSA, 0, 220);
   snap.resources.interceptorsIsrael = clamp(snap.resources.interceptorsIsrael, 0, 180);

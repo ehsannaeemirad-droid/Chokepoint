@@ -211,13 +211,6 @@ const PATH_OUTCOME_TEXT: Record<VictoryPathId, string> = {
     "Israel's offensive air arm has been worn down past the breaking point — too few squadrons remain combat-ready. Iran has degraded the coalition's sharpest sword.",
 };
 
-const PATH_LABEL: Record<VictoryPathId, string> = {
-  regimeSurvival: 'regime survival',
-  noOccupation: 'no occupation',
-  oilShock: 'the oil shock',
-  israeliDegradation: 'degraded Israeli offense',
-};
-
 export interface Outcome {
   status: 'playing' | 'won' | 'lost';
   outcome: string;
@@ -350,10 +343,12 @@ export function checkOutcome(snap: GameSnapshot, map: TheaterMap): Outcome {
     const achieved = victoryPaths(snap, map).filter((p) => p.satisfied);
     if (achieved.length > 0) {
       const won = snap.faction === 'iran';
-      const names = achieved.map((p) => PATH_LABEL[p.id]).join(', ');
+      // The outcome text is a closed set so the presentation layer can translate
+      // every terminal state; which paths were achieved is surfaced separately
+      // in the objectives/scorecard rows.
       return {
         status: won ? 'won' : 'lost',
-        outcome: `The campaign has ended. Iran achieved ${names}. ${PATH_OUTCOME_TEXT[achieved[0]!.id]}`,
+        outcome: PATH_OUTCOME_TEXT[achieved[0]!.id],
       };
     }
     const won = snap.faction !== 'iran';

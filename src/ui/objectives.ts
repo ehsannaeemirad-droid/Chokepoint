@@ -22,17 +22,24 @@ export type ObjectiveTone = 'good' | 'warn' | 'bad' | 'info';
 
 export interface ObjectiveRow {
   id: string;
+  /** i18n key for the short name. */
   labelKey: string;
+  /** 0-100 progress toward the path (player-relative: higher is better for the viewer). */
   progress: number;
   tone: ObjectiveTone;
+  /** One-line "what moves it" — English; UI localises via i18n when keyed. */
   movesIt: string;
+  /** Raw stats for the explainer panel. */
   stats: Record<string, string | number | boolean>;
+  /** True when this is an enemy path the player must prevent. */
   enemy: boolean;
+  /** Streak / threshold summary for the bar caption. */
   caption: string;
 }
 
 export interface ObjectivesView {
   rows: ObjectiveRow[];
+  /** Live scorecard-style grade estimate 0-100 for the player side. */
   grade: number;
   gradeLabel: string;
 }
@@ -51,6 +58,7 @@ function nuclearSites(snap: GameSnapshot): { id: string; integrity: number }[] {
   }));
 }
 
+/** Player-relative progress for coalition (US/Israel) win paths. */
 function coalitionRows(snap: GameSnapshot, map: TheaterMap): ObjectiveRow[] {
   const sites = nuclearSites(snap);
   const avgIntegrity = sites.reduce((s, n) => s + n.integrity, 0) / Math.max(1, sites.length);
@@ -66,11 +74,13 @@ function coalitionRows(snap: GameSnapshot, map: TheaterMap): ObjectiveRow[] {
   const bases = operationalGulfBases(snap, map);
   const basingProgress = Math.round(Math.min(100, (bases / 4) * 100));
   const oil = snap.meters.oilPrice;
+  const oilThreshold = snap.victory?.oilShock.indexThreshold ?? 130;
   const oilStreak = snap.meters.oilShockStreak;
   const oilTurns = snap.victory?.oilShock.consecutiveTurns ?? 5;
+  // Higher is safer for coalition: inverse of oil-shock progress.
   const hormuzSafe = Math.round(100 - Math.min(100, (oilStreak / oilTurns) * 100));
 
-  return [
+  const rows: ObjectiveRow[] = [
     {
       id: 'nuclear_degraded',
       labelKey: 'obj.nuclear',
@@ -84,7 +94,9 @@ function coalitionRows(snap: GameSnapshot, map: TheaterMap): ObjectiveRow[] {
         target: 'all ≤ 0 or sustained ≤ 40',
       },
       enemy: false,
-      caption: allDown ? 'complex destroyed' : `avg ${Math.round(avgIntegrity)}% integrity`,
+      caption: allDown
+        ? 'complex destroyed'
+        : `avg ${Math.round(avgIntegrity)}% integrity`,
     },
     {
       id: 'war_cost',
@@ -129,17 +141,23 @@ function coalitionRows(snap: GameSnapshot, map: TheaterMap): ObjectiveRow[] {
       movesIt: 'Naval presence, ASM strikes, mine clearance; avoid sustained disruption',
       stats: {
         oil: Math.round(oil),
-        threshold: snap.victory?.oilShock.indexThreshold ?? 130,
+        threshold: oilThreshold,
         streak: oilStreak,
         turns: oilTurns,
         hormuz: Math.round(snap.meters.hormuz),
       },
       enemy: false,
-      caption: oilStreak > 0 ? `oil shock streak ${oilStreak}/${oilTurns}` : `oil $${Math.round(oil)}`,
+      caption:
+        oilStreak > 0
+          ? `oil shock streak ${oilStreak}/${oilTurns}`
+          : `oil $${Math.round(oil)}`,
     },
   ];
+
+  return rows;
 }
 
+/** Player-relative progress for Iran's four victory paths. */
 function iranRows(snap: GameSnapshot, map: TheaterMap): ObjectiveRow[] {
   const paths = victoryPaths(snap, map);
   const byId = new Map(paths.map((p) => [p.id, p]));
@@ -168,7 +186,10 @@ function iranRows(snap: GameSnapshot, map: TheaterMap): ObjectiveRow[] {
     mapPath(
       'noOccupation',
       'Deny US ground forces consecutive holds on Iranian nodes',
-      (p) => (p.satisfied ? 'no occupation reached' : `occupation streak ${p.stats.streak}/${p.stats.turns}`),
+      (p) =>
+        p.satisfied
+          ? 'no occupation reached'
+          : `occupation streak ${p.stats.streak}/${p.stats.turns}`,
     ),
     mapPath(
       'oilShock',
@@ -183,11 +204,13 @@ function iranRows(snap: GameSnapshot, map: TheaterMap): ObjectiveRow[] {
   ];
 }
 
+/** Most dangerous enemy path from the player's point of view. */
 function enemyThreatRow(snap: GameSnapshot, map: TheaterMap, faction: PlayableFactionId): ObjectiveRow | null {
   if (faction === 'iran') {
+    // Coalition threat: nuclear complex being degraded.
     const sites = nuclearSites(snap);
     const avg = sites.reduce((s, n) => s + n.integrity, 0) / Math.max(1, sites.length);
-    const progress = Math.round(100 - avg);
+    const progress = Math.round(100 - avg); // high = bad for Iran
     return {
       id: 'enemy_nuclear',
       labelKey: 'obj.enemyNuclear',
@@ -200,6 +223,7 @@ function enemyThreatRow(snap: GameSnapshot, map: TheaterMap, faction: PlayableFa
     };
   }
 
+  // Coalition player: watch Iran's strongest immediate path.
   const paths = victoryPaths(snap, map).filter((p) => !p.decidesAtEnd);
   if (paths.length === 0) return null;
   const worst = [...paths].sort((a, b) => b.progress - a.progress)[0]!;
@@ -221,23 +245,37 @@ function enemyThreatRow(snap: GameSnapshot, map: TheaterMap, faction: PlayableFa
   };
 }
 
+/**
+ * Live objectives view for the persistent strip.
+ * Shows the player's top paths + the single most dangerous enemy path.
+ */
 export function buildObjectives(snap: GameSnapshot, map: TheaterMap): ObjectivesView {
   const faction = snap.faction;
   const own = faction === 'iran' ? iranRows(snap, map) : coalitionRows(snap, map);
+  // Rank own paths: lowest progress first for attention, but keep nuclear/war-cost near top for coalition.
   const ranked = [...own].sort((a, b) => {
+    // Critical first.
     const rank = (r: ObjectiveRow) => (r.tone === 'bad' ? 0 : r.tone === 'warn' ? 1 : 2);
     return rank(a) - rank(b) || b.progress - a.progress;
   });
   const top = ranked.slice(0, 3);
   const threat = enemyThreatRow(snap, map, faction);
   const rows = threat ? [...top, threat] : top;
+
+  // Simple live grade: average of own top paths.
   const grade =
     own.length === 0 ? 50 : Math.round(own.reduce((s, r) => s + r.progress, 0) / own.length);
   const gradeLabel =
     grade >= 70 ? 'strong' : grade >= 45 ? 'contested' : grade >= 25 ? 'strained' : 'critical';
+
   return { rows, grade, gradeLabel };
 }
 
+/**
+ * Deterministic impact preview for an order about to be queued.
+ * Uses only current snapshot meters — does not invent randomness.
+ * Ranges are conservative static estimates documented in DESIGN.md.
+ */
 export interface ImpactPreview {
   lines: string[];
   risks: string[];
@@ -310,6 +348,7 @@ export function previewOrderImpact(
   return { lines, risks };
 }
 
+/** Meter deltas between two snapshots (for the after-action card). */
 export interface MeterDelta {
   key: string;
   label: string;
