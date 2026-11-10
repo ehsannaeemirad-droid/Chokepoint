@@ -7,6 +7,7 @@
       "cost": 4,
       "turns": 3,
       "kind": "interceptors",
+      "mode": "airlift",
       "amount": 20,
       "label_fa": "پرواز ترابری ۲۰ موشک رهگیر",
       "note_fa": "مخزن مشترک پاتریوت/تاد را بازپرگیری می‌کند."
@@ -18,6 +19,7 @@
       "cost": 6,
       "turns": 4,
       "kind": "patriot",
+      "mode": "sealift",
       "amount": 1,
       "label_fa": "باتری پاتریوت",
       "note_fa": "یک باتری پی‌ای‌سی-۳ در العدید."
@@ -29,6 +31,7 @@
       "cost": 8,
       "turns": 6,
       "kind": "thaad",
+      "mode": "sealift",
       "amount": 1,
       "label_fa": "باتری تاد",
       "note_fa": "پدافند پایانی بالستیک در الظفره."
@@ -40,6 +43,7 @@
       "cost": 7,
       "turns": 5,
       "kind": "air",
+      "mode": "airlift",
       "amount": 1,
       "label_fa": "اسکادران اف-۱۵ای",
       "note_fa": "دوازده فروند هواپیمای تهاجمی دیگر با خلبان."
@@ -51,6 +55,7 @@
       "cost": 10,
       "turns": 6,
       "kind": "csg",
+      "mode": "naval",
       "amount": 1,
       "label_fa": "گروه ضربت ناوهونده دوم",
       "note_fa": "یک پایگاه هوایی سیار و حضور دریایی دیگر در خلیج."
@@ -62,6 +67,7 @@
     "note": "Competes with US reinforcement airlift. Arrives in 2 turns.",
     "cost": 2,
     "turns": 2,
+    "mode": "airlift",
     "amount": 15,
     "label_fa": "ترابری هوایی آمریکا به اسرائیل (+۱۵ رهگیر)",
     "note_fa": "با ترابری نیروهای کمکی آمریکا رقابت می‌کند. در ۲ نوبت می‌رسد."

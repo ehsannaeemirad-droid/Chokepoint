@@ -74,6 +74,7 @@ export interface ReinforcementPackage {
   turns: number;
   kind: 'interceptors' | 'patriot' | 'thaad' | 'air' | 'csg';
   amount: number;
+  mode: TransportMode;
 }
 
 export const REINFORCEMENTS: ReinforcementPackage[] = logisticsData.packages as unknown as ReinforcementPackage[];
@@ -100,6 +101,40 @@ export function effectiveArrival(r: Reinforcement): number {
   return r.arrivesTurn + (r.delayTurns ?? 0);
 }
 
+/** Transport modes are distinct: they do not share delay or capacity rules. */
+export type TransportMode = 'airlift' | 'sealift' | 'naval';
+
+const AIRLIFT_NODES = ['al_udeid', 'al_dhafra', 'ali_al_salem', 'prince_sultan', 'nevatim', 'hatzerim'];
+const SEALIFT_NODES = ['haifa', 'aden', 'basra'];
+
+export function transportModeOf(r: { kind: string; mode?: TransportMode }): TransportMode {
+  if (r.mode) return r.mode;
+  if (r.kind === 'interceptors' || r.kind === 'air') return 'airlift';
+  if (r.kind === 'csg') return 'naval';
+  return 'sealift';
+}
+
+/**
+ * Whether the receiving infrastructure can take a shipment of this mode.
+ * Airlift needs a working airbase, sealift a working port, and naval
+ * deployments a sea route that is not fully shut.
+ */
+export function transportAccess(
+  snap: GameSnapshot,
+  mode: TransportMode,
+): { ok: boolean; reason: string } {
+  if (mode === 'airlift') {
+    const ok = AIRLIFT_NODES.some((id) => (snap.nodes[id]?.integrity ?? 0) > 25);
+    return ok ? { ok: true, reason: '' } : { ok: false, reason: 'no operational airbase' };
+  }
+  if (mode === 'sealift') {
+    const ok = SEALIFT_NODES.some((id) => (snap.nodes[id]?.integrity ?? 0) > 25);
+    return ok ? { ok: true, reason: '' } : { ok: false, reason: 'no operational port' };
+  }
+  const ok = !snap.suezClosed || snap.meters.hormuz < 85;
+  return ok ? { ok: true, reason: '' } : { ok: false, reason: 'sea lanes closed' };
+}
+
 
 /**
  * Projected-state reservations (Phase 2 item 1).
@@ -117,6 +152,7 @@ export interface OrderReservations {
   iranResources: number;
   airlift: number;
   mines: number;
+  tankers: number;
   rounds: Record<DeliveryClass, number>;
   sorties: Record<'drone' | 'ballistic', number>;
 }
@@ -128,6 +164,7 @@ export function emptyReservations(): OrderReservations {
     iranResources: 0,
     airlift: 0,
     mines: 0,
+    tankers: 0,
     rounds: { drone: 0, fateh: 0, khorramshahr: 0, fattah: 0, asm: 0 },
     sorties: { drone: 0, ballistic: 0 },
   };
@@ -168,12 +205,16 @@ export function reserveOrder(snap: GameSnapshot, reserved: OrderReservations, or
       return;
     case 'reinforce': {
       const pkg = REINFORCEMENTS.find((r) => r.id === order.packageId);
-      if (pkg) reserved.politicalWill += pkg.cost;
+      if (pkg) {
+        reserved.politicalWill += pkg.cost;
+        if (transportModeOf(pkg) === 'airlift') reserved.tankers += 1;
+      }
       return;
     }
     case 'airlift':
       reserved.politicalWill += ISRAEL_AIRLIFT.cost;
       reserved.airlift += 5;
+      reserved.tankers += 1;
       return;
     case 'diplomacy':
       reserved.politicalWill += 2;
@@ -307,9 +348,15 @@ export function validateOrder(
         return { ok: false, reason: `Needs ${pkg.cost} political will` };
       }
       if (snap.reinforcements.some((r) => r.id === pkg.id)) return { ok: false, reason: 'That package is already in transit' };
+      if (transportModeOf(pkg) === 'airlift' && snap.resources.tankerSorties - reserved.tankers < 1) {
+        return { ok: false, reason: 'No tanker sorties left this turn' };
+      }
       return { ok: true };
     }
     case 'airlift': {
+      if (snap.resources.tankerSorties - reserved.tankers < 1) {
+        return { ok: false, reason: 'No tanker sorties left this turn' };
+      }
       if (snap.resources.airlift - reserved.airlift < 5) {
         return { ok: false, reason: 'No airlift capacity left this turn' };
       }
@@ -554,13 +601,16 @@ export function applyOrder(
       const pkg = REINFORCEMENTS.find((r) => r.id === order.packageId);
       if (!pkg) return;
       snap.resources.politicalWill = clamp(snap.resources.politicalWill - pkg.cost, 0, 100);
-      const transit = pkg.turns + (snap.suezClosed ? 2 : 0);
+      const mode = transportModeOf(pkg);
+      if (mode === 'airlift') snap.resources.tankerSorties = clamp(snap.resources.tankerSorties - 1, 0, 8);
+      const transit = pkg.turns + (mode !== 'airlift' && snap.suezClosed ? 2 : 0);
       snap.reinforcements.push({
         id: pkg.id,
         label: pkg.label,
         arrivesTurn: snap.turn + transit,
         kind: pkg.kind,
         amount: pkg.amount,
+        mode,
       });
       const straitRisk = snap.meters.hormuz > logisticsCfg(snap).interdictHormuz;
       events.push({
@@ -572,6 +622,7 @@ export function applyOrder(
     }
     case 'airlift': {
       snap.resources.airlift -= 5;
+      snap.resources.tankerSorties = clamp(snap.resources.tankerSorties - 1, 0, 8);
       snap.resources.politicalWill = clamp(snap.resources.politicalWill - ISRAEL_AIRLIFT.cost, 0, 100);
       snap.reinforcements.push({
         id: ISRAEL_AIRLIFT.id,
@@ -579,6 +630,7 @@ export function applyOrder(
         arrivesTurn: snap.turn + ISRAEL_AIRLIFT.turns,
         kind: 'interceptors',
         amount: 15,
+        mode: 'airlift',
       });
       events.push({
         text: 'US airlift allocated to Israel: 15 interceptors arrive in 2 turns.',
@@ -701,25 +753,41 @@ function attritionPhase(
   }
 
   snap.resources.airlift = clamp(snap.resources.airlift + economyAirliftRegen(snap), 0, BALANCE.sharedAirliftCapacity);
+  snap.resources.tankerSorties = clamp(snap.resources.tankerSorties + 1, 0, 8);
 
   const cfg = logisticsCfg(snap);
-  if (snap.meters.hormuz > cfg.interdictHormuz) {
-    for (const r of snap.reinforcements) {
-      const before = r.delayTurns ?? 0;
-      r.delayTurns = Math.min(cfg.maxDelay, before + 1);
-      if (r.delayTurns > before) {
-        events.push({
-          text: `Strait risk delays ${r.label}: ETA slips to turn ${effectiveArrival(r)}.`,
-          tone: 'warn',
-          faction: 'usa',
-        });
-      }
+  for (const r of snap.reinforcements) {
+    const mode = transportModeOf(r);
+    const straitRisk = mode !== 'airlift' && snap.meters.hormuz > cfg.interdictHormuz;
+    const access = transportAccess(snap, mode);
+    if (!straitRisk && access.ok) continue;
+    const before = r.delayTurns ?? 0;
+    r.delayTurns = Math.min(cfg.maxDelay, before + 1);
+    if (r.delayTurns > before) {
+      events.push({
+        text: straitRisk
+          ? `Strait risk delays ${r.label}: ETA slips to turn ${effectiveArrival(r)}.`
+          : `${r.label} waits for a usable ${mode === 'airlift' ? 'airbase' : 'port'}: ETA slips to turn ${effectiveArrival(r)}.`,
+        tone: 'warn',
+        faction: 'usa',
+      });
     }
   }
 
   const due = snap.reinforcements.filter((r) => effectiveArrival(r) <= snap.turn);
   snap.reinforcements = snap.reinforcements.filter((r) => effectiveArrival(r) > snap.turn);
   for (const r of due) {
+    const access = transportAccess(snap, transportModeOf(r));
+    if (!access.ok) {
+      r.delayTurns = Math.min(cfg.maxDelay, (r.delayTurns ?? 0) + 1);
+      snap.reinforcements.push(r);
+      events.push({
+        text: `${r.label} is holding: ${access.reason}. ETA slips to turn ${effectiveArrival(r)}.`,
+        tone: 'warn',
+        faction: 'usa',
+      });
+      continue;
+    }
     if (r.id === ISRAEL_AIRLIFT.id) {
       snap.resources.interceptorsIsrael = clamp(snap.resources.interceptorsIsrael + r.amount, 0, 180);
       events.push({ text: 'US airlift landed in Israel: +15 interceptors.', tone: 'good', faction: 'israel' });

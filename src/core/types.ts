@@ -168,6 +168,8 @@ export interface Reinforcement {
   kind: 'interceptors' | 'patriot' | 'thaad' | 'air' | 'csg';
   amount: number;
   delayTurns?: number;
+  /** How the shipment reaches theatre; absent on older saves. */
+  mode?: 'airlift' | 'sealift' | 'naval';
 }
 
 export interface LogisticsConfig {

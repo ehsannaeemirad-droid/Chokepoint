@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 import { Game } from '../core/Game';
 import { DEFAULT_LOGISTICS_CFG, effectiveArrival, logisticsCfg } from '../core/engine';
 
-function pushPackage(game: Game, id = 'interceptors'): void {
+function pushPackage(game: Game, id = 'patriot'): void {
   game.queueOrder({ kind: 'reinforce', packageId: id });
   game.endTurn();
 }
