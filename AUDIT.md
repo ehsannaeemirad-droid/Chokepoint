@@ -638,3 +638,53 @@ basing network holds) remains a single-dimension immediate win; it should be
 folded into the coalition score next. The `noOccupation` path id is retained
 for save/objective compatibility although its meaning is now strategic
 endurance, and the objectives panel copy still says "no occupation".
+
+## 18. Phase 3 — faction AI, maritime awareness, stock conservation
+
+Commit: `feat: faction AI doctrines, maritime action and stock discipline`.
+
+- **Separate strategies.** `src/ai/doctrine.ts` adds eight scenario-selectable
+  doctrines. Campaign defaults are `maximumPressure` for the USA, `attrition`
+  for Israel and `maritimePressure` for Iran; the tutorial overrides the USA
+  with `ammoConservation` and Iran with `escalationRestraint`. Each profile
+  carries target biases, an ammunition reserve, a salvo multiplier, mining
+  appetite, package count and a hard per-turn strike cap.
+- **Target evaluation.** Coalition target lists are built from live Iranian
+  nodes and scored by faction objectives × strategic/hardened value × doctrine.
+  The USA opens on the nuclear programme, Israel on missile production, and the
+  two ordered lists are asserted different in `doctrine.test.ts`. Destroyed
+  sites are filtered again before each package, and an already-wrecked node is
+  worth less, so salvos spread instead of repeatedly hitting one base.
+- **Maritime awareness.** Iran now has a dedicated maritime action: its mine
+  group moves toward the Hormuz approach and lays fields through the normal
+  order pipeline. Coalition AI clears located fields or escorts shipping when
+  the doctrine wants maritime work. This exposed a real defect: AI unit orders
+  were passed through `validateOrder`, which compared the unit faction to the
+  *player's* faction, so every AI mine/clear/escort order was rejected as "not
+  your unit". `canPlayerOrder` and `validateOrder` now accept an explicit actor;
+  the player path is unchanged.
+- **Stock conservation.** Iranian spending respects the doctrine reserve via
+  `spendableStock`; salvo size scales with doctrine; non-saturation doctrines
+  fire one salvo slot per turn; `ammoConservation` caps production. Coalition
+  aircraft below the reserve floor are not tasked, and each doctrine caps the
+  number of strikes per turn.
+- **Multi-seed simulation.** `src/ai/balance.test.ts` runs the USA, Israel and
+  Iran across seeds 11/22/33 with a simple strike-only player policy and reports
+  status, duration, oil, Hormuz, rounds, mines, fields and interceptors. Latest
+  run: USA lost on turns 12/8/12 (political will), Israel lost at the turn-30
+  bell on all three seeds, Iran won at turn 30 on all three. Two Iranian
+  minefields were laid and the mine stock fell from 4 to 0 in every USA/Israel
+  campaign, so maritime behaviour is exercised and stock-negative states do not
+  occur. A repeated seed produces an identical outcome.
+
+Verification: `tsc` exit 0, 32 files / 255 tests passed, `build` exit 0.
+
+Gaps found by the simulation, not fixed here:
+- The strike-only player policy never spends interceptors or sets ROE, so the
+  USA collapsing by turn 8-12 is an upper bound on AI pressure, not a balanced
+  match. A defensive player policy belongs in the next balance pass, and
+  political-will loss under drone/ballistic salvos should be reviewed against
+  interceptor use.
+- Iranian doctrine is chosen per scenario but not yet player-selectable, and
+  `aiTargetWeights` (used for UI threat hints) still carries the old fixed
+  table rather than the doctrine scores.
