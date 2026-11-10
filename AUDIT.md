@@ -514,3 +514,33 @@ Verification: `tsc` exit 0, 27 files / 231 tests passed, `build` exit 0.
 
 Gaps: the reinforcement panel shows ETA but not the transport mode; Suez remains
 a scenario-level boolean rather than a node that can be attacked.
+
+## 14. Phase 2 item 8 — intelligence
+
+Commit: `feat: make intelligence positional, decaying and honest`.
+
+- `src/core/intel.ts` owns coverage: humint (SOF, 6 hexes, ±8%), ISR (MQ-9,
+  12 hexes, ±18%) and no coverage (±35%). `updateIntelligence` runs every turn
+  before chokepoints: a unit under coverage becomes revealed and gets
+  `lastSeen`; a revealed unit unseen for more than 3 turns loses `revealed`.
+  This is the detection decay item 4 recorded as missing, and it now applies to
+  the AI's target list too.
+- `informationState` returns unknown / estimated / identified / tracked:
+  humint is tracked, ISR is identified, stale sightings degrade to estimated,
+  never-seen units stay unknown.
+- `unitStrengthEstimate` no longer hard-codes 'none'. It reads the unit's hex,
+  narrows with coverage, widens 25% per stale turn (capped at 3), and returns
+  `null` for units the viewer has never located. Hex view filters unrevealed
+  enemy units, closing a leak where their names and strength were listed.
+- UI enemy chips append the localised information state; four i18n keys added
+  in English and Persian. `fog.test.ts` updated to assert no band for an
+  unknown unit and a band once located.
+- Tests: `src/core/intel.test.ts` (5) cover coverage ranges, reveal/stamp,
+  decay to unknown, no invented estimate, and band narrowing with ISR.
+
+Verification: `tsc` exit 0, 28 files / 236 tests passed, `build` exit 0.
+
+Gaps: the player cannot task recon; coverage is passive from SOF/MQ-9
+positioning, which the spec allows but does not make a decision. No per-target
+decay for facility integrity estimates (only units). UI labels were not visually
+inspected.
