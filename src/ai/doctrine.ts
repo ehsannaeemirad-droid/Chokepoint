@@ -259,3 +259,18 @@ export function wantsMaritime(snap: GameSnapshot, doctrine: DoctrineProfile): bo
   if (doctrine.mineBias < 0.8) return false;
   return snap.meters.hormuz < 70 || Object.keys(snap.minefields ?? {}).length > 0;
 }
+
+/**
+ * Domestic political restraint (SPEC §28: AI responds to political conditions).
+ * Below a floor of political will, only a maximum-pressure doctrine keeps
+ * flying; the others stand down rather than spend the war coalition.
+ */
+export function coalitionShouldStandDown(snap: GameSnapshot, doctrine: DoctrineProfile): boolean {
+  if (doctrine.id === 'maximumPressure') return false;
+  return snap.resources.politicalWill < 20 || (snap.domestic?.congress ?? 60) < 25;
+}
+
+/** Iran holds fire when its own institutions are close to breaking. */
+export function iranShouldHoldFire(snap: GameSnapshot): boolean {
+  return (snap.iranDomestic?.stability ?? 100) < 30;
+}

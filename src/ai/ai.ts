@@ -19,8 +19,10 @@ import { applyOrder, validateOrder } from '../core/engine';
 import { isSeaHex, minefields } from '../core/maritime';
 import {
   belowReserve,
+  coalitionShouldStandDown,
   coalitionTargetScore,
   doctrineFor,
+  iranShouldHoldFire,
   iranTargetScore,
   spendableStock,
   wantsMaritime,
@@ -239,6 +241,14 @@ function iranSalvo(ctx: AiContext): boolean {
     (u) => u.faction === 'iran' && ['fateh110', 'khorramshahr', 'fattah', 'asm_launcher'].includes(u.typeId),
   );
   if (launchers.length === 0) return false;
+  if (iranShouldHoldFire(ctx.snap)) {
+    ctx.events.push({
+      text: 'Iran holds its missile fire to stabilise the home front.',
+      tone: 'info',
+      faction: 'iran',
+    });
+    return false;
+  }
 
   const doctrine = doctrineFor('iran', ctx.snap.scenarioId);
   const firingDoctrine = doctrine;
@@ -550,6 +560,15 @@ function coalitionAi(ctx: AiContext, faction: 'usa' | 'israel'): boolean {
       u.cooldown === 0,
   );
   if (aircraft.length === 0) return false;
+
+  if (coalitionShouldStandDown(ctx.snap, doctrine)) {
+    ctx.events.push({
+      text: `${faction === 'usa' ? 'US' : 'Israeli'} aircraft stand down: domestic support will not sustain more strikes.`,
+      tone: 'warn',
+      faction,
+    });
+    return false;
+  }
 
   let packages = doctrine.maxPackages;
   if (faction === 'israel') {

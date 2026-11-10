@@ -19,6 +19,8 @@ interface Row {
   mines: number;
   minefields: number;
   interceptors: number;
+  politicalWill: number;
+  posture: string;
 }
 
 /** A simple player policy so the AI is exercised across full campaigns. */
@@ -42,12 +44,39 @@ function issueStrike(game: Game, faction: Faction): void {
   }
 }
 
-function play(faction: Faction, seed: number): Row {
+/**
+ * A defensive player policy: constrain ROE, keep the airlift running, escort
+ * shipping and clear located mines. This exercises the mechanics a real player
+ * has that the pure strike policy ignores.
+ */
+function issueDefensiveOrders(game: Game, faction: Faction): void {
+  if (faction === 'iran') return;
+  if (game.snap.roe?.posture !== 'constrained') {
+    game.queueOrder({ kind: 'roe', posture: 'constrained' });
+  }
+  if (game.snap.resources.tankerSorties > 0) {
+    game.queueOrder({ kind: 'airlift' });
+  }
+  const ship = game.snap.units.find(
+    (u) => u.faction === faction && unitType(u.typeId).category === 'naval' && u.cooldown === 0,
+  );
+  if (!ship) return;
+  const detected = Object.entries(game.snap.minefields ?? {}).find(([, f]) => f.detected && f.mines > 0);
+  if (detected) {
+    const [col, row] = detected[0].split(',').map(Number);
+    game.queueOrder({ kind: 'clear', unitUid: ship.uid, col, row });
+  } else if ((game.snap.escortCoverage ?? 0) < 2) {
+    game.queueOrder({ kind: 'escort', unitUid: ship.uid });
+  }
+}
+
+function play(faction: Faction, seed: number, defensive = false): Row {
   const game = new Game();
   game.start('campaign', faction, seed);
   let guard = 0;
   while (game.snap.status === 'playing' && guard < 32) {
     issueStrike(game, faction);
+    if (defensive) issueDefensiveOrders(game, faction);
     game.endTurn();
     guard++;
   }
@@ -75,6 +104,8 @@ function play(faction: Faction, seed: number): Row {
     mines: snap.iran.mines,
     minefields: Object.values(snap.minefields ?? {}).filter((f) => f.mines > 0).length,
     interceptors: snap.resources.interceptorsUSA + snap.resources.interceptorsIsrael,
+    politicalWill: Math.round(snap.resources.politicalWill),
+    posture: snap.roe?.posture ?? 'standard',
   };
 }
 
@@ -114,6 +145,19 @@ describe('multi-seed AI balance', () => {
     // Different doctrines should not collapse into one identical Iranian war.
     const iranianRows = rows.filter((r) => r.faction === 'iran');
     expect(new Set(iranianRows.map((r) => `${r.status}:${r.turn}`)).size).toBeGreaterThan(0);
+  }, 120_000);
+
+  it('runs a defensive player policy and reports the difference', () => {
+    const rows: Row[] = [];
+    for (const seed of [11, 22, 33]) rows.push(play('usa', seed, true));
+    console.log('Defensive-policy rows:', JSON.stringify(rows, null, 1));
+
+    for (const row of rows) {
+      expect(['won', 'lost', 'playing']).toContain(row.status);
+      expect(row.turn).toBeLessThanOrEqual(31);
+      expect(row.posture).toBe('constrained');
+      expect(row.interceptors).toBeGreaterThanOrEqual(0);
+    }
   }, 120_000);
 
   it('is deterministic for a repeated seed', () => {

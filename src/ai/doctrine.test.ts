@@ -5,10 +5,12 @@ import type { AiContext } from './tree';
 import {
   DOCTRINES,
   belowReserve,
+  coalitionShouldStandDown,
   coalitionTargetScore,
   doctrineFor,
   doctrineIdFor,
   iranTargetScore,
+  iranShouldHoldFire,
   spendableStock,
   wantsMaritime,
 } from './doctrine';
@@ -88,6 +90,34 @@ describe('AI doctrines', () => {
     expect(spendableStock(0, DOCTRINES.attrition)).toBe(0);
     expect(belowReserve(1, DOCTRINES.ammoConservation)).toBe(true);
     expect(belowReserve(3, DOCTRINES.ammoConservation)).toBe(false);
+  });
+
+  it('stands down when domestic support is gone, except under maximum pressure', () => {
+    const lowWill = structuredClone(game.snap);
+    lowWill.resources.politicalWill = 10;
+    expect(coalitionShouldStandDown(lowWill, DOCTRINES.attrition)).toBe(true);
+    expect(coalitionShouldStandDown(lowWill, DOCTRINES.maximumPressure)).toBe(false);
+
+    const lowCongress = structuredClone(game.snap);
+    lowCongress.domestic!.congress = 20;
+    expect(coalitionShouldStandDown(lowCongress, DOCTRINES.attrition)).toBe(true);
+  });
+
+  it('holds Iranian fire when the regime is close to breaking', () => {
+    const shaken = structuredClone(game.snap);
+    shaken.iranDomestic = {
+      stability: 20,
+      eliteCohesion: 50,
+      irgcCohesion: 50,
+      publicDissatisfaction: 50,
+      economicPressure: 40,
+      militaryCredibility: 50,
+      leadershipContinuity: 50,
+      negotiationPosition: 40,
+    };
+    expect(iranShouldHoldFire(shaken)).toBe(true);
+    shaken.iranDomestic!.stability = 60;
+    expect(iranShouldHoldFire(shaken)).toBe(false);
   });
 
   it('keeps restraint doctrines out of the maritime fight', () => {
