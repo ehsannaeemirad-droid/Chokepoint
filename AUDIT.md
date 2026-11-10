@@ -562,8 +562,8 @@ Commit: `fix: give Russia and China distinct diplomatic effects`.
 - `HOST_ORDER` now includes Jordan and Egypt, so their host states decay,
   restrict, close and reopen instead of sitting frozen at scenario values.
   Egypt's Suez closure already keys off sustained Hormuz disruption
-  (`hormuzTurnsAbove70 >= 5`), which is a real state change with a reversal
-  path when the meter falls.
+  (`hormuzTurnsAbove70 >= 5`), which is a real state change; it has no
+  reopening path yet, recorded as a gap.
 - Tests: `src/politics/diplomacy.test.ts` (4) cover income attribution, the
   NFZ air/naval split, the honest Pakistan package, and Jordan reopening.
 
