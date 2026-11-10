@@ -437,6 +437,8 @@ export interface Meters {
   inflation: number;
   nuclearEscalation: number;
   nuclearStrikes: number;
+  /** Strikes on nuclear facilities, distinct from actual nuclear weapon use. */
+  nuclearFacilityStrikes?: number;
   launchersAtStart: number;
   israeliAirAtStart: number;
   regimeIntactStreak: number;
@@ -460,6 +462,17 @@ export interface Resources {
   politicalWill: number;
   tankerSorties: number;
   airlift: number;
+}
+
+export interface IranDomestic {
+  stability: number;
+  eliteCohesion: number;
+  irgcCohesion: number;
+  publicDissatisfaction: number;
+  economicPressure: number;
+  militaryCredibility: number;
+  leadershipContinuity: number;
+  negotiationPosition: number;
 }
 
 export interface GameSnapshot {
@@ -497,6 +510,7 @@ export interface GameSnapshot {
   meters: Meters;
   superpowers: Record<'russia' | 'china', SuperpowerState>;
   reinforcements: Reinforcement[];
+  iranDomestic?: IranDomestic;
   pakistanTriggered: boolean;
   suezClosed: boolean;
   incirlikOpen: boolean;

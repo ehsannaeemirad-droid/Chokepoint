@@ -67,6 +67,9 @@ export function recordImpact(snap: GameSnapshot, map: TheaterMap, nodeId: string
     snap.resources.politicalWill = clamp(snap.resources.politicalWill - 2, 0, 100);
   }
   if (nodeId === 'tehran') snap.meters.leadershipStrikes += 1;
+  if (node.kind === 'nuclear') {
+    snap.meters.nuclearFacilityStrikes = (snap.meters.nuclearFacilityStrikes ?? 0) + 1;
+  }
   if (node.kind === 'oil') {
     snap.meters.oilPrice = clamp(snap.meters.oilPrice + 6, 40, 220);
   }

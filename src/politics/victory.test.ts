@@ -58,13 +58,27 @@ describe('updateVictoryClocks', () => {
     h = setup('iran');
   });
 
-  it('tracks the regime-intact streak and resets it when Tehran falls', () => {
+  it('tracks the regime-intact streak and resets it when institutions break', () => {
     const { snap, map } = h;
     updateVictoryClocks(snap, map);
     updateVictoryClocks(snap, map);
     expect(snap.meters.regimeIntactStreak).toBe(2);
 
+    // Capital damage alone no longer breaks the regime (SPEC §24).
     snap.nodes.tehran!.integrity = 0;
+    updateVictoryClocks(snap, map);
+    expect(snap.meters.regimeIntactStreak).toBe(3);
+
+    snap.iranDomestic = {
+      stability: 10,
+      eliteCohesion: 20,
+      irgcCohesion: 20,
+      publicDissatisfaction: 80,
+      economicPressure: 80,
+      militaryCredibility: 20,
+      leadershipContinuity: 40,
+      negotiationPosition: 10,
+    };
     updateVictoryClocks(snap, map);
     expect(snap.meters.regimeIntactStreak).toBe(0);
   });

@@ -45,9 +45,14 @@ export const DEFAULT_VICTORY: VictoryThresholds = {
 
 const NUCLEAR_SITES = ['isfahan', 'natanz', 'fordow'];
 
-/** The regime stands: the capital holds and leadership decapitation never passed three strikes. */
+/**
+ * The regime stands: institutions hold. Capital damage alone is not a collapse
+ * switch (SPEC §24), so stability is the gate, with the capital condition kept
+ * as one material input rather than the deciding one.
+ */
 export function regimeIntact(snap: GameSnapshot): boolean {
-  return nodeState(snap, 'tehran').integrity > 0 && snap.meters.leadershipStrikes <= 3;
+  const stability = snap.iranDomestic?.stability ?? 100;
+  return stability >= 25 && snap.meters.leadershipStrikes <= 3;
 }
 
 /** Best integrity still standing among Iran's three nuclear facilities. */

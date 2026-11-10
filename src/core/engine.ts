@@ -14,6 +14,7 @@ import { maybeStartWar, readyReserves, regenerateUnderground } from './prewar';
 import { resolveCyber, resolveSabotage, resolveStrike, validateStrike } from '../combat/combat';
 import { canPlayerOrder } from './permissions';
 import { updateIntelligence } from './intel';
+import { updateIranDomestic } from '../politics/iranDomestic';
 import { addEscortCoverage, clearMines, isSeaHex, layMines, minefields, hexKey, MINE_SORTIE_MAX } from './maritime';
 import logisticsData from '../data/logistics.json';
 import { hexDistance } from '../map/hex';
@@ -821,6 +822,7 @@ function attritionPhase(
   }
 
   updateHosts(snap, map, events);
+  updateIranDomestic(snap, events);
   updateIntelligence(snap);
   updateChokepoints(snap, map);
   updateSuperpowers(snap, events);
