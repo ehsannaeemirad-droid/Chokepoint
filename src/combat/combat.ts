@@ -165,6 +165,12 @@ export function resolveIncoming(
         focus: { col: attack.col, row: attack.row },
       });
     }
+    // Political consequences are per raid, not per impacting munition. A
+    // single eight-drone salvo is one attack on the base, not eight separate
+    // domestic casualty events.
+    if (impacts > 0 && node?.id) {
+      recordImpact(snap, map, node.id, 1, attack.attacker);
+    }
     if (impacts > 0) {
       const where = node ? node.name : `hex ${attack.col},${attack.row}`;
       events.push({
@@ -191,7 +197,6 @@ function applyImpact(
     const state = snap.nodes[nodeId]!;
     const factor = node.hardened ? 1.0 : 4.2;
     state.integrity = clamp(state.integrity - damage * factor, 0, state.maxIntegrity);
-    recordImpact(snap, map, nodeId, 1, attack.attacker);
     if (node.host === 'iran') addIranWarCost(snap, 2);
     return;
   }

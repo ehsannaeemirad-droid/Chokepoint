@@ -54,7 +54,7 @@ function issueDefensiveOrders(game: Game, faction: Faction): void {
   if (game.snap.roe?.posture !== 'constrained') {
     game.queueOrder({ kind: 'roe', posture: 'constrained' });
   }
-  if (game.snap.resources.tankerSorties > 0) {
+  if (game.snap.resources.tankerSorties > 0 && game.snap.resources.politicalWill >= 30 && game.snap.resources.interceptorsUSA < 100) {
     game.queueOrder({ kind: 'airlift' });
   }
   const ship = game.snap.units.find(
