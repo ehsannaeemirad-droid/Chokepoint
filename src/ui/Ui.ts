@@ -34,6 +34,8 @@ import { initiativeCfg } from '../politics/initiative';
 import { talksCfg } from '../politics/talks';
 import { victoryPaths } from '../politics/victory';
 import { buildObjectives, previewOrderImpact, type ObjectiveRow } from './objectives';
+import { buildTurnReview, reportKey } from './review';
+import { factionLabel, unitLabel } from './labels';
 import { deleteSave, downloadText, exportReplay, listSaves, SLOTS, type SlotId } from '../services/save';
 import { Minimap } from './Minimap';
 import { bus, focusHex, zoomBy } from './bus';
@@ -93,23 +95,6 @@ const FACILITY_LABELS: Record<string, { en: string; fa: string }> = {
   'port-logistics': { en: 'Port logistics', fa: 'لجستیک بندری' },
 };
 
-const FACTION_FA: Record<string, string> = {
-  usa: 'ایالات متحده',
-  israel: 'اسرائیل',
-  iran: 'ایران',
-  houthi: 'جنبش حوثی',
-  saudi: 'عربستان سعودی',
-  pakistan: 'پاکستان',
-  india: 'هند',
-  qatar: 'قطر',
-  uae: 'امارات',
-  kuwait: 'کویت',
-  bahrain: 'بحرین',
-  jordan: 'اردن',
-  egypt: 'مصر',
-  turkey: 'ترکیه',
-  neutral: 'بی‌طرف',
-};
 
 const SCENARIO_FA: Record<string, string> = {
   campaign: 'دریای باریک',
@@ -209,7 +194,10 @@ export class Ui {
   private cinTimer = 0;
   private cinEvents: ResolveEvent[] = [];
   private cinIndex = 0;
-  private modalKind: 'menu' | 'outcome' | null = null;
+  private modalKind: 'menu' | 'outcome' | 'review' | null = null;
+  private reviewOpen = false;
+  private lastFocused: HTMLElement | null = null;
+  private reportCategory: StringKey | null = null;
   private navOpen = false;
   private navQuery = '';
   private navKind: NavKind = 'all';
@@ -316,7 +304,13 @@ export class Ui {
       this.showObjectiveDetail(a);
       return;
     }
-    if (verb === 'end-turn') return this.endTurn();
+    if (verb === 'end-turn') return this.openReview();
+    if (verb === 'review-back') return this.closeModal();
+    if (verb === 'review-resolve') {
+      this.reviewOpen = false;
+      this.closeModal();
+      return this.endTurn();
+    }
     if (verb === 'lang') {
       setLang((a === 'fa' ? 'fa' : 'en') as Lang);
       return;
@@ -396,6 +390,7 @@ export class Ui {
     }
     if (verb === 'remove-order') {
       this.game.removeOrder(Number(a));
+      if (this.reviewOpen) this.openReview();
       return;
     }
     if (verb === 'diplomacy' && a) {
@@ -1252,23 +1247,41 @@ export class Ui {
       victorySection = `<section class="panel-section"><h4>${t('panel.victoryPaths')}</h4>${pathRows}</section>`;
     }
 
+    const warCost = `<section class="panel-section"><h4>${t('panel.warCost')}</h4>
+      <div class="meter-row"><span>${t('panel.iranCost')}</span><div class="bar"><i style="width:${(s.meters.iranWarCost / s.meters.iranWarCostThreshold) * 100}%;background:var(--info)"></i></div><b>${Math.round(s.meters.iranWarCost)}/${s.meters.iranWarCostThreshold}</b></div>
+      <div class="meter-row"><span>${t('panel.usWill')}</span><div class="bar"><i style="width:${s.resources.politicalWill}%;background:var(--warn)"></i></div><b>${Math.round(s.resources.politicalWill)}</b></div>
+    </section>`;
+
     return `<header class="panel-head"><h3>${t('panel.strategic')}</h3><button data-action="panel:strategic" aria-label="${t('btn.close')}">✕</button></header>
       <div class="panel-body">
-        <section class="panel-section"><h4>${t('panel.basing')}</h4>${baseRows}</section>
-        <section class="panel-section"><h4>${t('panel.hosts')}</h4>${hostRows}</section>
-        <section class="panel-section"><h4>${t('panel.programme')}</h4>${facilities}</section>
-        <section class="panel-section"><h4>${t('panel.hormuz')}</h4>${hormuzCalc}</section>
-        ${victorySection}
-        ${domesticSection}
-        ${roeSection}
-        ${phase3Section}
-        ${escalationSection}
-        ${factionSection}
-        <section class="panel-section"><h4>${t('panel.warCost')}</h4>
-          <div class="meter-row"><span>${t('panel.iranCost')}</span><div class="bar"><i style="width:${(s.meters.iranWarCost / s.meters.iranWarCostThreshold) * 100}%;background:var(--info)"></i></div><b>${Math.round(s.meters.iranWarCost)}/${s.meters.iranWarCostThreshold}</b></div>
-          <div class="meter-row"><span>${t('panel.usWill')}</span><div class="bar"><i style="width:${s.resources.politicalWill}%;background:var(--warn)"></i></div><b>${Math.round(s.resources.politicalWill)}</b></div>
-        </section>
+        <details class="panel-group" open>
+          <summary>${t('panel.situation')}</summary>
+          <section class="panel-section"><h4>${t('panel.basing')}</h4>${baseRows}</section>
+          <section class="panel-section"><h4>${t('panel.hosts')}</h4>${hostRows}</section>
+          ${warCost}
+        </details>
+        <details class="panel-group">
+          <summary>${t('panel.military')}</summary>
+          <section class="panel-section"><h4>${t('panel.programme')}</h4>${facilities}</section>
+          ${victorySection}
+        </details>
+        <details class="panel-group">
+          <summary>${t('panel.economy')}</summary>
+          <section class="panel-section"><h4>${t('panel.hormuz')}</h4>${hormuzCalc}</section>
+          ${factionSection}
+        </details>
+        <details class="panel-group">
+          <summary>${t('panel.diplomacy')}</summary>
+          ${phase3Section}
+        </details>
+        <details class="panel-group">
+          <summary>${t('panel.politics')}</summary>
+          ${domesticSection}
+          ${roeSection}
+          ${escalationSection}
+        </details>
       </div>`;
+
   }
 
   private logHtml(): string {
@@ -1336,6 +1349,63 @@ export class Ui {
   }
 
   // ------------------------------------------------------------------ actions
+  private openReview(): void {
+    if (this.game.snap.status !== 'playing') return;
+    this.reviewOpen = true;
+    this.modalKind = 'review';
+    this.openModal(this.reviewHtml());
+  }
+
+  private reviewHtml(): string {
+    const review = buildTurnReview(this.game.snap, this.game.map);
+    const orderRows =
+      review.orders.length === 0
+        ? `<p class="modal-note">${t('review.noOrders')}</p>`
+        : review.orders
+            .map((order) => {
+              const status = order.errors.length
+                ? `<span class="status closed">${t('review.invalid')}</span>`
+                : `<span class="status open">${t('review.valid')}</span>`;
+              const errors = order.errors.map((e) => `<li class="risk">${e}</li>`).join('');
+              const list = (title: string, items: string[]) =>
+                items.length
+                  ? `<div class="review-consequence"><b>${title}</b><ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul></div>`
+                  : '';
+              return `<div class="review-order">
+                <div class="review-order-head"><b>${order.label}</b>${status}
+                  <button class="mini" data-action="remove-order:${order.index}" aria-label="${t('btn.cancel')}">✕</button>
+                </div>
+                ${errors ? `<ul class="review-errors">${errors}</ul>` : ''}
+                ${list(t('review.guaranteed'), order.guaranteed)}
+                ${list(t('review.likely'), order.likely)}
+                ${list(t('review.uncertain'), order.uncertain)}
+              </div>`;
+            })
+            .join('');
+    const spend = review.spending.length
+      ? review.spending.map((s) => `<span class="review-chip"><b>${s.label}</b> ${s.value}</span>`).join('')
+      : `<span class="review-chip">${t('review.none')}</span>`;
+    const warnings = review.warnings.length
+      ? review.warnings.map((w) => `<li class="risk">${w}</li>`).join('')
+      : `<li>${t('review.noneWarnings')}</li>`;
+
+    return `<div class="modal-card review" role="document" aria-labelledby="review-title">
+      <header><h2 id="review-title">${t('review.title')} · ${this.game.snap.turn}</h2>
+        <button data-action="review-back" aria-label="${t('btn.close')}">✕</button></header>
+      <div class="modal-body review-body">
+        <p class="modal-note">${t('review.subtitle')}</p>
+        <p class="modal-note">${t('review.ordersCount', { n: review.orders.length, v: review.validCount })}</p>
+        <section class="review-section"><h4>${t('review.orders')}</h4>${orderRows}</section>
+        <section class="review-section"><h4>${t('review.spend')}</h4><div class="review-chips">${spend}</div></section>
+        <section class="review-section"><h4>${t('review.warnings')}</h4><ul>${warnings}</ul></section>
+      </div>
+      <footer class="review-foot">
+        <button data-action="review-back">${t('review.back')}</button>
+        <button class="primary" data-action="review-resolve">${t('review.resolve')}</button>
+      </footer>
+    </div>`;
+  }
+
   private endTurn(): void {
     if (this.game.snap.status !== 'playing') return;
     const { events, resolvedTurn } = this.game.endTurn();
@@ -1358,6 +1428,7 @@ export class Ui {
 
     this.cinEvents = events.length ? events : [{ text: t('cin.none'), tone: 'info' }];
     this.cinIndex = 0;
+    this.reportCategory = null;
     if (this.reducedMotion) {
       this.revealAll();
       return;
@@ -1387,6 +1458,14 @@ export class Ui {
   private appendCinematicLine(event: ResolveEvent): void {
     const list = document.getElementById('cin-list');
     if (!list) return;
+    const category = reportKey(event.text);
+    if (category !== this.reportCategory) {
+      this.reportCategory = category;
+      const heading = document.createElement('h4');
+      heading.className = 'cin-group';
+      heading.textContent = t(category);
+      list.appendChild(heading);
+    }
     const line = document.createElement('p');
     line.className = `cin-line ${event.tone}`;
     // Phase 6: engine lines render through the Persian template pass when the
@@ -1553,8 +1632,15 @@ export class Ui {
 
   private openModal(html: string): void {
     const modal = $('#modal');
+    if (!modal.classList.contains('active')) {
+      this.lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    }
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
     modal.innerHTML = html;
     modal.classList.add('active');
+    const target = modal.querySelector<HTMLElement>('button, [href], input, select, textarea');
+    target?.focus();
   }
 
   private closeModal(): void {
@@ -1562,6 +1648,9 @@ export class Ui {
     modal.classList.remove('active');
     modal.innerHTML = '';
     this.modalKind = null;
+    this.reviewOpen = false;
+    this.lastFocused?.focus();
+    this.lastFocused = null;
   }
 
   // ------------------------------------------------------------------- helpers
@@ -1692,9 +1781,6 @@ export class Ui {
   }
 }
 
-function unitLabel(unit: UnitInstance): string {
-  return localName(unitType(unit.typeId));
-}
 
 function categoryLabel(category: string): string {
   return getLang() === 'fa' ? CATEGORY_FA[category] ?? category : CATEGORY_LABELS[category] ?? category.toUpperCase();
@@ -1710,9 +1796,6 @@ function facilityLabel(facility: string): string {
   return getLang() === 'fa' ? labels.fa : labels.en;
 }
 
-function factionLabel(id: string): string {
-  return getLang() === 'fa' ? FACTION_FA[id] ?? id : FACTION_LABELS_FALLBACK[id] ?? id;
-}
 
 function hostStatus(status: string): string {
   if (status === 'closed') return t('panel.hostClosed');
@@ -1728,20 +1811,3 @@ function shortFaction(faction: string): string {
   return factionLabel(faction).toUpperCase();
 }
 
-const FACTION_LABELS_FALLBACK: Record<string, string> = {
-  usa: 'United States',
-  israel: 'Israel',
-  iran: 'Iran',
-  houthi: 'Houthi Movement',
-  saudi: 'Saudi Arabia',
-  pakistan: 'Pakistan',
-  india: 'India',
-  qatar: 'Qatar',
-  uae: 'UAE',
-  kuwait: 'Kuwait',
-  bahrain: 'Bahrain',
-  jordan: 'Jordan',
-  egypt: 'Egypt',
-  turkey: 'Turkey',
-  neutral: 'Neutral',
-};

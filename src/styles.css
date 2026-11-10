@@ -1954,3 +1954,33 @@ html[dir='rtl'] .nav-drawer {
   .objectives-strip { left: 4px; right: 4px; top: 48px; }
   .obj-row { min-width: 100px; max-width: 140px; }
 }
+
+/* Phase 4: pre-resolution review, collapsible strategic groups and grouped reports. */
+.modal-card.review { width: min(620px, 100%); }
+.review-body { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.review-section { margin-top: 12px; }
+.review-section h4 { margin: 0 0 6px; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.review-order { border: 1px solid var(--line); border-radius: 10px; padding: 8px; margin-bottom: 8px; background: rgba(255, 255, 255, 0.02); }
+.review-order-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.review-order-head b { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.review-errors { margin: 6px 0 0; padding-inline-start: 18px; color: var(--alert); }
+.review-consequence { margin-top: 6px; font-size: 12px; color: var(--muted); }
+.review-consequence ul { margin: 3px 0 0; padding-inline-start: 18px; color: var(--text); }
+.review-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.review-chip { border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; font-size: 12px; }
+.review-foot { display: flex; gap: 8px; justify-content: flex-end; padding: 10px; border-top: 1px solid var(--line); }
+.review-foot button { min-height: 44px; }
+@media (max-width: 380px) {
+  .review-foot { flex-direction: column-reverse; }
+  .review-foot button { width: 100%; }
+}
+
+.panel-group { border-bottom: 1px solid var(--line); }
+.panel-group > summary { cursor: pointer; padding: 10px 12px; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); min-height: 44px; display: flex; align-items: center; }
+.panel-group[open] > summary { color: var(--text); }
+.panel-group > summary:focus-visible { outline: 2px solid var(--info, #3c8dbc); outline-offset: -2px; }
+.panel-group .panel-section:first-of-type { padding-top: 0; }
+
+.cin-group { margin: 12px 0 4px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); position: sticky; top: 0; background: var(--chrome); padding: 2px 0; }
+
+button:focus-visible, [role='button']:focus-visible, summary:focus-visible { outline: 2px solid var(--info, #3c8dbc); outline-offset: 2px; }
