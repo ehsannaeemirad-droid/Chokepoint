@@ -688,3 +688,29 @@ Gaps found by the simulation, not fixed here:
 - Iranian doctrine is chosen per scenario but not yet player-selectable, and
   `aiTargetWeights` (used for UI threat hints) still carries the old fixed
   table rather than the doctrine scores.
+
+## 19. Phase 3 — domestic evaluation and defensive simulation
+
+Commit: `feat: AI respects domestic politics and simulate a defensive player`.
+
+- Coalition doctrines other than `maximumPressure` stand down when US
+  political will falls below 20 or congressional support below 25; the stand-
+  down is logged with its reason. Iran holds its missile fire when regime
+  stability falls below 30, preserving the home front instead of firing.
+- `balance.test.ts` now also plays the USA under a defensive policy: constrain
+  ROE, run the strategic airlift, escort shipping and clear located mines. This
+  exercises orders the strike-only policy never touched.
+
+Latest defensive-policy results (seeds 11/22/33): USA lost on turns 7/5/8 with
+political will at 0 and ROE `constrained`. The strike-only policy lost on
+turns 12/8/12. The extra mechanics therefore did not extend survival in this
+harness; political-will drain from impacts on US bases is the binding
+constraint, not interceptor supply (188-261 interceptors remained at the end).
+This is a genuine balance finding for the next pass, not evidence that the new
+orders work defensively. It is possible that RNG divergence from the extra
+orders contributes to the shorter runs.
+
+Verification: `tsc` exit 0, 32 files / 258 tests passed, `build` exit 0.
+
+Remaining Phase 3 tasks: multi-seed distributions after tuning political-will
+loss, and surfacing doctrine selection to the player.
