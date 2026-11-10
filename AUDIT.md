@@ -544,3 +544,31 @@ Gaps: the player cannot task recon; coverage is passive from SOF/MQ-9
 positioning, which the spec allows but does not make a decision. No per-target
 decay for facility integrity estimates (only units). UI labels were not visually
 inspected.
+
+## 15. Phase 2 item 9 — diplomatic state effects
+
+Commit: `fix: give Russia and China distinct diplomatic effects`.
+
+- Russia and China are no longer one `max` tier. `russiaTier` drives Iranian AD
+  (shield +3% at tier 1, +6% plus radar detection at tier 2) and owns the
+  no-fly zone at tier 3. `chinaTier` drives oil income (+30% / +45%) and, at
+  tier 3, a recurring -2 US political will per turn. Tier-change text is now
+  per actor, so a Russian tier no longer reports Chinese sanctions relief.
+- The no-fly zone check in `validateStrike` exempts naval units: it closes
+  Iranian airspace to aircraft, not to sea-launched missiles.
+- Pakistan's defensive intervention no longer invents two fighter squadrons.
+  It reports air-defence crews and intelligence sharing, reinforces Prince
+  Sultan Air Base by +10 integrity, and leaves the unit list unchanged.
+- `HOST_ORDER` now includes Jordan and Egypt, so their host states decay,
+  restrict, close and reopen instead of sitting frozen at scenario values.
+  Egypt's Suez closure already keys off sustained Hormuz disruption
+  (`hormuzTurnsAbove70 >= 5`), which is a real state change with a reversal
+  path when the meter falls.
+- Tests: `src/politics/diplomacy.test.ts` (4) cover income attribution, the
+  NFZ air/naval split, the honest Pakistan package, and Jordan reopening.
+
+Verification: `tsc` exit 0, 29 files / 240 tests passed, `build` exit 0.
+
+Gaps: Oman remains a neutral node with no mediator mechanic of its own (the
+talks channel is Qatar's); Egypt's Suez closure is not tied to its host threat,
+only to the Hormuz clock.
