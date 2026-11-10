@@ -149,11 +149,14 @@ describe('victoryPaths progress', () => {
     expect(oil.progress).toBe(60);
   });
 
-  it('is satisfied for no-occupation until the US actually occupies', () => {
+  it('needs more than the absence of occupation', () => {
     const { snap, map } = setup('iran');
-    const noOcc = victoryPaths(snap, map).find((p) => p.id === 'noOccupation')!;
-    expect(noOcc.satisfied).toBe(true);
-    expect(noOcc.progress).toBe(100);
+    // Full deterrent and stable institutions, but no costs imposed yet.
+    expect(victoryPaths(snap, map).find((p) => p.id === 'noOccupation')!.satisfied).toBe(false);
+
+    snap.meters.iranWarCost = snap.meters.iranWarCostThreshold;
+    snap.meters.hormuzTurnsAbove50 = 6;
+    expect(victoryPaths(snap, map).find((p) => p.id === 'noOccupation')!.satisfied).toBe(true);
 
     snap.meters.maxOccupationStreak = 3; // == turnsRequired
     expect(victoryPaths(snap, map).find((p) => p.id === 'noOccupation')!.satisfied).toBe(false);
@@ -211,13 +214,17 @@ describe('checkOutcome with the four paths', () => {
     expect(checkOutcome(snap, map).status).toBe('won');
   });
 
-  it('satisfies no-occupation at the final turn when the US never occupied', () => {
+  it('wins at the bell only with a strategic result, not mere survival', () => {
     const { snap, map } = h;
     snap.turn = 30;
     snap.meters.regimeIntactStreak = 0; // regime path fails
+    expect(checkOutcome(snap, map).status).toBe('lost');
+
+    snap.meters.iranWarCost = snap.meters.iranWarCostThreshold;
+    snap.meters.hormuzTurnsAbove50 = 6;
     const result = checkOutcome(snap, map);
     expect(result.status).toBe('won');
-    expect(result.outcome).toContain('no occupation');
+    expect(result.outcome).toContain('strategic result');
   });
 
   it('denies the no-occupation path once the US reached the occupation state', () => {
@@ -228,29 +235,35 @@ describe('checkOutcome with the four paths', () => {
     expect(checkOutcome(snap, map).status).toBe('lost');
   });
 
-  it('gives the coalition player the win when no path is achieved', () => {
+  it('does not hand the coalition a win for a stalemate', () => {
     const { snap, map } = h;
     snap.faction = 'usa';
     snap.turn = 30;
     snap.meters.regimeIntactStreak = 0;
-    // Deny no-occupation: only an reached occupation state keeps that path
-    // from being satisfied at the bell.
     snap.meters.maxOccupationStreak = 3;
     const result = checkOutcome(snap, map);
-    expect(result.status).toBe('won');
-    expect(result.outcome).toContain('none of its four victory paths');
+    expect(result.status).toBe('lost');
+    expect(result.outcome).toContain('without a coalition strategic result');
   });
 
-  it('satisfies no-occupation against the coalition when the US never occupied', () => {
+  it('awards the coalition when several dimensions actually line up', () => {
+    const { snap, map } = h;
+    snap.faction = 'usa';
+    snap.turn = 30;
+    for (const id of ['isfahan', 'natanz', 'fordow']) snap.nodes[id]!.integrity = 0;
+    snap.units = snap.units.filter((u) => !['asm_launcher', 'fateh110', 'khorramshahr'].includes(u.typeId));
+    snap.meters.iranWarCost = snap.meters.iranWarCostThreshold * 0.9;
+    expect(checkOutcome(snap, map).status).toBe('won');
+  });
+
+  it('the coalition loses when Iran holds the dimensions that matter', () => {
     const { snap, map } = h;
     snap.faction = 'usa';
     snap.turn = 30;
     snap.meters.regimeIntactStreak = 0;
-    // The US roster has no ground formations, so the occupation state is
-    // unreachable today: at the bell the no-occupation path is satisfied and
-    // the coalition player loses on points.
+    snap.meters.iranWarCost = snap.meters.iranWarCostThreshold * 0.9;
+    snap.meters.hormuzTurnsAbove50 = 6;
     expect(checkOutcome(snap, map).status).toBe('lost');
-    expect(checkOutcome(snap, map).outcome).toContain('no occupation');
   });
 
   it('keeps the political-will collapse as an immediate Iranian win', () => {

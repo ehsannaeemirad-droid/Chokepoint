@@ -81,6 +81,73 @@ export function israeliOffensiveCapacity(snap: GameSnapshot): number {
   return clamp(Math.round((readiness / baseline) * 100), 0, 100);
 }
 
+export const IRAN_SCORE_THRESHOLD = 55;
+export const COALITION_SCORE_THRESHOLD = 60;
+
+export interface StrategicScore {
+  score: number;
+  parts: Record<string, number>;
+}
+
+/**
+ * Iran's strategic result, 0-100, from several dimensions rather than the mere
+ * absence of ground occupation (SPEC §27): retained deterrent, institutional
+ * stability, economic resilience, costs imposed, regional leverage and
+ * negotiating position.
+ */
+export function iranStrategicScore(snap: GameSnapshot, map: TheaterMap): StrategicScore {
+  void map;
+  const m = snap.meters;
+  const d = snap.iranDomestic;
+  const launchers = snap.units.filter(
+    (u) => u.typeId === 'asm_launcher' || u.typeId === 'fateh110' || u.typeId === 'khorramshahr',
+  ).length;
+  const start = Math.max(1, m.launchersAtStart || launchers);
+  const warShare = clamp(m.iranWarCost / Math.max(1, m.iranWarCostThreshold), 0, 1);
+
+  const parts = {
+    deterrent: clamp(Math.round((launchers / start) * 20), 0, 20),
+    stability: clamp(Math.round(((d?.stability ?? 70) / 100) * 20), 0, 20),
+    economy: clamp(Math.round((1 - (d?.economicPressure ?? 25) / 100) * 10), 0, 10),
+    costs: clamp(
+      Math.round(warShare * 15 + (m.hormuz > 50 ? 5 : 0) + (m.oilPrice >= 130 ? 5 : 0)),
+      0,
+      25,
+    ),
+    region: clamp(Math.round(Math.min(1, m.hormuzTurnsAbove50 / 6) * 15), 0, 15),
+    negotiation: clamp(Math.round(((d?.negotiationPosition ?? 40) / 100) * 10), 0, 10),
+  };
+  const score = clamp(Object.values(parts).reduce((s, v) => s + v, 0), 0, 100);
+  return { score, parts };
+}
+
+/**
+ * The coalition's strategic result, 0-100. Destroying the nuclear complex is
+ * worth a quarter, not the war: access, threat reduction, domestic support,
+ * costs imposed and political will must also hold (SPEC §27).
+ */
+export function coalitionStrategicScore(snap: GameSnapshot, map: TheaterMap): StrategicScore {
+  const m = snap.meters;
+  const bases = operationalGulfBases(snap, map);
+  const best = bestNuclearIntegrity(snap);
+  const launchers = snap.units.filter(
+    (u) => u.typeId === 'asm_launcher' || u.typeId === 'fateh110' || u.typeId === 'khorramshahr',
+  ).length;
+  const start = Math.max(1, m.launchersAtStart || launchers);
+  const congress = snap.domestic?.congress ?? 60;
+
+  const parts = {
+    nuclear: best <= 0 ? 25 : best < 25 ? 15 : best < 40 ? 8 : 0,
+    threat: launchers < start * 0.5 ? 20 : launchers < start * 0.75 ? 10 : 0,
+    access: bases >= 3 ? 15 : bases >= 2 ? 8 : 0,
+    domestic: congress >= 40 ? 15 : congress >= 30 ? 8 : 0,
+    cost: m.iranWarCost >= m.iranWarCostThreshold * 0.8 ? 15 : 0,
+    will: snap.resources.politicalWill >= 40 ? 10 : 0,
+  };
+  const score = clamp(Object.values(parts).reduce((s, v) => s + v, 0), 0, 100);
+  return { score, parts };
+}
+
 /**
  * Iranian nodes currently held by US ground formations. "Holding" means a
  * ground-category unit of the US sits on the node's hex. The current US
@@ -151,25 +218,32 @@ export function victoryPaths(snap: GameSnapshot, map: TheaterMap): PathProgress[
     const nuclearPct = Math.min(100, (best / threshold) * 100);
     paths.push({
       id: 'regimeSurvival',
-      satisfied: streak >= turns && best > threshold,
+      satisfied:
+        streak >= turns &&
+        best > threshold &&
+        (snap.iranDomestic?.stability ?? 100) >= 40 &&
+        iranStrategicScore(snap, map).parts.deterrent! > 0,
       decidesAtEnd: true,
       progress: Math.round(Math.min(streakPct, nuclearPct)),
       stats: { streak, turns, best: Math.round(best), threshold },
     });
   }
 
-  // 2. No occupation — satisfied unless the US reaches the occupation state.
+  // 2. Strategic endurance — no occupation is necessary but not sufficient.
+  //    Iran must also hold the dimensions that make survival a result.
   {
     const held = occupiedIranianNodes(snap, map);
     const streak = m.maxOccupationStreak;
     const nodes = v.occupation.nodesRequired;
     const turns = v.occupation.turnsRequired;
+    const strategic = iranStrategicScore(snap, map);
+    const noOcc = 100 - Math.min(100, (streak / turns) * 100);
     paths.push({
       id: 'noOccupation',
-      satisfied: streak < turns,
+      satisfied: streak < turns && strategic.score >= IRAN_SCORE_THRESHOLD,
       decidesAtEnd: true,
-      progress: Math.round(100 - Math.min(100, (streak / turns) * 100)),
-      stats: { held, nodes, streak, turns },
+      progress: Math.round(Math.min(noOcc, (strategic.score / IRAN_SCORE_THRESHOLD) * 100)),
+      stats: { held, nodes, streak, turns, score: strategic.score, threshold: IRAN_SCORE_THRESHOLD },
     });
   }
 
@@ -209,7 +283,7 @@ const PATH_OUTCOME_TEXT: Record<VictoryPathId, string> = {
   regimeSurvival:
     'The campaign has ended. The regime is still standing and its nuclear complex was never pushed below the survival threshold — Iran outlasted the coalition.',
   noOccupation:
-    'The campaign has ended. American ground forces never held enough Iranian soil for long enough — there is no occupation, and the regime claims the field.',
+    'The campaign has ended. Iran avoided occupation and still held a credible deterrent, cohesive institutions and enough leverage to claim a strategic result.',
   oilShock:
     'The oil shock has arrived: with Hormuz strangled for turns on end the price index blew through the threshold and held. The coalition economies blinked first.',
   israeliDegradation:
@@ -254,6 +328,9 @@ export function checkOutcome(snap: GameSnapshot, map: TheaterMap): Outcome {
     };
   }
 
+  const iranScore = iranStrategicScore(snap, map).score;
+  const coalitionScore = coalitionStrategicScore(snap, map).score;
+
   // Immediate Iranian path wins (any player at the table).
   if (snap.victory) {
     const immediate = victoryPaths(snap, map).find(
@@ -277,12 +354,17 @@ export function checkOutcome(snap: GameSnapshot, map: TheaterMap): Outcome {
   if (snap.faction === 'usa') {
     const iranCeasefire =
       snap.meters.iranWarCost >= snap.meters.iranWarCostThreshold && bases >= 3 && !snap.pakistanTriggered;
-    if (iranCeasefire || (hardenedDown && snap.turn <= 30)) {
+    if (hardenedDown && coalitionScore >= COALITION_SCORE_THRESHOLD) {
       return {
         status: 'won',
-        outcome: hardenedDown
-          ? 'Iran’s hardened nuclear and missile complex is destroyed. The programme is set back a decade.'
-          : 'Iran accepted a ceasefire: its war cost passed the threshold while the Gulf basing network held.',
+        outcome:
+          'Iran’s hardened nuclear complex is destroyed, its launch force is broken, the basing network holds and Congress is still behind the war. The programme is set back a decade.',
+      };
+    }
+    if (iranCeasefire) {
+      return {
+        status: 'won',
+        outcome: 'Iran accepted a ceasefire: its war cost passed the threshold while the Gulf basing network held.',
       };
     }
     // Mirror of the Iran-player win below: the same world state must end the
@@ -338,30 +420,37 @@ export function checkOutcome(snap: GameSnapshot, map: TheaterMap): Outcome {
           'The American domestic consensus collapsed under casualties and prices. Congress forced a withdrawal — the regime outlasted the coalition.',
       };
     }
-    if (hardenedDown && snap.meters.hormuz < 20 && nodeState(snap, 'tehran').integrity < 30) {
-      return { status: 'lost', outcome: 'Production is destroyed, Hormuz is open and Tehran is in ruins. The regime cannot continue.' };
+    if (
+      hardenedDown &&
+      snap.meters.hormuz < 20 &&
+      (snap.iranDomestic?.stability ?? 100) < 25
+    ) {
+      return {
+        status: 'lost',
+        outcome:
+          'The nuclear complex is destroyed, Hormuz is open and Iran’s institutions have broken. The regime cannot continue.',
+      };
     }
   }
 
-  // Final-turn resolution: the four paths decide the campaign.
+  // Final-turn resolution: multidimensional scores, not a single path.
   if (snap.victory && snap.turn >= snap.maxTurns) {
-    const achieved = victoryPaths(snap, map).filter((p) => p.satisfied);
-    if (achieved.length > 0) {
-      const won = snap.faction === 'iran';
-      // The outcome text is a closed set so the presentation layer can translate
-      // every terminal state; which paths were achieved is surfaced separately
-      // in the objectives/scorecard rows.
+    if (snap.faction === 'iran') {
+      const achieved = victoryPaths(snap, map).some((p) => p.satisfied);
+      const won = achieved || iranScore >= IRAN_SCORE_THRESHOLD;
       return {
         status: won ? 'won' : 'lost',
-        outcome: PATH_OUTCOME_TEXT[achieved[0]!.id],
+        outcome: won
+          ? 'The campaign has ended. Iran preserved its government, a credible deterrent and enough regional and economic leverage to claim a strategic result.'
+          : 'The campaign has ended without a strategic result for Iran: its deterrent, cohesion or leverage fell short, whatever the map looked like.',
       };
     }
-    const won = snap.faction !== 'iran';
+    const won = coalitionScore >= COALITION_SCORE_THRESHOLD;
     return {
       status: won ? 'won' : 'lost',
       outcome: won
-        ? 'The campaign has ended. Iran holds none of its four victory paths: the regime is broken, Hormuz is open, and the nuclear programme is in ruins.'
-        : 'The campaign has ended. Iran holds none of its four victory paths: the regime survived on the map, but achieved nothing it set out to win.',
+        ? 'The campaign has ended with a coalition strategic result: the nuclear programme is set back, Iran’s launch force is reduced, access holds and domestic support endured.'
+        : 'The campaign has ended without a coalition strategic result: Iran still holds a deterrent or leverage, or the coalition’s access, costs or domestic support gave way.',
     };
   }
 

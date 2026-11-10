@@ -341,6 +341,20 @@ const OUTCOME_FA: Record<string, string> = {
     'کارزار به پایان رسید. رژیم همچنان پابرجاست و مجتمع هسته‌ای‌اش هرگز زیر آستانه بقا نرفت — ایران از ائتلاف فرسوده‌تر شد.',
   'The campaign has ended. American ground forces never held enough Iranian soil for long enough — there is no occupation, and the regime claims the field.':
     'کارزار به پایان رسید. نیروهای زمینی آمریکا هرگز به اندازه کافی خاک ایران را اشغال نکردند — اشغالی در کار نیست و رژیم میدان را از آن خود می‌داند.',
+  'The campaign has ended. Iran avoided occupation and still held a credible deterrent, cohesive institutions and enough leverage to claim a strategic result.':
+    'کارزار به پایان رسید. ایران از اشغال گریخت و همچنان بازدارندگی معتبر، نهادهای منسجم و اهرم کافی برای ادعای نتیجه‌ای راهبردی را در دست داشت.',
+  'Iran’s hardened nuclear complex is destroyed, its launch force is broken, the basing network holds and Congress is still behind the war. The programme is set back a decade.':
+    'مجتمع هسته‌ای سخت‌شده ایران نابود شد، نیروی پرتابی‌اش شکست، شبکه پایگاه‌ها پابرجاست و کنگره هنوز پشت جنگ است. برنامه یک دهه عقب افتاد.',
+  'The nuclear complex is destroyed, Hormuz is open and Iran’s institutions have broken. The regime cannot continue.':
+    'مجتمع هسته‌ای نابود شده، هرمز باز است و نهادهای ایران شکسته‌اند. رژیم نمی‌تواند ادامه دهد.',
+  'The campaign has ended. Iran preserved its government, a credible deterrent and enough regional and economic leverage to claim a strategic result.':
+    'کارزار به پایان رسید. ایران دولت خود، بازدارندگی معتبر و اهرم منطقه‌ای و اقتصادی کافی برای ادعای نتیجه‌ای راهبردی را حفظ کرد.',
+  'The campaign has ended without a strategic result for Iran: its deterrent, cohesion or leverage fell short, whatever the map looked like.':
+    'کارزار بدون نتیجه راهبردی برای ایران پایان یافت: بازدارندگی، انسجام یا اهرم آن کافی نبود، هر چه نقشه نشان می‌داد.',
+  'The campaign has ended with a coalition strategic result: the nuclear programme is set back, Iran’s launch force is reduced, access holds and domestic support endured.':
+    'کارزار با نتیجه راهبردی ائتلاف پایان یافت: برنامه هسته‌ای عقب افتاد، نیروی پرتابی ایران کاهش یافت، دسترسی پابرجا ماند و حمایت داخلی دوام آورد.',
+  'The campaign has ended without a coalition strategic result: Iran still holds a deterrent or leverage, or the coalition’s access, costs or domestic support gave way.':
+    'کارزار بدون نتیجه راهبردی ائتلاف پایان یافت: ایران همچنان بازدارندگی یا اهرم دارد، یا دسترسی، هزینه‌ها یا حمایت داخلی ائتلاف از دست رفت.',
   'The oil shock has arrived: with Hormuz strangled for turns on end the price index blew through the threshold and held. The coalition economies blinked first.':
     'شوک نفتی فرا رسید: با خفگی چندین‌نوبتی هرمز، شاخص قیمت از آستانه گذشت و بر جای ماند. اقتصادهای ائتلاف زودتر پلک زدند.',
   "Israel's offensive air arm has been worn down past the breaking point — too few squadrons remain combat-ready. Iran has degraded the coalition's sharpest sword.":
