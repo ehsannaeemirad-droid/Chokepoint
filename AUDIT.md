@@ -606,3 +606,35 @@ Gaps: no Israeli domestic panel (reserve strain, civilian disruption, stock
 depletion are folded into existing meters); Iran's new dimensions are not yet
 shown in the UI; negotiating position is computed but not consumed by the
 talks state machine.
+
+## 17. Phase 2 item 11 — victory evaluation
+
+Commit: `feat: decide victory on strategic dimensions, not single paths`.
+
+- `iranStrategicScore` (0-100) combines retained deterrent (20), institutional
+  stability (20), economic resilience (10), costs imposed (up to 25), regional
+  leverage (15) and negotiating position (10). `coalitionStrategicScore`
+  combines nuclear damage (up to 25), threat reduction (20), base access (15),
+  congressional support (15), Iranian war cost (15) and US political will (10).
+- The automatic `noOccupation` path is gone: no occupation is necessary but not
+  sufficient, because the path now also requires an Iranian score of 55. The
+  final-turn Iranian win requires a satisfied path or score >= 55. Regime
+  survival additionally requires stability >= 40 and a retained deterrent.
+- Destroying all three nuclear sites no longer wins by itself. It is 25 points
+  of the coalition score, and the coalition wins at the bell at 60; a stalemate
+  reads as a defeat for the coalition player. The final-turn outcome strings
+  were replaced with dimension-based ones and all eight new outcomes were added
+  to the Persian outcome map.
+- Tests: `victory.test.ts` now asserts that no-occupation alone fails, that a
+  strategic result wins, that a stalemate is not a coalition win, and that a
+  coalition win needs nuclear, threat, access, cost and domestic dimensions
+  together. `log.test.ts` still passes because every new outcome has a Persian
+  rendering.
+
+Verification: `tsc` exit 0, 30 files / 246 tests passed, `build` exit 0.
+
+Gaps: the US war-cost ceasefire condition (`iranWarCost >= threshold` while the
+basing network holds) remains a single-dimension immediate win; it should be
+folded into the coalition score next. The `noOccupation` path id is retained
+for save/objective compatibility although its meaning is now strategic
+endurance, and the objectives panel copy still says "no occupation".
