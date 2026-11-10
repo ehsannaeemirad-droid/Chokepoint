@@ -714,3 +714,35 @@ Verification: `tsc` exit 0, 32 files / 258 tests passed, `build` exit 0.
 
 Remaining Phase 3 tasks: multi-seed distributions after tuning political-will
 loss, and surfacing doctrine selection to the player.
+
+## 20. Phase 3 — per-raid political impact
+
+Commit: `fix: count political consequences once per raid`.
+
+- The Phase 3 defensive runs exposed the cause of the early US collapse:
+  `recordImpact` was called inside `resolveIncoming`'s per-munition loop. One
+  twelve-drone raid on Al Udeid therefore applied -24 political will, twelve
+  casualty events and twelve escalation increments. Integrity damage and
+  Iranian war cost remain per munition; political consequences, host threat,
+  casualties, escalation and war-cost bookkeeping for the raid are now applied
+  once after its impacts are counted.
+- The simulation's defensive policy no longer buys the 6-will airlift every
+  turn; it airlifts only when will ≥ 30 and US interceptors < 100.
+
+Post-fix distributions with the same 3 seeds (11/22/33):
+
+| Policy | USA result | Political will at end |
+|---|---|---|
+| strike only | lost 30, lost 30, lost 17 | 34, 26, 16 |
+| defensive | lost 30, lost 30, lost 25 | 30, 22, 18 |
+
+The USA now generally reaches the bell; it loses on the coalition score
+because a one-strike-per-turn player cannot reduce the nuclear programme and
+the launch force enough. That is a policy limit, not an early collapse.
+
+Verification: `tsc` exit 0, 33 files / 259 tests passed, `build` exit 0. New
+`politicalImpact.test.ts` guards the one-raid/one-political-event rule.
+
+Remaining Phase 3 work: player-selectable doctrines, and a player policy that
+trades strikes between the nuclear programme and launchers to test the
+coalition score itself.
