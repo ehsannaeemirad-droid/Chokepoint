@@ -16,6 +16,16 @@ import { iranLaunchPressure, initiativeCfg, israelPackages } from '../politics/i
 import { addIranWarCost, nodeImpactCount, setHostStatus } from '../politics/politics';
 import { runTree, type ActionNode, type AiContext, type ConditionNode, type TreeNode } from './tree';
 import { applyOrder, validateOrder } from '../core/engine';
+import { isSeaHex, minefields } from '../core/maritime';
+import {
+  belowReserve,
+  coalitionTargetScore,
+  doctrineFor,
+  iranTargetScore,
+  spendableStock,
+  wantsMaritime,
+  type DoctrineProfile,
+} from './doctrine';
 
 const TREES = treeData as unknown as Record<string, TreeNode>;
 
@@ -183,29 +193,43 @@ function houthiAttack(ctx: AiContext): boolean {
   return fired > 0;
 }
 
-function iranTargets(ctx: AiContext, unit: { col: number; row: number; typeId: string }) {
+/**
+ * Iranian target list, scored by faction objectives and doctrine rather than a
+ * fixed weight table. Airbases and ports matter because they sustain the
+ * coalition; cities are a deliberate escalation cost.
+ */
+function iranTargets(
+  ctx: AiContext,
+  unit: { col: number; row: number; typeId: string },
+  doctrine: DoctrineProfile,
+) {
   const range = unitType(unit.typeId).rng;
   const candidates: Array<{ col: number; row: number; nodeId?: string; weight: number; label: string }> = [];
-  const push = (nodeId: string, weight: number) => {
-    const hex = ctx.map.nodeHexOf(nodeId);
-    if (!hex) return;
-    if (hexDistance({ col: unit.col, row: unit.row }, hex) > range) return;
-    const node = ctx.map.nodeById.get(nodeId);
-    candidates.push({ col: hex.col, row: hex.row, nodeId, weight, label: node?.name ?? nodeId });
-  };
-  push('al_udeid', 3);
-  push('al_dhafra', 3);
-  push('ali_al_salem', 3);
-  push('nsa_bahrain', 2);
-  push('prince_sultan', 2);
-  push('tel_aviv', 2);
-  push('jerusalem', 2);
-  push('abqaiq', 1);
-  push('ras_tanura', 1);
+
+  for (const node of ctx.map.nodeById.values()) {
+    const defender = defenderOfNode(node);
+    if (defender !== 'usa' && defender !== 'israel' && node.host !== 'saudi') continue;
+    const hex = ctx.map.nodeHexOf(node.id);
+    if (!hex) continue;
+    if (hexDistance({ col: unit.col, row: unit.row }, hex) > range) continue;
+    if (nodeState(ctx.snap, node.id).integrity <= 0) continue;
+    const state = nodeState(ctx.snap, node.id);
+    // A wrecked facility is worth less: expected damage falls with integrity,
+    // so the AI spreads its salvos instead of overkilling one airbase.
+    const health = 0.35 + 0.65 * (state.integrity / Math.max(1, state.maxIntegrity));
+    const weight = Math.round(iranTargetScore(node, doctrine) * health * 10) / 10;
+    if (weight <= 0) continue;
+    candidates.push({ col: hex.col, row: hex.row, nodeId: node.id, weight, label: node.name });
+  }
 
   const csg = ctx.snap.units.find((u) => u.typeId === 'csg');
   if (csg && hexDistance({ col: unit.col, row: unit.row }, { col: csg.col, row: csg.row }) <= range) {
-    candidates.push({ col: csg.col, row: csg.row, weight: 3, label: 'US carrier strike group' });
+    candidates.push({
+      col: csg.col,
+      row: csg.row,
+      weight: 4 * (doctrine.targetBias.naval ?? 1),
+      label: 'US carrier strike group',
+    });
   }
   return candidates;
 }
@@ -216,11 +240,19 @@ function iranSalvo(ctx: AiContext): boolean {
   );
   if (launchers.length === 0) return false;
 
+  const doctrine = doctrineFor('iran', ctx.snap.scenarioId);
+  const firingDoctrine = doctrine;
+  const usedTargets = new Set<string>();
   let fired = 0;
-  const attempts = 2;
+  // Only a saturation doctrine spends the second salvo slot; other Iranian
+  // doctrines keep a launcher in reserve and keep the campaign from ending in
+  // a single week of missile fire.
+  const attempts = firingDoctrine.id === 'saturation' ? 2 : 1;
   for (let a = 0; a < attempts; a++) {
     const unit = launchers[Math.floor(ctx.rng() * launchers.length)]!;
-    const candidates = iranTargets(ctx, unit);
+    const candidates = iranTargets(ctx, unit, firingDoctrine).filter(
+      (c) => !c.nodeId || !usedTargets.has(c.nodeId),
+    );
     if (candidates.length === 0) continue;
     const total = candidates.reduce((s, c) => s + c.weight, 0);
     let roll = ctx.rng() * total;
@@ -236,43 +268,34 @@ function iranSalvo(ctx: AiContext): boolean {
     // Salvos draw on the same mated-round stock and launcher budget the player
     // uses; the logged count is what was actually fired, not what was wanted.
     const salvos: SalvoSpecLike[] = [];
-    if (ctx.snap.iran.rounds.drone > 0) {
-      const want = Math.min(ctx.snap.iran.rounds.drone, 3 + Math.floor(ctx.rng() * 4));
+    const stock = ctx.snap.iran.rounds;
+    const scale = firingDoctrine.salvoScale;
+    if (stock.drone > 0) {
+      const want = Math.min(spendableStock(stock.drone, firingDoctrine), Math.round((3 + ctx.rng() * 4) * scale));
       const count = spendIranRounds(ctx.snap, 'drone', want);
       if (count > 0) salvos.push({ threat: 'drone', damage: 3, count, label: 'Shahed one-way attack drones' });
     }
-    if (ctx.snap.iran.rounds.khorramshahr > 0 && ctx.rng() < 0.55) {
-      const want = Math.min(ctx.snap.iran.rounds.khorramshahr, 1 + Math.floor(ctx.rng() * 2));
+    if (stock.khorramshahr > 0 && ctx.rng() < 0.55) {
+      const want = Math.min(
+        spendableStock(stock.khorramshahr, firingDoctrine),
+        Math.max(1, Math.round((1 + ctx.rng() * 2) * scale)),
+      );
       const count = spendIranRounds(ctx.snap, 'khorramshahr', want);
       if (count > 0) salvos.push({ threat: 'ballistic', damage: 8, count, label: 'Khorramshahr ballistic missiles' });
-    } else if (ctx.snap.iran.rounds.fateh > 0) {
-      const want = Math.min(ctx.snap.iran.rounds.fateh, 2 + Math.floor(ctx.rng() * 2));
+    } else if (stock.fateh > 0) {
+      const want = Math.min(
+        spendableStock(stock.fateh, firingDoctrine),
+        Math.max(1, Math.round((2 + ctx.rng() * 2) * scale)),
+      );
       const count = spendIranRounds(ctx.snap, 'fateh', want);
       if (count > 0) salvos.push({ threat: 'ballistic', damage: 5, count, label: 'Fateh-110 ballistic missiles' });
     }
-    if (ctx.snap.iran.rounds.fattah > 0 && ctx.rng() < 0.18) {
-      const count = spendIranRounds(ctx.snap, 'fattah', 1);
+    if (stock.fattah > 0 && ctx.rng() < 0.18) {
+      const count = spendIranRounds(ctx.snap, 'fattah', Math.min(1, spendableStock(stock.fattah, firingDoctrine)));
       if (count > 0) salvos.push({ threat: 'hypersonic', damage: 10, count, label: 'Fattah hypersonic missile' });
     }
-    // Mine-laying now goes through the same order pipeline the player uses:
-    // validate, then apply. No hidden stock decrement.
-    if (ctx.snap.iran.mines > 0 && ctx.rng() < 0.35) {
-      const miner = ctx.snap.units.find((u) => u.faction === 'iran' && u.typeId === 'mine_layer');
-      const hormuz = ctx.map.nodeHexOf('hormuz');
-      if (miner && hormuz) {
-        const order = {
-          kind: 'mine' as const,
-          unitUid: miner.uid,
-          col: hormuz.col,
-          row: hormuz.row,
-          count: 1,
-        };
-        if (validateOrder(ctx.snap, ctx.map, order).ok) {
-          applyOrder(ctx.snap, ctx.map, order, ctx.rng, ctx.events);
-        }
-      }
-    }
     if (salvos.length === 0) continue;
+    if (choice.nodeId) usedTargets.add(choice.nodeId);
 
     ctx.events.push({
       text: `Iran launched ${salvos.reduce((n, s) => n + s.count, 0)} munitions at ${choice.label}.`,
@@ -300,6 +323,74 @@ function iranSalvo(ctx: AiContext): boolean {
   return fired > 0;
 }
 
+/**
+ * Iranian maritime action: lay a field inside the chokepoint approach, or move
+ * the mine group toward it first. Uses the same validate/apply pipeline as the
+ * player, so no hidden mines appear.
+ */
+function iranMaritime(ctx: AiContext, doctrine: DoctrineProfile): boolean {
+  if (!wantsMaritime(ctx.snap, doctrine)) return false;
+  const miner = ctx.snap.units.find((u) => u.faction === 'iran' && u.typeId === 'mine_layer' && u.cooldown === 0);
+  const hormuz = ctx.map.nodeHexOf('hormuz');
+  if (!miner || !hormuz) return false;
+  if (ctx.snap.iran.mines <= 0) return false;
+  if (ctx.rng() >= clamp(0.55 * doctrine.mineBias, 0, 0.95)) return false;
+
+  // The chokepoint marker itself may sit on a land hex, so search the water
+  // around it: any sea hex inside the chokepoint approach counts.
+  const seaHexes: Array<{ col: number; row: number }> = [];
+  for (let col = hormuz.col - 2; col <= hormuz.col + 2; col++) {
+    for (let row = hormuz.row - 2; row <= hormuz.row + 2; row++) {
+      const d = hexDistance(hormuz, { col, row });
+      if (d > 4) continue;
+      if (!isSeaHex(ctx.map, col, row)) continue;
+      seaHexes.push({ col, row });
+    }
+  }
+  const rng = unitType(miner.typeId).rng;
+  const layHex = seaHexes.find(
+    (h) => hexDistance({ col: miner.col, row: miner.row }, h) <= rng && !(ctx.snap.minefields?.[`${h.col},${h.row}`]?.mines),
+  );
+  if (layHex) {
+    const order = { kind: 'mine' as const, unitUid: miner.uid, col: layHex.col, row: layHex.row, count: 2 };
+    if (validateOrder(ctx.snap, ctx.map, order, undefined, 'iran').ok) {
+      applyOrder(ctx.snap, ctx.map, order, ctx.rng, ctx.events);
+      ctx.events.push({
+        text: 'Iranian mine warfare group laid a field in the Hormuz approach.',
+        tone: 'warn',
+        faction: 'iran',
+        focus: layHex,
+      });
+      return true;
+    }
+  }
+
+  // Not in range: close the distance to the nearest approach hex.
+  const dest = seaHexes
+    .map((h) => ({ h, d: hexDistance({ col: miner.col, row: miner.row }, h) }))
+    .sort((a, b) => a.d - b.d)[0]?.h;
+  if (!dest) return false;
+  const step = { kind: 'move' as const, unitUid: miner.uid, col: miner.col, row: miner.row };
+  const maxMove = Math.min(unitType(miner.typeId).mov, Math.max(1, hexDistance({ col: miner.col, row: miner.row }, dest)));
+  for (let i = 0; i < maxMove; i++) {
+    if (step.row > dest.row) step.row -= 1;
+    else if (step.row < dest.row) step.row += 1;
+    else if (step.col > dest.col) step.col -= 1;
+    else if (step.col < dest.col) step.col += 1;
+  }
+  if (validateOrder(ctx.snap, ctx.map, step, undefined, 'iran').ok) {
+    applyOrder(ctx.snap, ctx.map, step, ctx.rng, ctx.events);
+    ctx.events.push({
+      text: 'Iranian mine warfare group is moving toward the chokepoint.',
+      tone: 'info',
+      faction: 'iran',
+      focus: { col: step.col, row: step.row },
+    });
+    return true;
+  }
+  return false;
+}
+
 function iranProduce(ctx: AiContext): boolean {
   const stock = ctx.snap.iran;
   stock.resources += 10;
@@ -316,7 +407,9 @@ function iranProduce(ctx: AiContext): boolean {
     deliverMatedRounds(ctx.snap, 'drone', Math.round(2 * scale));
     produced += 1;
   }
-  while (stock.resources >= 20 && produced < 6) {
+  const doctrine = doctrineFor('iran', ctx.snap.scenarioId);
+  const buildCap = doctrine.id === 'ammoConservation' ? 2 : 6;
+  while (stock.resources >= 20 && produced < buildCap) {
     stock.resources -= 5;
     deliverMatedRounds(ctx.snap, 'drone', 4);
     produced++;
@@ -383,19 +476,84 @@ function tutorialIran(ctx: AiContext): void {
  * Washington constrains Jerusalem, Israel flies no offensive sorties; above
  * the aggressive threshold (or when approved) it flies a second package.
  */
+/** Coalition target list: every live Iranian node, ordered by doctrine score. */
+export function coalitionTargets(
+  ctx: AiContext,
+  faction: 'usa' | 'israel',
+  doctrine: DoctrineProfile,
+): Array<{ id: string; score: number; col: number; row: number }> {
+  const out: Array<{ id: string; score: number; col: number; row: number }> = [];
+  for (const node of ctx.map.nodeById.values()) {
+    if (node.host !== 'iran') continue;
+    if (nodeState(ctx.snap, node.id).integrity <= 0) continue;
+    const hex = ctx.map.nodeHexOf(node.id);
+    if (!hex) continue;
+    out.push({ id: node.id, score: coalitionTargetScore(faction, node, doctrine), col: hex.col, row: hex.row });
+  }
+  return out.sort((a, b) => b.score - a.score || a.id.localeCompare(b.id));
+}
+
+/** Coalition maritime work: clear located minefields, otherwise escort shipping. */
+function coalitionMaritime(ctx: AiContext, doctrine: DoctrineProfile): number {
+  if (!wantsMaritime(ctx.snap, doctrine)) return 0;
+  const ships = ctx.snap.units.filter(
+    (u) =>
+      u.faction === ctx.faction &&
+      unitType(u.typeId).category === 'naval' &&
+      u.cooldown === 0 &&
+      u.magazine > 0,
+  );
+  if (ships.length === 0) return 0;
+
+  const fields = minefields(ctx.snap);
+  for (const [key, field] of Object.entries(fields)) {
+    if (!field.detected || field.mines <= 0) continue;
+    const [col, row] = key.split(',').map(Number);
+    if (!Number.isFinite(col) || !Number.isFinite(row)) continue;
+    for (const ship of ships) {
+      const order = { kind: 'clear' as const, unitUid: ship.uid, col, row };
+      if (!validateOrder(ctx.snap, ctx.map, order, undefined, ctx.faction).ok) continue;
+      applyOrder(ctx.snap, ctx.map, order, ctx.rng, ctx.events);
+      ctx.events.push({
+        text: `${ctx.faction === 'usa' ? 'US' : 'Israeli'} mine clearance is under way at ${col},${row}.`,
+        tone: 'info',
+        faction: ctx.faction,
+        focus: { col, row },
+      });
+      return 1;
+    }
+  }
+
+  if ((ctx.snap.escortCoverage ?? 0) < 1) {
+    const ship = ships.find((u) => u.magazine > 0) ?? ships[0]!;
+    const order = { kind: 'escort' as const, unitUid: ship.uid };
+    if (validateOrder(ctx.snap, ctx.map, order, undefined, ctx.faction).ok) {
+      applyOrder(ctx.snap, ctx.map, order, ctx.rng, ctx.events);
+      ctx.events.push({
+        text: 'Coalition warships begin escorting shipping through the Gulf.',
+        tone: 'info',
+        faction: ctx.faction,
+      });
+      return 1;
+    }
+  }
+  return 0;
+}
+
 function coalitionAi(ctx: AiContext, faction: 'usa' | 'israel'): boolean {
+  const doctrine = doctrineFor(faction, ctx.snap.scenarioId);
   const aircraft = ctx.snap.units.filter(
     (u) =>
       u.faction === faction &&
       unitType(u.typeId).category === 'air' &&
-      u.magazine > 0 &&
+      !belowReserve(u.magazine, doctrine) &&
       u.cooldown === 0,
   );
   if (aircraft.length === 0) return false;
 
-  let packages = 1;
+  let packages = doctrine.maxPackages;
   if (faction === 'israel') {
-    packages = israelPackages(ctx.snap);
+    packages = Math.min(packages, israelPackages(ctx.snap));
     if (packages <= 0) {
       ctx.events.push({
         text: 'Israeli aircraft stand down from offensive missions under the US constraint.',
@@ -406,30 +564,27 @@ function coalitionAi(ctx: AiContext, faction: 'usa' | 'israel'): boolean {
     }
   }
 
-  const targetIds = ['natanz', 'fordow', 'isfahan', 'bandar_abbas']
-    .map((id) => ({ id, integrity: nodeState(ctx.snap, id).integrity }))
-    .filter((t) => t.integrity > 0)
-    .sort((a, b) => b.integrity - a.integrity);
-
+  // Re-read the target list before each package: availability changes as soon
+  // as a strike resolves, and a destroyed site must not be attacked again.
+  const targets = coalitionTargets(ctx, faction, doctrine);
   let flown = 0;
-  for (let attempt = 0; attempt < packages; attempt++) {
+  for (let attempt = 0; attempt < packages && flown < doctrine.strikeCap; attempt++) {
     let struck = false;
-    for (const target of targetIds) {
+    for (const target of targets) {
       if (struck) break;
-      const hex = ctx.map.nodeHexOf(target.id);
-      if (!hex) continue;
+      if (nodeState(ctx.snap, target.id).integrity <= 0) continue;
       for (const plane of aircraft) {
         if (plane.magazine <= 0 || plane.cooldown > 0) continue;
-        const check = validateStrike(ctx.snap, ctx.map, plane, hex.col, hex.row, target.id);
+        const check = validateStrike(ctx.snap, ctx.map, plane, target.col, target.row, target.id);
         if (!check.ok) continue;
-        if (hexDistance({ col: plane.col, row: plane.row }, hex) > strikeRange(ctx.snap, plane)) continue;
+        if (hexDistance({ col: plane.col, row: plane.row }, target) > strikeRange(ctx.snap, plane)) continue;
         ctx.events.push({
-          text: `${faction === 'usa' ? 'US' : 'Israeli'} aircraft launched against ${ctx.map.nodeById.get(target.id)?.name}.`,
+          text: `${faction === 'usa' ? 'US' : 'Israeli'} aircraft launched against ${ctx.map.nodeById.get(target.id)?.name} (doctrine: ${doctrine.label}).`,
           tone: 'info',
           faction,
-          focus: { col: hex.col, row: hex.row },
+          focus: { col: target.col, row: target.row },
         });
-        const result = resolveStrike(ctx.snap, ctx.map, plane, hex.col, hex.row, target.id, ctx.rng);
+        const result = resolveStrike(ctx.snap, ctx.map, plane, target.col, target.row, target.id, ctx.rng);
         ctx.events.push(...result.events);
         struck = true;
         flown++;
@@ -437,6 +592,9 @@ function coalitionAi(ctx: AiContext, faction: 'usa' | 'israel'): boolean {
       }
     }
   }
+
+  if (flown < doctrine.strikeCap) flown += coalitionMaritime(ctx, doctrine);
+
   if (packages > 1 && flown > 0) {
     const cfg = initiativeCfg(ctx.snap);
     ctx.events.push({
@@ -472,7 +630,12 @@ export function runAiPhase(snap: GameSnapshot, map: TheaterMap, events: ResolveE
     if (faction === 'houthi') evaluate(faction, ctx, 'houthi');
     else if (faction === 'iran') {
       if (snap.scenarioId === 'tutorial') tutorialIran(ctx);
-      else evaluate(faction, ctx, 'iranMilitary');
+      else {
+        // Maritime pressure is part of the Iranian plan, not a random rider on
+        // a missile salvo.
+        iranMaritime(ctx, doctrineFor('iran', snap.scenarioId));
+        evaluate(faction, ctx, 'iranMilitary');
+      }
     } else coalitionAi(ctx, faction);
   }
 

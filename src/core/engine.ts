@@ -57,7 +57,7 @@ import {
 } from '../politics/talks';
 import { BALANCE } from './config';
 import { factionRng } from './rng';
-import type { GameSnapshot, LogisticsConfig, Order, Reinforcement, ResolveEvent, UnitInstance } from './types';
+import type { FactionId, GameSnapshot, LogisticsConfig, Order, Reinforcement, ResolveEvent, UnitInstance } from './types';
 import {
   clamp,
   defenderOfNode,
@@ -246,8 +246,9 @@ export function validateOrder(
   map: TheaterMap,
   order: Order,
   reserved: OrderReservations = emptyReservations(),
+  actor?: FactionId,
 ): OrderCheck {
-  const permission = canPlayerOrder(snap, map, order);
+  const permission = canPlayerOrder(snap, map, order, actor);
   if (!permission.ok) return { ok: false, reason: permission.reason };
 
   switch (order.kind) {

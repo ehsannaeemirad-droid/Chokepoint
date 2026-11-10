@@ -7,7 +7,7 @@
  * the target is eligible. Every order kind is classified in `SCOPE`, so a new
  * kind fails compilation until it has a permission rule.
  */
-import type { GameSnapshot, Order } from './types';
+import type { FactionId, GameSnapshot, Order } from './types';
 import type { TheaterMap } from '../map/TheaterMap';
 import { unitType } from './world';
 import { cyberTargets } from '../combat/combat';
@@ -46,7 +46,12 @@ const COALITION = new Set(['usa', 'israel']);
 
 const STRIKE_FORBIDDEN = new Set(['defense', 'production', 'cyber']);
 
-export function canPlayerOrder(snap: GameSnapshot, map: TheaterMap, order: Order): OrderPermission {
+export function canPlayerOrder(
+  snap: GameSnapshot,
+  map: TheaterMap,
+  order: Order,
+  actor: FactionId = snap.faction,
+): OrderPermission {
   void map;
   const scope = SCOPE[order.kind];
 
@@ -64,7 +69,7 @@ export function canPlayerOrder(snap: GameSnapshot, map: TheaterMap, order: Order
   const unitOrder = order as Extract<Order, { unitUid: string }>;
   const unit = snap.units.find((u) => u.uid === unitOrder.unitUid);
   if (!unit) return { ok: false, code: 'unknown-unit', reason: 'Select one of your units' };
-  if (unit.faction !== snap.faction) {
+  if (unit.faction !== actor) {
     return {
       ok: false,
       code: 'not-your-unit',
