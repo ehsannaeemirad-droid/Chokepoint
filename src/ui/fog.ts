@@ -1,39 +1,24 @@
 /**
- * Phase 4: fog of war — a presentation-layer estimation module.
+ * Fog of war — a presentation-layer estimation module.
  *
  * The engine state is NEVER touched: every function here is read-only, and
  * every number it produces derives deterministically from (seed, turn, label)
- * so the same campaign always shows the same estimates — within a turn the
- * bands are stable, and a replay reproduces them exactly. Byte-identical
- * snapshot replays are unaffected because nothing here writes to `snap`.
- *
- * What is hidden, per the spec: the enemy's exact ammunition, launcher and
- * shelter-facility values. What is shown instead: an estimate band whose
- * width depends on the viewer's reconnaissance coverage:
- *   - `humint` — a friendly special-operations team within 6 hexes: ±8%
- *   - `isr`    — a friendly MQ-9 within 12 hexes: ±18%
- *   - `none`   — no recon coverage: ±35%
- *
- * Your own side's numbers are always exact. Victory-path progress stays
- * exact for every viewer (it is the scoreboard, not intelligence).
+ * so the same campaign always shows the same estimates. Coverage comes from
+ * `src/core/intel.ts`, so reconnaissance genuinely narrows a band, and a unit
+ * that has not been seen for several turns widens it again.
  */
 import type { FactionId, GameSnapshot } from '../core/types';
 import { defenderOfNode } from '../core/world';
-import { hexDistance } from '../map/hex';
+import { RECON_SPREAD, reconQuality, staleTurns, type ReconQuality } from '../core/intel';
 import type { TheaterMap } from '../map/TheaterMap';
 
-export type ReconQuality = 'humint' | 'isr' | 'none';
+export type { ReconQuality } from '../core/intel';
 
 export interface Estimate {
   lo: number;
   hi: number;
   quality: ReconQuality;
 }
-
-const SPREAD: Record<ReconQuality, number> = { humint: 0.08, isr: 0.18, none: 0.35 };
-
-const HUMINT_RANGE = 6;
-const ISR_RANGE = 12;
 
 /** Deterministic 0-1 hash of the campaign seed, the turn and a label. */
 export function fogHash(seed: number, turn: number, label: string): number {
@@ -48,25 +33,29 @@ export function fogHash(seed: number, turn: number, label: string): number {
 }
 
 /** Best reconnaissance coverage a viewer has over a hex. */
-export function reconAt(snap: GameSnapshot, viewer: FactionId, col: number, row: number): ReconQuality {
-  let best: ReconQuality = 'none';
-  for (const unit of snap.units) {
-    if (unit.faction !== viewer) continue;
-    const d = hexDistance({ col, row }, { col: unit.col, row: unit.row });
-    if (unit.typeId === 'sof' && d <= HUMINT_RANGE) return 'humint';
-    if (unit.typeId === 'mq9' && d <= ISR_RANGE && best === 'none') best = 'isr';
-  }
-  return best;
+export function reconAt(
+  snap: GameSnapshot,
+  viewer: FactionId,
+  col: number,
+  row: number,
+): ReconQuality {
+  return reconQuality(snap, viewer, col, row);
 }
 
 /**
- * Estimate band around `value`. The true value always lies inside [lo, hi]:
- * the centre is jittered by up to half the spread and the band is a full
- * spread wide. Zero stays an exact zero — destruction is observable.
+ * Estimate band around `value`. The centre is jittered by up to half the
+ * spread and the band is a full spread wide. `staleScale` widens the band for
+ * information that has not been refreshed.
  */
-export function estimate(value: number, snap: GameSnapshot, label: string, quality: ReconQuality): Estimate {
+export function estimate(
+  value: number,
+  snap: GameSnapshot,
+  label: string,
+  quality: ReconQuality,
+  staleScale = 1,
+): Estimate {
   if (value <= 0) return { lo: 0, hi: 0, quality };
-  const spread = SPREAD[quality];
+  const spread = RECON_SPREAD[quality] * staleScale;
   const jitter = (fogHash(snap.seed, snap.turn, label) - 0.5) * 2;
   const center = value * (1 + (jitter * spread) / 2);
   const width = value * spread;
@@ -98,11 +87,29 @@ export function nodeIntegrityEstimate(snap: GameSnapshot, map: TheaterMap, nodeI
 
 /**
  * Estimate for a unit's strength, or `null` when the unit belongs to the
- * viewer.
+ * viewer or has never been located. A unit without current coverage keeps a
+ * wider band, scaled by how long it has been out of sight.
  */
-export function unitStrengthEstimate(snap: GameSnapshot, unit: { faction: FactionId; uid: string; strength: number }): Estimate | null {
+export function unitStrengthEstimate(
+  snap: GameSnapshot,
+  unit: {
+    faction: FactionId;
+    uid: string;
+    strength: number;
+    col?: number;
+    row?: number;
+    lastSeen?: number;
+    revealed?: boolean;
+  },
+): Estimate | null {
   if (unit.faction === snap.faction) return null;
-  return estimate(unit.strength, snap, `unit:${unit.uid}`, 'none');
+  const quality =
+    unit.col === undefined || unit.row === undefined
+      ? 'none'
+      : reconAt(snap, snap.faction, unit.col, unit.row);
+  if (unit.revealed === false && quality === 'none') return null;
+  const staleScale = 1 + Math.min(3, staleTurns(snap, unit)) * 0.25;
+  return estimate(unit.strength, snap, `unit:${unit.uid}`, quality, staleScale);
 }
 
 /** Human-readable band, localised by the caller's template. */

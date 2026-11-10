@@ -139,6 +139,8 @@ export interface UnitInstance {
   magazine: number;
   cooldown: number;
   revealed: boolean;
+  /** Last turn the player-side viewer had eyes on this unit. */
+  lastSeen?: number;
   /** Turn until which SEAD suppresses this unit; absent means never suppressed. */
   suppressedUntilTurn?: number;
   name: string;

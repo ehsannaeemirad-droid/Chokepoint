@@ -183,6 +183,10 @@ const DICT = {
   'verdict.decisive-coalition': ['Decisive coalition political victory', 'پیروزی سیاسی قاطع ائتلاف'],
 
   'fog.band': ['{lo} (est.)', '{lo} (تخمینی)'],
+  'intel.state.unknown': ['Unknown', 'نامشخص'],
+  'intel.state.estimated': ['Estimated', 'تخمینی'],
+  'intel.state.identified': ['Identified', 'شناسایی‌شده'],
+  'intel.state.tracked': ['Tracked', 'ردیابی‌شده'],
   'tip.fog': [
     'Intelligence estimate. Recon coverage (MQ-9, special-operations teams) narrows the band.',
     'برآورد اطلاعاتی. پوشش شناسایی (ام‌کیو-۹، تیم‌های عملیات ویژه) دامنه را تنگ‌تر می‌کند.',

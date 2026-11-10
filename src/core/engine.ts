@@ -13,6 +13,7 @@ import { runAiPhase, runHostPostures } from '../ai/ai';
 import { maybeStartWar, readyReserves, regenerateUnderground } from './prewar';
 import { resolveCyber, resolveSabotage, resolveStrike, validateStrike } from '../combat/combat';
 import { canPlayerOrder } from './permissions';
+import { updateIntelligence } from './intel';
 import { addEscortCoverage, clearMines, isSeaHex, layMines, minefields, hexKey, MINE_SORTIE_MAX } from './maritime';
 import logisticsData from '../data/logistics.json';
 import { hexDistance } from '../map/hex';
@@ -820,6 +821,7 @@ function attritionPhase(
   }
 
   updateHosts(snap, map, events);
+  updateIntelligence(snap);
   updateChokepoints(snap, map);
   updateSuperpowers(snap, events);
   updateEscalation(snap, events);

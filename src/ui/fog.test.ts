@@ -107,6 +107,10 @@ describe('access rules', () => {
     const f15 = usa.snap.units.find((u) => u.faction === 'usa')!;
     const launcher = usa.snap.units.find((u) => u.faction === 'iran')!;
     expect(unitStrengthEstimate(usa.snap, f15)).toBeNull();
+    // Never located: the viewer gets no band at all, not a wide guess.
+    expect(unitStrengthEstimate(usa.snap, launcher)).toBeNull();
+    launcher.revealed = true;
+    launcher.lastSeen = usa.snap.turn;
     expect(unitStrengthEstimate(usa.snap, launcher)).not.toBeNull();
   });
 });

@@ -25,6 +25,7 @@ import {
 import { faLog, faOutcome } from '../i18n/log';
 import { TERRAIN } from '../map/terrain';
 import { bandLabel, nodeIntegrityEstimate, unitStrengthEstimate } from './fog';
+import { informationState } from '../core/intel';
 import { majorBaseState } from '../politics/politics';
 import { domesticCfg } from '../politics/domestic';
 import { escalationCfg } from '../politics/escalation';
@@ -891,16 +892,22 @@ export class Ui {
     if (!tile) return '';
     const node = tile.nodeId ? this.game.map.nodeById.get(tile.nodeId) : undefined;
     const terrain = TERRAIN[tile.terrain];
-    const units = this.game.unitsAt(col, row);
+    const units = this.game
+      .unitsAt(col, row)
+      .filter((u) => u.faction === this.game.snap.faction || u.revealed);
     const fa = getLang() === 'fa';
     const unitChips = units.length
       ? `<div class="hex-units">${units
           .map((u) => {
             const chipEst = unitStrengthEstimate(this.game.snap, u);
             const strengthText = chipEst ? t('fog.band', { lo: bandLabel(chipEst) }) : `${Math.round(u.strength)}%`;
+            const intel =
+              u.faction === this.game.snap.faction
+                ? ''
+                : ` · ${t(`intel.state.${informationState(this.game.snap, this.game.snap.faction, u)}`)}`;
             return u.faction === this.game.snap.faction
               ? `<button class="unit-chip ${u.faction}" data-action="select:${u.uid}">${unitLabel(u)} · ${strengthText}</button>`
-              : `<span class="unit-chip ${u.faction}" data-tip="${t('tip.fog')}">${unitLabel(u)} · ${strengthText}</span>`;
+              : `<span class="unit-chip ${u.faction}" data-tip="${t('tip.fog')}">${unitLabel(u)} · ${strengthText}${intel}</span>`;
           })
           .join('')}</div>`
       : '';
