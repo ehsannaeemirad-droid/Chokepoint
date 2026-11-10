@@ -572,3 +572,37 @@ Verification: `tsc` exit 0, 29 files / 240 tests passed, `build` exit 0.
 Gaps: Oman remains a neutral node with no mediator mechanic of its own (the
 talks channel is Qatar's); Egypt's Suez closure is not tied to its host threat,
 only to the Hormuz clock.
+
+## 16. Phase 2 item 10 — domestic politics and escalation
+
+Commit: `feat: model Iran's domestic politics beyond capital damage`.
+
+- `src/politics/iranDomestic.ts` adds the Iranian dimensions SPEC §24 lists:
+  stability, elite cohesion, IRGC cohesion, public dissatisfaction, economic
+  pressure, military credibility, leadership continuity and negotiating
+  position. They drift each turn toward targets derived from war cost, oil
+  price, leadership strikes, population impacts and nuclear-site damage, and
+  log when stability or cohesion crosses a threshold.
+- `regimeIntact` now gates on stability >= 25 and leadership strikes, not on
+  Tehran's integrity. Capital damage contributes at most -8 to the stability
+  target, so a flattened capital alone cannot end the regime — the explicit
+  §24 correction. The victory test was updated: Tehran falling keeps the streak;
+  low stability resets it.
+- Escalation is classified: `meters.nuclearFacilityStrikes` counts strikes on
+  nuclear-kind nodes, distinct from `meters.nuclearStrikes` (weapon use). A
+  conventional node leaves both untouched. This keeps a missile or port strike
+  from reading as nuclear escalation, and a nuclear-site strike from reading as
+  a nuclear release.
+- Tests: `src/politics/iranDomestic.test.ts` (5) cover bounded dimensions, the
+  no-Tehran-collapse rule, multi-turn erosion, institutional regime survival,
+  and the nuclear/conventional split.
+- The US domestic system (congress, economy, restrictions, casualty reports)
+  was already multidimensional and is unchanged; Israel's domestic dimensions
+  remain represented only through the initiative track and US meters.
+
+Verification: `tsc` exit 0, 30 files / 245 tests passed, `build` exit 0.
+
+Gaps: no Israeli domestic panel (reserve strain, civilian disruption, stock
+depletion are folded into existing meters); Iran's new dimensions are not yet
+shown in the UI; negotiating position is computed but not consumed by the
+talks state machine.
