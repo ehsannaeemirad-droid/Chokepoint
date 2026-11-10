@@ -16,7 +16,7 @@ import type { FactionId, GameSnapshot, ThreatClass, UnitInstance } from '../core
 import { clamp, unitType } from '../core/world';
 import { hexDistance } from '../map/hex';
 import type { TheaterMap } from '../map/TheaterMap';
-import { maxSuperpowerTier, purchaseCostOfInterceptors } from '../politics/politics';
+import { purchaseCostOfInterceptors, russiaTier } from '../politics/politics';
 
 export type AdLayerName = 'long' | 'medium' | 'point';
 
@@ -84,8 +84,8 @@ export function detectRaid(
 
   if (defender === 'iran' || defender === 'houthi') {
     // Iran's national system is abstract: fewer named sensors, more depth.
-    chance = 0.55 + (maxSuperpowerTier(snap) >= 2 ? 0.2 : 0);
-    if (maxSuperpowerTier(snap) >= 2) sources.push('Russian-supplied radar');
+    chance = 0.55 + (russiaTier(snap) >= 2 ? 0.2 : 0);
+    if (russiaTier(snap) >= 2) sources.push('Russian-supplied radar');
   }
 
   for (const unit of snap.units) {
@@ -134,7 +134,7 @@ export function defenceLayers(
   if (nodeId && nodeSuppressed(snap, nodeId)) return [];
 
   if (defender === 'iran' || defender === 'houthi') {
-    const shield = maxSuperpowerTier(snap) >= 2 ? 0.06 : 0;
+    const shield = russiaTier(snap) >= 2 ? 0.06 : russiaTier(snap) >= 1 ? 0.03 : 0;
     return [
       { layer: 'long', label: 'Iranian long-range SAM', probability: 0.18 + shield, cost: 0 },
       { layer: 'medium', label: 'Iranian medium-range SAM', probability: 0.22 + shield, cost: 0 },

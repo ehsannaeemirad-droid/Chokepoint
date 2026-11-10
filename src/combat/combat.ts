@@ -14,7 +14,7 @@ import { addCasualties, restrictionBlocksStrike } from '../politics/domestic';
 import { roeBlocksStrike, roeDamageMultiplier } from '../politics/roe';
 import {
   addIranWarCost,
-  maxSuperpowerTier,
+  russiaTier,
   noFlyZoneActive,
   recordImpact,
   strikeRangeModifier,
@@ -64,7 +64,7 @@ export function bestDefence(
   // Iran has no interceptor economy: layered AD is abstracted as an intrinsic
   // roll, and great-power resupply makes it meaningfully better.
   if (defender === 'iran') {
-    const tier = maxSuperpowerTier(snap);
+    const tier = russiaTier(snap);
     const shielded = tier >= 2 ? 0.08 : 0;
     return {
       probability: (hardenedTarget ? 0.45 : 0.3) + shielded,
@@ -285,8 +285,9 @@ export function validateStrike(
   // Great-power red lines. Russia and China do not fight, but they can forbid.
   const coalition = unit.faction === 'usa' || unit.faction === 'israel';
   if (coalition && node?.host === 'iran') {
-    if (noFlyZoneActive(snap)) {
-      return { ok: false, reason: 'Russia and China have imposed a no-fly zone over Iran' };
+    // The no-fly zone restricts aircraft, not sea-launched missiles.
+    if (noFlyZoneActive(snap) && def.category !== 'naval') {
+      return { ok: false, reason: 'Russia has imposed a no-fly zone over Iran' };
     }
     if (node.kind === 'urban' && snap.resources.politicalWill < BALANCE.congressCityStrikeWill) {
       return {
