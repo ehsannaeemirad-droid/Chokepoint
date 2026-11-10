@@ -746,3 +746,41 @@ Verification: `tsc` exit 0, 33 files / 259 tests passed, `build` exit 0. New
 Remaining Phase 3 work: player-selectable doctrines, and a player policy that
 trades strikes between the nuclear programme and launchers to test the
 coalition score itself.
+
+## 21. Phase 4 — turn review, strategic panel, mobile/accessibility
+
+Commit: `feat: pre-resolution turn review and organised strategic panel`.
+
+- **Turn review (SPEC §32).** END TURN now opens a review modal instead of
+  resolving immediately. `src/ui/review.ts` is a pure builder over the
+  snapshot: each queued order with validation state and removal button,
+  committed resources from `orderReservations`, standing threat warnings
+  (political will, regime stability, Hormuz, interceptors, located mines,
+  final turn), and consequences split into guaranteed / likely / uncertain
+  from the existing impact preview. Resolve executes the reviewed turn; Back
+  returns to planning.
+- **Turn reports (SPEC §34).** The resolution stream inserts category headings
+  (air defence, maritime operations, logistics and production, political and
+  diplomatic, missile and drone activity, strategic consequences, other) while
+  preserving event order. Grouping is deterministic and tested.
+- **Strategic panel (SPEC §33).** The panel is now five native `<details>`
+  groups: Situation (open by default, with basing, hosts and war cost),
+  Military, Economy and logistics, Diplomacy, and Politics and escalation.
+  Existing content and actions are unchanged.
+- **Accessibility/mobile (SPEC §35).** The modal has `role="dialog"` /
+  `aria-modal`, moves focus to the first control and restores it on close.
+  Review actions are 44px, the footer stacks below 380px, the body scrolls,
+  and a global `:focus-visible` outline was added. Safe-area variables were
+  already in use and are retained.
+- Shared faction/unit labels moved to `src/ui/labels.ts` so the pure review
+  model does not import the DOM layer.
+
+Verification: `tsc` exit 0, 34 files / 264 tests passed, `build` exit 0.
+
+Limitations:
+- The UI was not opened in a browser or device emulator for this change, so
+  visual layout, focus behaviour and Persian RTL rendering remain unverified.
+- Some consequence lines still come from `previewOrderImpact` in English while
+  the review chrome is bilingual; that text needs a localisation pass.
+- Faction/scenario briefings and a full translation sweep were not part of
+  this pass; the existing quick-start coach and objectives strip remain.
