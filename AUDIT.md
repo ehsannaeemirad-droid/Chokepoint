@@ -488,3 +488,29 @@ attacks previously bypassed ammunition entirely. Each launch now spends one
 magazine point from the firing unit and an empty launcher cannot fire, matching
 §20's "other maritime actors" rule. Test added: six resolved turns leave no
 Houthi magazine negative and never increase the total.
+
+## 13. Phase 2 item 7 — transport modes
+
+Commit: `feat: split logistics into airlift, sealift and naval modes`.
+
+- `Reinforcement.mode` is `airlift | sealift | naval`, set from
+  `logistics.json` and backfilled by `transportModeOf` for older saves.
+- `transportAccess` gates delivery: airlift needs one of the six coalition
+  airbases above 25 integrity; sealift needs Haifa, Aden or Basra above 25;
+  naval needs Suez open or Hormuz below 85.
+- Delay accrual is mode-specific. Hormuz risk (above `interdictHormuz`) delays
+  sealift and naval only. Lack of a receiving airbase/port delays any mode.
+  Suez adds two turns to sealift/naval transit but never to airlift.
+- `tankerSorties` is live: one per airlift package, one per Israel airlift, and
+  validation reserves them per order. Regenerates one per turn, capped at 8.
+- Due shipments are held with a logged reason when `transportAccess` fails
+  instead of landing.
+- Tests: `src/core/transport.test.ts` (6) cover mode recording, old-save
+  fallback, tanker cost, airlift immunity to strait risk vs sealift delay,
+  tanker rejection, and airbase-denied holding. Transit tests now use a sealift
+  package because that is the mode the strait actually affects.
+
+Verification: `tsc` exit 0, 27 files / 231 tests passed, `build` exit 0.
+
+Gaps: the reinforcement panel shows ETA but not the transport mode; Suez remains
+a scenario-level boolean rather than a node that can be attacked.
