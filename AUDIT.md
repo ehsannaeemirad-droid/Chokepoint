@@ -909,3 +909,42 @@ Limitations:
 - Enemy pressure shows the existing enemy row only; it does not forecast the
   next turn.
 - No browser or RTL visual pass.
+
+## 26. Phase 5 — later-war scenarios and versioned replay playback
+
+Commits: `feat: add later-war scenarios and versioned replay playback`.
+
+- **Scenarios.** `src/data/lateScenarios.ts` derives three distinct starts from
+  the campaign baseline and overrides date, deployment, stocks, infrastructure,
+  host pressure, resources, meters and turn budget:
+  Opening Campaign (28 Feb 2026, 30 turns), Attrition Campaign (24 Mar 2026,
+  20 turns) and Renewed Conflict (15 Sep 2026, 24 turns). The pre-war campaign
+  remains undepleted; the later starts carry damage, depletion or reconstitution.
+- **Versions.** `src/core/versions.ts` defines rules 1.0.0, data 1.0.0,
+  scenario version 1 and replay format 5. Snapshots stamp the versions and keep
+  a per-turn `history` with orders, events, status and a state summary.
+- **Replay.** Export includes versions, turns and final result. Import rejects
+  malformed, old-format, unknown-scenario and version-mismatched files with a
+  specific issue kind. Playback runs headlessly, re-queues every recorded order,
+  compares each turn and the final state, and disables autosave writes.
+- **UI.** Menu import plus turn/event inspection, recorded-vs-reproduced status,
+  and localized order/event labels. Menu now shows all five scenarios; all have
+  bilingual briefings and Persian names.
+
+Verification (executed):
+- `tsc --noEmit` exit 0.
+- `vitest run`: 39 files / 294 tests passed.
+- `pnpm run build` exit 0.
+- Browser (Chromium, dev server): English and Persian RTL menu; all five
+  scenarios listed; Persian Attrition briefing complete; scenario launches to
+  turn 1/20; strategic summary renders in Persian; 390 px viewport has no
+  horizontal overflow.
+
+Limitations:
+- Replay inspection was not exercised through a real file picker in the browser;
+  import/playback is covered by unit tests.
+- 17 compact controls measured below 44 px on mobile (map labels, close and
+  secondary buttons); no layout overflow.
+- Unmatched battle-log lines still fall back to English; the template pass is not
+  exhaustive.
+- CI/Pages verification and the push are recorded separately after this commit.
