@@ -966,3 +966,40 @@ Still open against the full acceptance standard:
 - Radar/command facility classification and provenance specificity remain the
   carry-over Phase 1 data items.
 - Balance win distribution has no fresh checked-in simulation report.
+
+## 28. Final closeout — touch targets, exhaustive Persian logs, facility data, balance
+
+- **Mobile target sizes.** Added a phone/coarse-pointer floor in `src/styles.css`
+  for every button plus map labels, modal close buttons, order chips, slot
+  actions and map controls. At a 390 × 844 viewport, Chromium measured 47 visible
+  menu controls and 23 in-game controls with zero below 44 px; document width
+  stayed 390 px with no horizontal overflow.
+- **Exhaustive localization.** `src/i18n/log-coverage.test.ts` runs nine
+  full simulated campaigns (three factions × three seeds, 30 turns) and checks
+  every distinct log line through `faLog`. It collected 547 unique lines; the
+  new templates cover the remaining combat, superpower, Houthi, reserve,
+  mine-warfare, production and scenario-intro lines, leaving zero fallbacks.
+- **Facility classification and provenance.** Seven nodes now carry explicit
+  roles in `mapNodes.json` (Al Udeid/Prince Sultan/Tehran command, Al Dhafra and
+  Muwaffaq Salti radar, NSA Bahrain naval facility, Bandar Abbas port logistics).
+  Each has a unique `facility` reference; reported roles cite AFCENT, MDA or
+  USNAVCENT, while Tehran and Bandar Abbas are labelled game abstractions. The
+  Phase 1 provenance walk passes every classified node and every scenario value.
+- **Balance report.** `BALANCE.md` is generated from 24 fresh headless runs
+  (three factions × eight seeds; US/Israel defensive policy, Iran strike-only),
+  with per-faction win/loss counts, averages and all per-run rows. It records one
+  US win, seven US losses, eight Israeli losses and eight Iranian wins under that
+  deliberately narrow policy, and states the Iranian seed insensitivity honestly.
+
+Verification (executed):
+- `tsc --noEmit` exit 0.
+- `vitest run`: 40 files / 295 tests passed.
+- `pnpm run build` exit 0 (only the existing >500 kB chunk warning).
+- Dev-server browser check at 390 px: zero sub-44 px visible controls, no overflow.
+
+Limitations:
+- The balance report exercises one simple strike/defence policy, not optimal or
+  diplomatic play; it is a reproducible baseline, not a tuned win-rate claim.
+- Canvas-drawn map artwork is not a DOM control; the measured touch targets are
+  the DOM controls and labels the stylesheet can size.
+- CI and Pages results for this closeout commit are recorded after the push.

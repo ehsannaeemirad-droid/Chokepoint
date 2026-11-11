@@ -168,7 +168,7 @@ const LOG_PATTERNS: LogPattern[] = [
   },
   // ---- combat ---------------------------------------------------------------
   {
-    pattern: /^(?<system>[\w\s()/.-]+) intercepted (?<n>\d+)\/(?<total>\d+) (?<label>.+)\.$/,
+    pattern: /^(?<system>.+?) intercepted (?<n>\d+)\/(?<total>\d+) (?<label>.+)\.$/,
     template: '{system} {n} از {total} فروند {label} را رهگیری کرد.',
   },
   {
@@ -329,6 +329,137 @@ const LOG_PATTERNS: LogPattern[] = [
   {
     pattern: /^Russia and China declared a no-fly zone over Iran\. Coalition aircraft may no longer strike Iranian territory, and American political will bleeds every turn\.$/,
     template: 'روسیه و چین منطقه پرواز ممنوع بر ایران اعلام کردند. هواپیماهای ائتلاف دیگر نمی‌توانند خاک ایران را بزنند و اراده سیاسی آمریکا هر نوبت فرسایش می‌یابد.',
+  },
+  // ---- closeout: campaign, strategic and production lines -------------------
+  {
+    pattern: /^27 February 2026 — the eve of the Gulf war\. Stockpiles are at pre-war levels\. Set posture, preposition forces, and decide whether to open with strikes, diplomacy, or restraint\. No automatic first strike until you act or a configured trigger fires\.$/,
+    template:
+      '۲۷ فوریه ۲۰۲۶ — آستانه جنگ خلیج فارس. ذخایر در سطح پیش از جنگ است. حالت نیروها را تعیین کنید، نیروها را پیش‌دستانه مستقر کنید و تصمیم بگیرید با حمله، دیپلماسی یا خویشتن‌داری آغاز کنید. تا وقتی شما اقدام نکنید یا محرک تنظیم‌شده‌ای فعال نشود، حمله اولیه‌ای رخ نمی‌دهد.',
+  },
+  {
+    pattern: /^You command (?<country>.+)\. (?<turns>\d+) turns\. Every interceptor and every missile is scarce\.$/,
+    template: 'شما فرمانده {country} هستید. {turns} نوبت. هر رهگیر و هر موشک کمیاب است.',
+  },
+  {
+    pattern:
+      /^Air defences \((?<system>.+)\) intercepted (?<n>\d+) of (?<total>\d+) munitions? from (?<name>.+)\.$/,
+    template: 'پدافند هوایی ({system}) {n} از {total} مهمات {name} را رهگیری کرد.',
+  },
+  {
+    pattern:
+      /^(?<name>.+) struck (?<target>.+?) — surface plant wrecked, the halls (?<depth>\d+) m underground are untouched \((?<int>\d+)%\)\.$/,
+    template:
+      '{name} به {target} حمله کرد — تأسیسات سطحی ویران شد اما سالن‌های {depth} متری زیر زمین دست‌نخورده ماند ({int}٪).',
+  },
+  {
+    pattern: /^Beijing refused to join new sanctions: Iran can still sell crude and pay for its war \(income \+30%\)\.$/,
+    template: 'پکن از پیوستن به تحریم‌های تازه خودداری کرد: ایران همچنان نفت می‌فروشد و هزینه جنگ را می‌پردازد (درآمد +۳۰٪).',
+  },
+  {
+    pattern:
+      /^Beijing signalled it would not restrain Tehran and slowed diplomatic cooperation with Washington \(US political will -2 per turn\)\.$/,
+    template:
+      'پکن نشان داد تهران را مهار نخواهد کرد و همکاری دیپلماتیک با واشینگتن را کند کرد (اراده سیاسی آمریکا هر نوبت −۲).',
+  },
+  {
+    pattern: /^Chinese banks and refiners deepened sanctions workarounds for Iranian crude \(income \+45%\)\.$/,
+    template: 'بانک‌ها و پالایشگاه‌های چین دور زدن تحریم‌ها برای نفت ایران را عمیق‌تر کردند (درآمد +۴۵٪).',
+  },
+  {
+    pattern:
+      /^Carrier Strike Group is escorting shipping \(coverage (?<n>\d+)\/(?<total>\d+)\) — Hormuz risk falls while it holds station\.$/,
+    template: 'گروه ضربت ناو هواپیمابر در حال اسکورت کشتیرانی است (پوشش {n}/{total}) — تا در جای خود بماند، خطر هرمز کاهش می‌یابد.',
+  },
+  {
+    pattern: /^Coalition warships begin escorting shipping through the Gulf\.$/,
+    template: 'ناوهای ائتلاف اسکورت کشتیرانی در خلیج فارس را آغاز کردند.',
+  },
+  {
+    pattern: /^Hostilities open\. Pre-war restraints lift; opposing forces begin military resolution\.$/,
+    template: 'خصومت آغاز شد. محدودیت‌های پیش از جنگ برداشته می‌شود و نیروهای مقابل حل‌وفصل نظامی را آغاز می‌کنند.',
+  },
+  {
+    pattern: /^Houthi anti-ship attacks closed the Bab al-Mandeb shipping lane for a day; insurance costs rose\.$/,
+    template: 'حملات ضدکشتی حوثی‌ها تنگه باب‌المندب را یک روز بست؛ هزینه بیمه بالا رفت.',
+  },
+  {
+    pattern: /^Houthi launch against (?:a |the )?(?<target>.+)\.$/,
+    template: 'پرتاب حوثی‌ها علیه {target}.',
+  },
+  {
+    pattern: /^Iran holds its missile fire to stabilise the home front\.$/,
+    template: 'ایران آتش موشکی خود را برای تثبیت جبهه داخلی متوقف کرد.',
+  },
+  {
+    pattern:
+      /^Iranian regime stability falls to (?<n>\d+): elite cohesion (?<elite>\d+), IRGC cohesion (?<irgc>\d+)\.$/,
+    template: 'ثبات رژیم ایران به {n} سقوط کرد: انسجام نخبگان {elite}، انسجام سپاه {irgc}.',
+  },
+  {
+    pattern: /^Iranian mine warfare group laid a field in the Hormuz approach\.$/,
+    template: 'گروه مین‌گذاری ایران در نزدیکی هرمز میدان مین کار گذاشت.',
+  },
+  {
+    pattern:
+      /^(?<group>Iranian mine warfare group|Mine Warfare Group) laid (?<n>\d+) mines? at (?<col>-?\d+),(?<row>-?\d+)\.$/,
+    template: '{group} {n} مین در {col}،{row} کار گذاشت.',
+  },
+  {
+    pattern: /^Israeli aircraft launched against (?<target>.+) \(doctrine: (?<doctrine>.+)\)\.$/,
+    template: 'هواپیماهای اسرائیلی علیه {target} به پرواز درآمدند (دکترین: {doctrine}).',
+  },
+  {
+    pattern: /^Israeli aircraft stand down: domestic support will not sustain more strikes\.$/,
+    template: 'هواپیماهای اسرائیلی زمین‌گیر شدند: حمایت داخلی بیش از این تحمل حملات را ندارد.',
+  },
+  {
+    pattern:
+      /^Israeli reserve interceptors brought online: \+(?<n>\d+) ready \(reserve (?<reserve>\d+)\)\.$/,
+    template: 'رهگیرهای ذخیره اسرائیل وارد مدار شدند: +{n} آماده (ذخیره {reserve}).',
+  },
+  {
+    pattern: /^Moscow expedited air-defence spare parts to Iran: Iranian SAMs are marginally readier\.$/,
+    template: 'مسکو قطعات یدکی پدافند هوایی را به ایران فرستاد: سامانه‌های موشکی ایران کمی آماده‌تر شدند.',
+  },
+  {
+    pattern:
+      /^Pakistan agreed to defensive support \(roll (?<roll>[\d.]+) < 0\.40\): air-defence crews and intelligence sharing reinforce Prince Sultan Air Base\. No Pakistani combat aircraft deploy, and Pakistan will not attack Iran\.$/,
+    template:
+      'پاکستان با پشتیبانی دفاعی موافقت کرد (قرعه {roll} < ۰٫۴۰): خدمه پدافند هوایی و اشتراک اطلاعات پایگاه هوایی شاهزاده سلطان را تقویت می‌کنند. هیچ هواپیمای رزمی پاکستان مستقر نمی‌شود و پاکستان به ایران حمله نخواهد کرد.',
+  },
+  {
+    pattern: /^Reserve interceptors brought online: \+(?<n>\d+) US ready \(reserve (?<reserve>\d+)\)\.$/,
+    template: 'رهگیرهای ذخیره وارد مدار شدند: +{n} آمریکایی آماده (ذخیره {reserve}).',
+  },
+  {
+    pattern:
+      /^Russia declared a no-fly zone over Iran, with Chinese diplomatic backing\. Coalition aircraft may no longer strike Iranian territory; naval-launched strikes are unaffected\.$/,
+    template:
+      'روسیه با پشتیبانی دیپلماتیک چین منطقه پرواز ممنوع بر ایران اعلام کرد. هواپیماهای ائتلاف دیگر نمی‌توانند خاک ایران را بزنند؛ حملات از دریا بی‌تأثیر نمی‌مانند.',
+  },
+  {
+    pattern: /^Russia rushed air-defence reloads and radar crews to Iran: Iranian air defence is harder to penetrate\.$/,
+    template: 'روسیه مهمات پدافند و خدمه رادار را به ایران فرستاد: شکستن پدافند ایران دشوارتر شد.',
+  },
+  {
+    pattern: /^Saudi counter-battery fire destroyed a Houthi (?<target>.+) after oil infrastructure was hit\.$/,
+    template: 'آتش ضدباتری سعودی یک {target} حوثی را پس از اصابت به زیرساخت نفتی نابود کرد.',
+  },
+  {
+    pattern: /^Saudi counter-battery fire missed a Houthi launch site\.$/,
+    template: 'آتش ضدباتری سعودی به محل پرتاب حوثی‌ها نرسید.',
+  },
+  {
+    pattern: /^US aircraft launched against (?<target>.+) \(doctrine: (?<doctrine>.+)\)\.$/,
+    template: 'هواپیماهای آمریکایی علیه {target} به پرواز درآمدند (دکترین: {doctrine}).',
+  },
+  {
+    pattern: /^US airlift landed in Israel: \+(?<n>\d+) interceptors\.$/,
+    template: 'پل هوایی آمریکا در اسرائیل فرود آمد: +{n} رهگیر.',
+  },
+  {
+    pattern: /^Underground production delivered \+(?<n>\d+) (?<what>.+)\.$/,
+    template: 'تولید زیرزمینی {n} {what} تحویل داد.',
   },
 ];
 

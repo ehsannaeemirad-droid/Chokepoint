@@ -2026,3 +2026,11 @@ button:focus-visible, [role='button']:focus-visible, summary:focus-visible { out
 .replay-compare span { display: block; font-size: 10px; color: var(--muted); text-transform: uppercase; }
 .replay-compare b { font-size: 13px; }
 @media (max-width: 520px) { .replay-compare { grid-template-columns: 1fr; } }
+
+/* Phase 4 closeout: touch-target floor on phone/coarse-pointer layouts. */
+@media (max-width: 560px), (pointer: coarse) {
+  button { min-height: 44px !important; min-width: 44px !important; }
+  .node-label { min-height: 44px !important; padding-block: 10px; }
+  .modal-card header button, .panel-head button, .cin-card header button { min-width: 44px; min-height: 44px; }
+  .order-chip button, .slot-actions button, .mode-hint button, .map-controls button { min-width: 44px; min-height: 44px; }
+}
