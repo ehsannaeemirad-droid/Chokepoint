@@ -820,3 +820,33 @@ Limitations:
   JSON, so scenario balance changes may require copy updates.
 - Historical claims are limited to the game's own setting; no external
   sourcing was added.
+
+## 23. Phase 4 — localization pass: objectives and impact preview
+
+Commit: `fix: localize objectives, impact previews and UI labels`.
+
+- **Objective strip.** `src/ui/objectives.ts` no longer builds English strings:
+  every `movesIt` explanation and every caption with words (integrity,
+  pressure, basing, oil streak/price, paths, occupation, Israeli capacity,
+  complex average) goes through EN/FA dictionary keys, as does the live grade
+  label (`strong/contested/strained/critical`).
+- **Impact preview.** All `previewOrderImpact` lines and risk warnings are keyed
+  and translated, including the dynamic communicate cooldown and will costs and
+  the diplomacy host name. Because the turn review consumes the same preview,
+  its likely and uncertain consequences now follow the selected language.
+- **Chrome.** The objectives region label, coach dialog label, grade tooltip and
+  impact-preview heading are localised; no hard-coded English remains in those
+  UI paths.
+- **Test.** A Persian regression test stubs the document, switches to `fa`, and
+  asserts objective copy, the grade label and strike/communicate previews all
+  contain Persian text. Existing English assertions still pass.
+
+Verification: `tsc` exit 0, 35 files / 274 tests passed, `build` exit 0.
+
+Limitations:
+- Engine validation messages (`Game.queueOrder` / `validateOrder`) are still
+  English; an invalid order in Persian mode shows the English reason after an
+  English toast fallback. Fixing that needs stable reason codes in the engine.
+- Battle-log narrative is translated at presentation through `i18n/log.ts` for
+  known patterns; unmatched generated lines intentionally remain English.
+- No browser or RTL visual pass was performed.
