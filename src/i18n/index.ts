@@ -358,6 +358,140 @@ const DICT = {
   'obj.grade': ['Campaign grade', 'نمره کارزار'],
   'obj.impact': ['Impact preview', 'پیش‌بینی اثر'],
   'obj.afterAction': ['This turn', 'این نوبت'],
+  'obj.move.nuclear': [
+    'Strikes on Isfahan, Natanz, Fordow (B-2 for buried halls)',
+    'حملات به اصفهان، نطنز و فردو (B-2 برای تالارهای زیرزمینی)',
+  ],
+  'obj.move.warCost': [
+    'Successful strikes on Iranian forces, cities, and production',
+    'حملات موفق به نیروها، شهرها و تولید ایران',
+  ],
+  'obj.move.domestic': [
+    'Casualties, oil price, reinforcements, public address',
+    'تلفات، قیمت نفت، نیروی کمکی و پیام عمومی',
+  ],
+  'obj.move.basing': [
+    'Diplomacy and avoiding strikes that raise host threat',
+    'دیپلماسی و پرهیز از حملاتی که تهدید میزبان را بالا می‌برد',
+  ],
+  'obj.move.hormuz': [
+    'Naval presence, ASM strikes, mine clearance; avoid sustained disruption',
+    'حضور دریایی، حملات موشک ضدکشتی، مین‌روبی؛ پرهیز از اختلال پایدار',
+  ],
+  'obj.move.regime': [
+    'Keep Tehran intact and nuclear sites above the survival floor',
+    'تهران را سالم و سایت‌های هسته‌ای را بالای کف بقا نگه دارید',
+  ],
+  'obj.move.noOccupation': [
+    'Deny US ground forces consecutive holds on Iranian nodes',
+    'اجازه ندهید نیروی زمینی آمریکا پیاپی گره‌های ایران را بگیرد',
+  ],
+  'obj.move.oilShock': [
+    'Sustained Hormuz disruption raises the oil index',
+    'اختلال پایدار هرمز شاخص نفت را بالا می‌برد',
+  ],
+  'obj.move.israeli': [
+    'Attrite Israeli airframes and magazines before the deadline',
+    'توان هوایی و ذخایر اسرائیل را پیش از مهلت فرسوده کنید',
+  ],
+  'obj.move.enemyNuclear': [
+    'Coalition strikes on Isfahan / Natanz / Fordow',
+    'حملات ائتلاف به اصفهان / نطنز / فردو',
+  ],
+  'obj.move.enemyOil': ['Iranian ASM, mines, FAC near Hormuz', 'موشک ضدکشتی، مین و قایق تندرو ایران نزدیک هرمز'],
+  'obj.move.enemyIsrael': [
+    'Iranian strikes on Israeli air and magazines',
+    'حملات ایران به نیروی هوایی و ذخایر اسرائیل',
+  ],
+  'obj.cap.destroyed': ['complex destroyed', 'مجتمع نابود شد'],
+  'obj.cap.integrity': ['avg {n}% integrity', 'میانگین یکپارچگی {n}٪'],
+  'obj.cap.pressure': ['pressure {n} (danger ≥{max})', 'فشار {n} (خطر ≥{max})'],
+  'obj.cap.bases': ['{n} Gulf bases open', '{n} پایگاه خلیج باز'],
+  'obj.cap.oilStreak': ['oil shock streak {n}/{turns}', 'رشته شوک نفتی {n}/{turns}'],
+  'obj.cap.oilPrice': ['oil {n}', 'نفت {n} دلار'],
+  'obj.cap.regimeStreak': [
+    'streak {streak}/{turns}, best nuke {best}%',
+    'رشته {streak}/{turns}، بهترین هسته‌ای {best}٪',
+  ],
+  'obj.cap.noOccupation': ['no occupation reached', 'اشغالی رخ نداد'],
+  'obj.cap.occupationStreak': ['occupation streak {streak}/{turns}', 'رشته اشغال {streak}/{turns}'],
+  'obj.cap.oilPath': ['{price} · streak {streak}/{turns}', '{price} دلار · رشته {streak}/{turns}'],
+  'obj.cap.capacity': [
+    'capacity {n} (need <{threshold} by T{turn})',
+    'ظرفیت {n} (کمتر از {threshold} تا نوبت {turn})',
+  ],
+  'obj.cap.capacityShort': ['capacity {n}', 'ظرفیت {n}'],
+  'obj.cap.complex': ['complex avg {n}%', 'میانگین مجتمع {n}٪'],
+  'obj.cap.streak': ['streak {n}/{turns}', 'رشته {n}/{turns}'],
+
+  'grade.strong': ['strong', 'قوی'],
+  'grade.contested': ['contested', 'رقابتی'],
+  'grade.strained': ['strained', 'تحت فشار'],
+  'grade.critical': ['critical', 'بحرانی'],
+
+  'aria.objectives': ['Campaign objectives', 'اهداف کارزار'],
+  'aria.coach': ['Quick-start coach', 'راهنمای شروع سریع'],
+  'tip.grade': ['Live campaign grade estimate', 'برآورد زنده نمره کارزار'],
+
+  'impact.selectedHost': ['selected host', 'میزبان انتخاب‌شده'],
+  'impact.strike.1': [
+    'Expected: +war cost on Iranian targets, −magazine on the firing unit',
+    'انتظار: افزایش هزینه جنگ برای اهداف ایران، کاهش مهمات یگان شلیک‌کننده',
+  ],
+  'impact.strike.2': [
+    'Host threat rises if the impact lands on host soil',
+    'اگر اصابت روی خاک میزبان باشد، تهدید میزبان بالا می‌رود',
+  ],
+  'impact.strike.risk': [
+    'Congress near restriction threshold — further casualties may restrict strikes',
+    'کنگره نزدیک آستانه محدودیت است — تلفات بیشتر ممکن است حملات را محدود کند',
+  ],
+  'impact.reinforce.1': [
+    'Expected: package enters transit (2–4 turns); +economy pressure from cost',
+    'انتظار: بسته وارد مسیر ترانزیت می‌شود (۲–۴ نوبت)؛ افزایش فشار اقتصادی از هزینه',
+  ],
+  'impact.reinforce.risk': [
+    'Hormuz disruption high — package may accrue strait delay',
+    'اختلال هرمز بالا — بسته ممکن است تأخیر تنگه بگیرد',
+  ],
+  'impact.diplomacy': [
+    'Expected: −host threat for {host}, −political will',
+    'انتظار: کاهش تهدید {host}، کاهش اراده سیاسی',
+  ],
+  'impact.airlift': [
+    'Expected: +15 interceptors to Israel, −airlift budget',
+    'انتظار: +۱۵ رهگیر به اسرائیل، کاهش بودجه ترابری هوایی',
+  ],
+  'impact.communicate.1': [
+    'Expected: +{gain} congressional support, −{cost} political will',
+    'انتظار: +{gain} حمایت کنگره، −{cost} اراده سیاسی',
+  ],
+  'impact.communicate.2': ['Cooldown: {n} turns', 'دوره انتظار: {n} نوبت'],
+  'impact.produce': [
+    'Expected: −Iran resources, +stock of selected munition/drone type',
+    'انتظار: کاهش منابع ایران، افزایش ذخیره مهمات/پهپاد انتخاب‌شده',
+  ],
+  'impact.roe.constrained': [
+    'Expected: −escalation signature, +1 congress/turn, urban strikes blocked',
+    'انتظار: کاهش نشانه تشدید تنش، +۱ کنگره در نوبت، حملات شهری مسدود',
+  ],
+  'impact.roe.aggressive': [
+    'Expected: +15% strike damage, ×1.5 escalation, −1 congress/turn, +host threat',
+    'انتظار: +۱۵٪ خسارت حمله، ×۱٫۵ تشدید تنش، −۱ کنگره در نوبت، افزایش تهدید میزبان',
+  ],
+  'impact.roe.standard': [
+    'Expected: standard damage and escalation multipliers',
+    'انتظار: خسارت و ضریب‌های تشدید تنش استاندارد',
+  ],
+  'impact.initiative': [
+    'Expected: changes Israeli AI offensive probability next turns',
+    'انتظار: احتمال تهاجم هوش مصنوعی اسرائیل در نوبت‌های بعد تغییر می‌کند',
+  ],
+  'impact.talks': [
+    'Expected: advances or collapses Qatar-mediated ceasefire progress',
+    'انتظار: پیشرفت یا فروپاشی آتش‌بس با میانجی‌گری قطر',
+  ],
+  'impact.default': ['No meter preview for this order', 'برای این فرمان پیش‌بینی سنجه‌ای نیست'],
   'coach.title': ['Quick start', 'شروع سریع'],
   'coach.gotIt': ['Got it', 'متوجه شدم'],
 

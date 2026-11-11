@@ -122,7 +122,7 @@ function template(): string {
   <button class="icon-btn lang-btn" data-action="lang:${fa ? 'en' : 'fa'}" data-tip="${t('tip.lang')}">${fa ? 'EN' : 'فا'}</button>
 </header>
 
-<div id="objectives-strip" class="objectives-strip" role="region" aria-label="Objectives"></div>
+<div id="objectives-strip" class="objectives-strip" role="region" aria-label="${t('aria.objectives')}"></div>
 <div id="impact-preview" class="impact-preview" hidden></div>
 <div id="coach" class="coach" hidden></div>
 <div id="tutorial-banner" class="tutorial-banner"></div>
@@ -1757,7 +1757,7 @@ export class Ui {
         </button>`;
       })
       .join('');
-    const grade = `<div class="obj-grade" data-tip="Live campaign grade estimate"><b>${view.grade}</b><span>${view.gradeLabel}</span></div>`;
+    const grade = `<div class="obj-grade" data-tip="${t('tip.grade')}"><b>${view.grade}</b><span>${view.gradeLabel}</span></div>`;
     el.innerHTML = `<div class="obj-inner">${grade}${rows}</div>`;
   }
 
@@ -1804,7 +1804,7 @@ export class Ui {
     const lines = preview.lines.map((l) => `<li>${l}</li>`).join('');
     const risks = preview.risks.map((l) => `<li class="risk">${l}</li>`).join('');
     el.hidden = false;
-    el.innerHTML = `<div class="impact-card"><b>${getLang() === 'fa' ? 'پیش‌بینی اثر' : 'Impact preview'}</b><ul>${lines}${risks}</ul></div>`;
+    el.innerHTML = `<div class="impact-card"><b>${t('obj.impact')}</b><ul>${lines}${risks}</ul></div>`;
   }
 
   private renderCoach(): void {
@@ -1817,7 +1817,7 @@ export class Ui {
     }
     const fa = getLang() === 'fa';
     el.hidden = false;
-    el.innerHTML = `<div class="coach-card" role="dialog" aria-label="Coach">
+    el.innerHTML = `<div class="coach-card" role="dialog" aria-label="${t('aria.coach')}">
       <header><b>${fa ? 'شروع سریع' : 'Quick start'}</b>
         <button data-action="coach-dismiss" aria-label="${t('btn.close')}">✕</button></header>
       <ol>

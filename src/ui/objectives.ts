@@ -17,6 +17,8 @@ import {
   type VictoryPathId,
 } from '../politics/victory';
 import { domesticCfg } from '../politics/domestic';
+import { t } from '../i18n';
+import { factionLabel } from './labels';
 
 export type ObjectiveTone = 'good' | 'warn' | 'bad' | 'info';
 
@@ -86,7 +88,7 @@ function coalitionRows(snap: GameSnapshot, map: TheaterMap): ObjectiveRow[] {
       labelKey: 'obj.nuclear',
       progress: allDown ? 100 : nuclearProgress,
       tone: toneFor(allDown ? 100 : nuclearProgress),
-      movesIt: 'Strikes on Isfahan, Natanz, Fordow (B-2 for buried halls)',
+      movesIt: t('obj.move.nuclear'),
       stats: {
         isfahan: sites[0]!.integrity,
         natanz: sites[1]!.integrity,
@@ -95,15 +97,15 @@ function coalitionRows(snap: GameSnapshot, map: TheaterMap): ObjectiveRow[] {
       },
       enemy: false,
       caption: allDown
-        ? 'complex destroyed'
-        : `avg ${Math.round(avgIntegrity)}% integrity`,
+        ? t('obj.cap.destroyed')
+        : t('obj.cap.integrity', { n: Math.round(avgIntegrity) }),
     },
     {
       id: 'war_cost',
       labelKey: 'obj.warCost',
       progress: warProgress,
       tone: toneFor(warProgress),
-      movesIt: 'Successful strikes on Iranian forces, cities, and production',
+      movesIt: t('obj.move.warCost'),
       stats: { warCost: Math.round(warCost), threshold: warThreshold },
       enemy: false,
       caption: `${Math.round(warCost)} / ${warThreshold}`,
@@ -113,7 +115,7 @@ function coalitionRows(snap: GameSnapshot, map: TheaterMap): ObjectiveRow[] {
       labelKey: 'obj.domestic',
       progress: domesticProgress,
       tone: toneFor(domesticProgress),
-      movesIt: 'Casualties, oil price, reinforcements, public address',
+      movesIt: t('obj.move.domestic'),
       stats: {
         pressure: Math.round(pressure),
         congress: Math.round(d?.congress ?? 60),
@@ -121,24 +123,24 @@ function coalitionRows(snap: GameSnapshot, map: TheaterMap): ObjectiveRow[] {
         collapseAt: cfg.collapsePressure,
       },
       enemy: false,
-      caption: `pressure ${Math.round(pressure)} (danger ≥${cfg.collapsePressure})`,
+      caption: t('obj.cap.pressure', { n: Math.round(pressure), max: cfg.collapsePressure }),
     },
     {
       id: 'basing',
       labelKey: 'obj.basing',
       progress: basingProgress,
       tone: toneFor(basingProgress),
-      movesIt: 'Diplomacy and avoiding strikes that raise host threat',
+      movesIt: t('obj.move.basing'),
       stats: { bases, needed: 3 },
       enemy: false,
-      caption: `${bases} Gulf bases open`,
+      caption: t('obj.cap.bases', { n: bases }),
     },
     {
       id: 'hormuz_open',
       labelKey: 'obj.hormuz',
       progress: hormuzSafe,
       tone: toneFor(hormuzSafe),
-      movesIt: 'Naval presence, ASM strikes, mine clearance; avoid sustained disruption',
+      movesIt: t('obj.move.hormuz'),
       stats: {
         oil: Math.round(oil),
         threshold: oilThreshold,
@@ -149,8 +151,8 @@ function coalitionRows(snap: GameSnapshot, map: TheaterMap): ObjectiveRow[] {
       enemy: false,
       caption:
         oilStreak > 0
-          ? `oil shock streak ${oilStreak}/${oilTurns}`
-          : `oil $${Math.round(oil)}`,
+          ? t('obj.cap.oilStreak', { n: oilStreak, turns: oilTurns })
+          : t('obj.cap.oilPrice', { n: Math.round(oil) }),
     },
   ];
 
@@ -180,26 +182,44 @@ function iranRows(snap: GameSnapshot, map: TheaterMap): ObjectiveRow[] {
   return [
     mapPath(
       'regimeSurvival',
-      'Keep Tehran intact and nuclear sites above the survival floor',
-      (p) => `streak ${p.stats.streak}/${p.stats.turns}, best nuke ${p.stats.best}%`,
+      t('obj.move.regime'),
+      (p) =>
+        t('obj.cap.regimeStreak', {
+          streak: String(p.stats.streak),
+          turns: String(p.stats.turns),
+          best: String(p.stats.best),
+        }),
     ),
     mapPath(
       'noOccupation',
-      'Deny US ground forces consecutive holds on Iranian nodes',
+      t('obj.move.noOccupation'),
       (p) =>
         p.satisfied
-          ? 'no occupation reached'
-          : `occupation streak ${p.stats.streak}/${p.stats.turns}`,
+          ? t('obj.cap.noOccupation')
+          : t('obj.cap.occupationStreak', {
+              streak: String(p.stats.streak),
+              turns: String(p.stats.turns),
+            }),
     ),
     mapPath(
       'oilShock',
-      'Sustained Hormuz disruption raises the oil index',
-      (p) => `$${p.stats.price} · streak ${p.stats.streak}/${p.stats.turns}`,
+      t('obj.move.oilShock'),
+      (p) =>
+        t('obj.cap.oilPath', {
+          price: String(p.stats.price),
+          streak: String(p.stats.streak),
+          turns: String(p.stats.turns),
+        }),
     ),
     mapPath(
       'israeliDegradation',
-      'Attrite Israeli airframes and magazines before the deadline',
-      (p) => `capacity ${p.stats.capacity} (need <${p.stats.threshold} by T${p.stats.byTurn})`,
+      t('obj.move.israeli'),
+      (p) =>
+        t('obj.cap.capacity', {
+          n: String(p.stats.capacity),
+          threshold: String(p.stats.threshold),
+          turn: String(p.stats.byTurn),
+        }),
     ),
   ];
 }
@@ -216,10 +236,10 @@ function enemyThreatRow(snap: GameSnapshot, map: TheaterMap, faction: PlayableFa
       labelKey: 'obj.enemyNuclear',
       progress,
       tone: toneFor(progress, true),
-      movesIt: 'Coalition strikes on Isfahan / Natanz / Fordow',
+      movesIt: t('obj.move.enemyNuclear'),
       stats: { avg: Math.round(avg) },
       enemy: true,
-      caption: `complex avg ${Math.round(avg)}%`,
+      caption: t('obj.cap.complex', { n: Math.round(avg) }),
     };
   }
 
@@ -233,15 +253,13 @@ function enemyThreatRow(snap: GameSnapshot, map: TheaterMap, faction: PlayableFa
     progress: worst.progress,
     tone: toneFor(worst.progress, true),
     movesIt:
-      worst.id === 'oilShock'
-        ? 'Iranian ASM, mines, FAC near Hormuz'
-        : 'Iranian strikes on Israeli air and magazines',
+      worst.id === 'oilShock' ? t('obj.move.enemyOil') : t('obj.move.enemyIsrael'),
     stats: worst.stats,
     enemy: true,
     caption:
       worst.id === 'oilShock'
-        ? `streak ${worst.stats.streak}/${worst.stats.turns}`
-        : `capacity ${worst.stats.capacity}`,
+        ? t('obj.cap.streak', { n: String(worst.stats.streak), turns: String(worst.stats.turns) })
+        : t('obj.cap.capacityShort', { n: String(worst.stats.capacity) }),
   };
 }
 
@@ -266,7 +284,13 @@ export function buildObjectives(snap: GameSnapshot, map: TheaterMap): Objectives
   const grade =
     own.length === 0 ? 50 : Math.round(own.reduce((s, r) => s + r.progress, 0) / own.length);
   const gradeLabel =
-    grade >= 70 ? 'strong' : grade >= 45 ? 'contested' : grade >= 25 ? 'strained' : 'critical';
+    grade >= 70
+      ? t('grade.strong')
+      : grade >= 45
+        ? t('grade.contested')
+        : grade >= 25
+          ? t('grade.strained')
+          : t('grade.critical');
 
   return { rows, grade, gradeLabel };
 }
@@ -291,58 +315,62 @@ export function previewOrderImpact(
 
   switch (order.kind) {
     case 'strike': {
-      lines.push('Expected: +war cost on Iranian targets, −magazine on the firing unit');
-      lines.push('Host threat rises if the impact lands on host soil');
+      lines.push(t('impact.strike.1'));
+      lines.push(t('impact.strike.2'));
       if ((snap.domestic?.congress ?? 100) <= cfg.restrictCongress + 5) {
-        risks.push('Congress near restriction threshold — further casualties may restrict strikes');
+        risks.push(t('impact.strike.risk'));
       }
       break;
     }
     case 'reinforce': {
-      lines.push('Expected: package enters transit (2–4 turns); +economy pressure from cost');
+      lines.push(t('impact.reinforce.1'));
       if (snap.meters.hormuz >= (snap.logisticsCfg?.interdictHormuz ?? 60)) {
-        risks.push('Hormuz disruption high — package may accrue strait delay');
+        risks.push(t('impact.reinforce.risk'));
       }
       break;
     }
     case 'diplomacy': {
-      lines.push(`Expected: −host threat for ${order.host ?? 'selected host'}, −political will`);
+      lines.push(
+        t('impact.diplomacy', {
+          host: order.host ? factionLabel(order.host) : t('impact.selectedHost'),
+        }),
+      );
       break;
     }
     case 'airlift': {
-      lines.push('Expected: +15 interceptors to Israel, −airlift budget');
+      lines.push(t('impact.airlift'));
       break;
     }
     case 'communicate': {
       const gain = cfg.communicate.gain;
-      lines.push(`Expected: +${gain} congressional support, −${cfg.communicate.cost} political will`);
-      lines.push(`Cooldown: ${cfg.communicate.cooldown} turns`);
+      lines.push(t('impact.communicate.1', { gain, cost: cfg.communicate.cost }));
+      lines.push(t('impact.communicate.2', { n: cfg.communicate.cooldown }));
       break;
     }
     case 'produce': {
-      lines.push('Expected: −Iran resources, +stock of selected munition/drone type');
+      lines.push(t('impact.produce'));
       break;
     }
     case 'roe': {
       if (order.posture === 'constrained') {
-        lines.push('Expected: −escalation signature, +1 congress/turn, urban strikes blocked');
+        lines.push(t('impact.roe.constrained'));
       } else if (order.posture === 'aggressive') {
-        lines.push('Expected: +15% strike damage, ×1.5 escalation, −1 congress/turn, +host threat');
+        lines.push(t('impact.roe.aggressive'));
       } else {
-        lines.push('Expected: standard damage and escalation multipliers');
+        lines.push(t('impact.roe.standard'));
       }
       break;
     }
     case 'israel-initiative': {
-      lines.push('Expected: changes Israeli AI offensive probability next turns');
+      lines.push(t('impact.initiative'));
       break;
     }
     case 'talks': {
-      lines.push('Expected: advances or collapses Qatar-mediated ceasefire progress');
+      lines.push(t('impact.talks'));
       break;
     }
     default:
-      lines.push('No meter preview for this order');
+      lines.push(t('impact.default'));
   }
 
   return { lines, risks };

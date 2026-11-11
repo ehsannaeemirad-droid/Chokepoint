@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { setLang } from '../i18n';
 import { TheaterMap } from '../map/TheaterMap';
 import { game } from '../core/Game';
 import {
@@ -55,5 +56,33 @@ describe('objectives legibility', () => {
     const b = buildObjectives(snap, map);
     expect(a).toEqual(b);
     expect(snap).toEqual(game.snap);
+  });
+});
+
+describe('Persian presentation', () => {
+  it('localises objective copy, grade and impact previews', () => {
+    const original = Object.getOwnPropertyDescriptor(globalThis, 'document');
+    Object.defineProperty(globalThis, 'document', {
+      value: { documentElement: {}, body: { classList: { toggle() {} } } },
+      configurable: true,
+      writable: true,
+    });
+    try {
+      game.start('campaign', 'usa', 42);
+      setLang('fa');
+      const view = buildObjectives(game.snap, game.map);
+      const persian = /[؀-ۿ]/;
+      expect(persian.test(view.gradeLabel)).toBe(true);
+      for (const row of view.rows) expect(persian.test(row.movesIt)).toBe(true);
+      const strike = previewOrderImpact(game.snap, { kind: 'strike' });
+      expect(strike.lines.length).toBeGreaterThan(0);
+      for (const line of strike.lines) expect(persian.test(line)).toBe(true);
+      const comm = previewOrderImpact(game.snap, { kind: 'communicate' });
+      for (const line of comm.lines) expect(persian.test(line)).toBe(true);
+    } finally {
+      setLang('en');
+      if (original) Object.defineProperty(globalThis, 'document', original);
+      else delete (globalThis as { document?: unknown }).document;
+    }
   });
 });
