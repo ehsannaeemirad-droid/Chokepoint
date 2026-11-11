@@ -1002,4 +1002,13 @@ Limitations:
   diplomatic play; it is a reproducible baseline, not a tuned win-rate claim.
 - Canvas-drawn map artwork is not a DOM control; the measured touch targets are
   the DOM controls and labels the stylesheet can size.
-- CI and Pages results for this closeout commit are recorded after the push.
+- Push: `f99c357` on `main`.
+- CI run `43023141669`: success (typecheck, 295 tests, build).
+- Pages deploy run `43023141432` and Pages build `43023141050` were green, but
+  the repository was still set to legacy branch source and served the raw
+  `/src/main.ts` entry instead of `dist`. Switched Pages to the workflow artifact
+  and reran `Deploy to GitHub Pages` as run `43023637780`: success. The deployed
+  URL now returns the built HTML with `./assets/…`; the JS, CSS and manifest all
+  return HTTP 200.
+- A desktop-browser visual pass of the Pages URL timed out, so deployment is
+  verified over HTTP and by asset delivery, not by a rendered-page screenshot.
