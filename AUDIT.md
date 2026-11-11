@@ -1041,7 +1041,7 @@ Limitations:
 
 Verification (executed):
 - `tsc --noEmit` exit 0.
-- `vitest run`: 41 files / 304 tests passed.
+- `vitest run`: 41 files / 305 tests passed.
 - `pnpm run build` exit 0 (only the existing >500 kB chunk warning).
 - Dev-server browser check at 390 px: Iran strategic panel renders Russia/China
   favour gauges and cost-gated aid buttons; no console/runtime errors.

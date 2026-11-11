@@ -106,7 +106,7 @@ export function attackersForHex(
   unitLabel?: (unit: UnitInstance) => string,
 ): Array<{ unit: UnitInstance; dist: number }> {
   const tasked = new Set(
-    snap.orders.filter((o) => o.kind === 'strike').map((o) => (o as { unitUid: string }).unitUid),
+    snap.orders.filter((o) => 'unitUid' in o).map((o) => (o as { unitUid: string }).unitUid),
   );
   return snap.units
     .filter((unit) => unit.faction === snap.faction && !tasked.has(unit.uid))

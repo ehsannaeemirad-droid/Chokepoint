@@ -50,6 +50,27 @@ describe('target-first attacker discovery', () => {
     expect(attackersForHex(game.snap, game.map, hex.col, hex.row, 'al_udeid')).toHaveLength(0);
   });
 
+  it('excludes a unit with any queued task from the attacker list', () => {
+    const game = start('usa');
+    let target: { col: number; row: number; nodeId: string } | null = null;
+    let attackers = [] as ReturnType<typeof attackersForHex>;
+    for (const node of game.map.nodes) {
+      const defender = defenderOfNode(node);
+      const hex = game.map.nodeHexOf(node.id);
+      if (!defender || !hex || !hostileTo('usa', defender)) continue;
+      attackers = attackersForHex(game.snap, game.map, hex.col, hex.row, node.id);
+      if (attackers.length > 0) {
+        target = { col: hex.col, row: hex.row, nodeId: node.id };
+        break;
+      }
+    }
+    expect(target).toBeTruthy();
+    const uid = attackers[0]!.unit.uid;
+    expect(game.queueOrder({ kind: 'hold', unitUid: uid }).ok).toBe(true);
+    const after = attackersForHex(game.snap, game.map, target!.col, target!.row, target!.nodeId);
+    expect(after.map((entry) => entry.unit.uid)).not.toContain(uid);
+  });
+
   it('rejects a missile launcher moving onto water', () => {
     const game = start('iran');
     const launcher = game.snap.units.find((u) => u.typeId === 'fateh110')!;
