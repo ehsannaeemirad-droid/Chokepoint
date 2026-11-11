@@ -948,3 +948,21 @@ Limitations:
 - Unmatched battle-log lines still fall back to English; the template pass is not
   exhaustive.
 - CI/Pages verification and the push are recorded separately after this commit.
+
+## 27. Phase 5 — CI, Pages and browser verification
+
+- Push: `main` updated to `8148a93` (then this documentation commit).
+- CI run `43018874502`: success (typecheck, tests, build).
+- Deploy run `43018874699`: success; Pages build run `43018871567`: success.
+- Browser checks on the dev server: English/Persian RTL menu, five scenarios,
+  Persian Attrition briefing, launch to turn 1/20, Persian strategic summary,
+  mobile 390 px with no horizontal overflow.
+
+Still open against the full acceptance standard:
+- Several compact mobile controls remain below the 44 px target.
+- Unmatched battle-log lines still fall back to English.
+- The replay import file picker was not exercised in the browser; service tests
+  cover parse, version rejection, playback comparison and autosave isolation.
+- Radar/command facility classification and provenance specificity remain the
+  carry-over Phase 1 data items.
+- Balance win distribution has no fresh checked-in simulation report.
