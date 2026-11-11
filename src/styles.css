@@ -1984,3 +1984,22 @@ html[dir='rtl'] .nav-drawer {
 .cin-group { margin: 12px 0 4px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); position: sticky; top: 0; background: var(--chrome); padding: 2px 0; }
 
 button:focus-visible, [role='button']:focus-visible, summary:focus-visible { outline: 2px solid var(--info, #3c8dbc); outline-offset: 2px; }
+
+/* Pre-campaign briefing. */
+.modal-card.briefing { width: min(720px, 100%); }
+.briefing .modal-body { overflow-y: auto; }
+.briefing section { margin: 10px 0 16px; }
+.briefing h3 { margin: 0 0 6px; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+.briefing h4 { margin: 12px 0 4px; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+.brief-lead p, .brief-scenario p { margin: 0; line-height: 1.5; }
+.brief-era { font-size: 12px; color: var(--muted); margin-bottom: 6px !important; }
+.brief-list { margin: 0; padding-inline-start: 18px; line-height: 1.5; }
+.brief-list li + li { margin-top: 4px; }
+.brief-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 20px; }
+.brief-grid section { margin: 4px 0 8px; }
+.brief-priority { border-inline-start: 2px solid var(--info, #3c8dbc); padding-inline-start: 12px; }
+.brief-scenario { border-top: 1px solid var(--line); padding-top: 12px; }
+@media (max-width: 520px) {
+  .briefing .modal-body { padding-bottom: 4px; }
+  .brief-grid { grid-template-columns: 1fr; }
+}

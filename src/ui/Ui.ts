@@ -10,7 +10,7 @@ import { FACTION_COLORS } from '../core/config';
 import { ISRAEL_AIRLIFT, REINFORCEMENTS, effectiveArrival } from '../core/engine';
 import { ARSENAL_UNCERTAINTY_PCT, arsenalRows, deliveryClassFor } from '../core/inventory';
 import { game, SCENARIOS, type Game, type InteractionMode } from '../core/Game';
-import type { FactionId, Order, ResolveEvent, UnitInstance } from '../core/types';
+import type { FactionId, Order, PlayableFactionId, ResolveEvent, UnitInstance } from '../core/types';
 import { unitType } from '../core/world';
 import {
   getLang,
@@ -36,6 +36,7 @@ import { victoryPaths } from '../politics/victory';
 import { buildObjectives, previewOrderImpact, type ObjectiveRow } from './objectives';
 import { buildTurnReview, reportKey } from './review';
 import { factionLabel, unitLabel } from './labels';
+import { factionBriefing, scenarioBriefing, type Bi } from './briefing';
 import { deleteSave, downloadText, exportReplay, listSaves, SLOTS, type SlotId } from '../services/save';
 import { Minimap } from './Minimap';
 import { bus, focusHex, zoomBy } from './bus';
@@ -100,6 +101,10 @@ const SCENARIO_FA: Record<string, string> = {
   campaign: 'دریای باریک',
   tutorial: 'ضربه نخست',
 };
+
+const bi = (value: Bi): string => (getLang() === 'fa' ? value.fa : value.en);
+const briefList = (items: Bi[]): string =>
+  `<ul class="brief-list">${items.map((item) => `<li>${bi(item)}</li>`).join('')}</ul>`;
 
 function template(): string {
   const fa = getLang() === 'fa';
@@ -187,14 +192,14 @@ export class Ui {
   private game: Game;
   private openPanel: 'forces' | 'strategic' | 'log' | null = null;
   private menuScenario = 'campaign';
-  private menuFaction: FactionId = 'usa';
+  private menuFaction: PlayableFactionId = 'usa';
   private toastTimer = 0;
   private tipTimer = 0;
   private tipHideTimer = 0;
   private cinTimer = 0;
   private cinEvents: ResolveEvent[] = [];
   private cinIndex = 0;
-  private modalKind: 'menu' | 'outcome' | 'review' | null = null;
+  private modalKind: 'menu' | 'outcome' | 'review' | 'briefing' | null = null;
   private reviewOpen = false;
   private lastFocused: HTMLElement | null = null;
   private reportCategory: StringKey | null = null;
@@ -289,6 +294,7 @@ export class Ui {
     this.render();
     if (this.modalKind === 'menu') this.openMenu();
     else if (this.modalKind === 'outcome') this.openOutcome();
+    else if (this.modalKind === 'briefing') this.openBriefing();
   }
 
   private handle(action: string): void {
@@ -462,11 +468,12 @@ export class Ui {
     if (verb === 'skip-cinematic') return this.revealAll();
     if (verb === 'continue-cinematic') return this.closeCinematic();
     if (verb === 'close-modal') return this.closeModal();
-    if (verb === 'start') {
+    if (verb === 'brief') return this.openBriefing();
+    if (verb === 'begin') {
       const scenario = a ?? this.menuScenario;
-      const faction = (b ?? this.menuFaction) as FactionId;
+      const faction = (b ?? this.menuFaction) as PlayableFactionId;
       this.closeModal();
-      this.game.start(scenario, faction as never, Math.floor(Math.random() * 900000) + 1000);
+      this.game.start(scenario, faction, Math.floor(Math.random() * 900000) + 1000);
       const hex = this.homeHex();
       if (hex) focusHex(hex);
       this.showToast(t('toast.newCampaign'), 'good');
@@ -495,7 +502,7 @@ export class Ui {
       return;
     }
     if (verb === 'faction') {
-      this.menuFaction = (a ?? 'usa') as FactionId;
+      this.menuFaction = (a ?? 'usa') as PlayableFactionId;
       this.openMenu();
       return;
     }
@@ -1547,6 +1554,48 @@ export class Ui {
     `);
   }
 
+  /** Faction + scenario briefing between selection and the first turn. */
+  private openBriefing(): void {
+    const scenario = SCENARIOS[this.menuScenario] ?? SCENARIOS.campaign!;
+    const faction = factionBriefing(this.menuFaction);
+    const scen = scenarioBriefing(scenario.id);
+    this.modalKind = 'briefing';
+    this.openModal(`
+      <div class="modal-card briefing">
+        <header><h2>${t('brief.title')}</h2><button data-action="menu" aria-label="${t('btn.close')}">✕</button></header>
+        <div class="modal-body">
+          <p class="modal-note">${bi(scen.title)} · ${shortFaction(this.menuFaction)} · ${t('menu.turns', { n: scenario.turns })}</p>
+          <section class="brief-lead"><h3>${t('brief.situation')}</h3><p>${bi(faction.situation)}</p></section>
+          <section><h3>${t('brief.objectives')}</h3>${briefList(faction.objectives)}</section>
+          <div class="brief-grid">
+            <section><h3>${t('brief.strengths')}</h3>${briefList(faction.strengths)}</section>
+            <section><h3>${t('brief.weaknesses')}</h3>${briefList(faction.weaknesses)}</section>
+          </div>
+          <div class="brief-grid">
+            <section><h3>${t('brief.political')}</h3>${briefList(faction.political)}</section>
+            <section><h3>${t('brief.economic')}</h3>${briefList(faction.economic)}</section>
+          </div>
+          <section><h3>${t('brief.capabilities')}</h3>${briefList(faction.capabilities)}</section>
+          <section><h3>${t('brief.actions')}</h3>${briefList(faction.actions)}</section>
+          <section><h3>${t('brief.threats')}</h3>${briefList(faction.threats)}</section>
+          <section class="brief-priority"><h3>${t('brief.firstTurn')}</h3>${briefList(faction.firstTurn)}</section>
+          <section class="brief-scenario">
+            <h3>${t('brief.scenario')}</h3>
+            <p class="brief-era">${bi(scen.era)}</p>
+            <p>${bi(scen.situation)}</p>
+            <h4>${t('brief.scenarioObjectives')}</h4>${briefList(scen.objectives)}
+            <h4>${t('brief.ending')}</h4>${briefList(scen.ending)}
+            <h4>${t('brief.opening')}</h4>${briefList(scen.firstTurn)}
+          </section>
+        </div>
+        <footer class="review-foot">
+          <button data-action="menu">${t('brief.back')}</button>
+          <button class="primary" data-action="begin:${scenario.id}:${this.menuFaction}">${t('brief.begin')}</button>
+        </footer>
+      </div>
+    `);
+  }
+
   private openMenu(): void {
     const saves = listSaves();
     const slotRows = SLOTS.map((slot, index) => {
@@ -1590,7 +1639,7 @@ export class Ui {
                 )
                 .join('')}
             </div>
-            <button class="primary wide" data-action="start:${this.menuScenario}:${this.menuFaction}">${t('btn.start')}</button>
+            <button class="primary wide" data-action="brief:${this.menuScenario}:${this.menuFaction}">${t('btn.start')}</button>
           </section>
           <section>
             <h3>${t('menu.saves')}</h3>
