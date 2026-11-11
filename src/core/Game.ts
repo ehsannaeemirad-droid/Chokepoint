@@ -233,6 +233,7 @@ export class Game {
       },
       greatPowerFavors: { russia: 3, china: 3 },
       iranProductionBoost: 0,
+      iranIntelUntil: 0,
       pakistanTriggered: false,
       suezClosed: false,
       incirlikOpen: false,

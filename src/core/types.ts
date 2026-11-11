@@ -538,6 +538,8 @@ export interface GameSnapshot {
   greatPowerFavors?: Record<'russia' | 'china', number>;
   /** Turns of accelerated Iranian production bought from China. */
   iranProductionBoost?: number;
+  /** Turn through which purchased espionage gives Iran exact enemy data. */
+  iranIntelUntil?: number;
   reinforcements: Reinforcement[];
   iranDomestic?: IranDomestic;
   pakistanTriggered: boolean;

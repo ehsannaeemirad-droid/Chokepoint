@@ -1031,12 +1031,17 @@ Limitations:
 - **Great-power aid.** Iran earns Russian and Chinese favour points each turn
   (faster once a patron reaches shield tier) and can spend them on Caspian/airbridge
   missile shipments, a temporary production surge, or espionage that reveals all
-  hidden enemy units. The strategic panel shows point balances, costs and route
-  text; one request per turn is enforced by order reservations.
+  hidden enemy units and gives exact enemy readiness/integrity for two turns. The
+  strategic panel shows point balances, costs and route text; one request per turn
+  is enforced by order reservations.
+- **Final bug fixes.** Missile launchers can no longer relocate onto water, a move
+  now reserves the unit against a second task, the target-first list excludes
+  units with any queued task, and malformed/unknown aid orders are rejected before
+  they reach the resolver.
 
 Verification (executed):
 - `tsc --noEmit` exit 0.
-- `vitest run`: 41 files / 302 tests passed.
+- `vitest run`: 41 files / 304 tests passed.
 - `pnpm run build` exit 0 (only the existing >500 kB chunk warning).
 - Dev-server browser check at 390 px: Iran strategic panel renders Russia/China
   favour gauges and cost-gated aid buttons; no console/runtime errors.

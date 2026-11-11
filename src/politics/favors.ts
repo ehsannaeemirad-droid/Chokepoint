@@ -73,13 +73,16 @@ export function applyAid(snap: GameSnapshot, patron: Patron, aid: AidKind, event
 
   let revealed = 0;
   for (const unit of snap.units) {
-    if (unit.faction === 'iran' || unit.revealed) continue;
+    if (unit.faction === 'iran') continue;
+    if (!unit.revealed) revealed += 1;
     unit.revealed = true;
     unit.lastSeen = snap.turn;
-    revealed += 1;
   }
+  // Coalition positions are already plotted in this theatre, so the paid
+  // package's real value is exact readiness and integrity, not a list of dots.
+  snap.iranIntelUntil = Math.max(snap.iranIntelUntil ?? 0, snap.turn + 2);
   events.push({
-    text: `A ${patron === 'russia' ? 'Russian' : 'Chinese'} intelligence package ${route} located ${revealed} previously hidden enemy unit${revealed === 1 ? '' : 's'}.`,
+    text: `A ${patron === 'russia' ? 'Russian' : 'Chinese'} intelligence package ${route} exposed ${revealed} hidden enemy unit${revealed === 1 ? '' : 's'} and gives exact enemy data through turn ${snap.iranIntelUntil}.`,
     tone: 'good',
     faction: 'iran',
   });

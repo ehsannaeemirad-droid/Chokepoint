@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { attackersForHex, strikeTargetsFor } from './targets';
-import { applyOrder } from '../core/engine';
+import { applyOrder, validateOrder } from '../core/engine';
 import { Game } from '../core/Game';
 import { defenderOfNode, unitType } from '../core/world';
 import { hostileTo } from './combat';
 import type { ResolveEvent, UnitInstance } from '../core/types';
 import { applyAid, favorsOf } from '../politics/favors';
+import { nodeIntegrityEstimate, paidIntel, unitStrengthEstimate } from '../ui/fog';
 
 function start(faction: 'usa' | 'israel' | 'iran'): Game {
   const game = new Game();
@@ -48,6 +49,29 @@ describe('target-first attacker discovery', () => {
     const hex = game.map.nodeHexOf('al_udeid')!;
     expect(attackersForHex(game.snap, game.map, hex.col, hex.row, 'al_udeid')).toHaveLength(0);
   });
+
+  it('rejects a missile launcher moving onto water', () => {
+    const game = start('iran');
+    const launcher = game.snap.units.find((u) => u.typeId === 'fateh110')!;
+    let sea: { col: number; row: number } | null = null;
+    for (let col = 0; col < 60 && !sea; col++) {
+      for (let row = 0; row < 60 && !sea; row++) {
+        const tile = game.map.hexAt(col, row);
+        if (tile && (tile.terrain === 'deep' || tile.terrain === 'coast')) sea = { col, row };
+      }
+    }
+    expect(sea).toBeTruthy();
+    launcher.col = sea!.col;
+    launcher.row = sea!.row;
+    const result = validateOrder(game.snap, game.map, {
+      kind: 'move',
+      unitUid: launcher.uid,
+      col: sea!.col,
+      row: sea!.row,
+    });
+    expect(result.ok).toBe(false);
+    expect(result.code).toBe('ground-water');
+  });
 });
 
 describe('movable Iranian launchers', () => {
@@ -89,6 +113,13 @@ describe('US naval fleet targeting', () => {
 });
 
 describe('great-power favours', () => {
+  it('rejects an unaffordable aid request through the order path', () => {
+    const game = start('iran');
+    const result = game.queueOrder({ kind: 'aid', patron: 'russia', aid: 'production' });
+    expect(result.ok).toBe(false);
+    expect(result.code).toBe('not-enough-favors');
+  });
+
   it('spends Russian points on a Caspian missile shipment', () => {
     const game = start('iran');
     favorsOf(game.snap).russia = 5;
@@ -107,6 +138,11 @@ describe('great-power favours', () => {
     favorsOf(game.snap).china = 5;
     applyAid(game.snap, 'china', 'intel', []);
     expect(enemy.revealed).toBe(true);
+    expect(paidIntel(game.snap)).toBe(true);
+    const estimate = unitStrengthEstimate(game.snap, enemy)!;
+    expect(estimate.lo).toBe(estimate.hi);
+    const node = game.map.nodes.find((n) => n.host === 'usa' || n.host === 'israel')!;
+    expect(nodeIntegrityEstimate(game.snap, game.map, node.id)).toBeNull();
   });
 
   it('starts a temporary production surge', () => {

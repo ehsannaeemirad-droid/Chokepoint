@@ -191,6 +191,7 @@ export function reserveOrder(snap: GameSnapshot, reserved: OrderReservations, or
       }
       return;
     }
+    case 'move':
     case 'special':
       reserved.units.add(order.unitUid);
       return;
@@ -269,6 +270,9 @@ export function validateOrder(
     case 'move': {
       const unit = findUnit(snap, order.unitUid);
       if (!unit) return reject('select-unit', 'Select one of your units');
+      if (reserved.units.has(unit.uid)) {
+        return reject('unit-tasked', 'That unit has already been tasked this turn');
+      }
       const def = unitType(unit.typeId);
       const dist = hexDistance({ col: unit.col, row: unit.row }, { col: order.col, row: order.row });
       if (dist > def.mov) {
@@ -279,8 +283,11 @@ export function validateOrder(
       if (def.category === 'naval' && !(tile.terrain === 'deep' || tile.terrain === 'coast')) {
         return reject('naval-at-sea', 'Naval units must stay at sea');
       }
-      if (def.category === 'ground' && (tile.terrain === 'deep' || tile.terrain === 'coast')) {
-        return reject('ground-water', 'Ground units cannot enter water');
+      if (
+        ['ground', 'missile', 'drone', 'defense', 'production', 'cyber', 'specops'].includes(def.category) &&
+        (tile.terrain === 'deep' || tile.terrain === 'coast')
+      ) {
+        return reject('ground-water', 'That unit cannot enter water');
       }
       return { ok: true };
     }
@@ -421,6 +428,9 @@ export function validateOrder(
     }
     case 'aid': {
       if (snap.faction !== 'iran') return reject('iran-aid-only', 'Only Iran can call in great-power support');
+      if (!['russia', 'china'].includes(order.patron) || !['missiles', 'production', 'intel'].includes(order.aid)) {
+        return reject('unknown-order', 'Unknown great-power request');
+      }
       if (reserved.aid) return reject('aid-already-queued', 'Only one great-power request can be queued per turn');
       const favors = favorsOf(snap);
       const cost = aidCost(order.patron, order.aid);

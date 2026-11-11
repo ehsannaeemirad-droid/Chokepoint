@@ -71,6 +71,11 @@ export function exactAccess(snap: GameSnapshot, defender: FactionId | null): boo
   return defender === null || defender === snap.faction;
 }
 
+/** Purchased Chinese/Russian espionage temporarily removes estimate bands. */
+export function paidIntel(snap: GameSnapshot): boolean {
+  return snap.faction === 'iran' && (snap.iranIntelUntil ?? 0) >= snap.turn;
+}
+
 /**
  * Estimate for a facility's integrity, or `null` when the viewer owns the
  * facility and may read the exact value.
@@ -79,6 +84,7 @@ export function nodeIntegrityEstimate(snap: GameSnapshot, map: TheaterMap, nodeI
   const node = map.nodeById.get(nodeId);
   if (!node) return null;
   if (exactAccess(snap, defenderOfNode(node))) return null;
+  if (paidIntel(snap)) return null;
   const hex = map.nodeHexOf(nodeId);
   const quality = hex ? reconAt(snap, snap.faction, hex.col, hex.row) : 'none';
   const value = snap.nodes[nodeId]?.integrity ?? 0;
@@ -107,6 +113,7 @@ export function unitStrengthEstimate(
     unit.col === undefined || unit.row === undefined
       ? 'none'
       : reconAt(snap, snap.faction, unit.col, unit.row);
+  if (paidIntel(snap)) return { lo: Math.round(unit.strength), hi: Math.round(unit.strength), quality };
   if (unit.revealed === false && quality === 'none') return null;
   const staleScale = 1 + Math.min(3, staleTurns(snap, unit)) * 0.25;
   return estimate(unit.strength, snap, `unit:${unit.uid}`, quality, staleScale);
