@@ -784,3 +784,39 @@ Limitations:
   the review chrome is bilingual; that text needs a localisation pass.
 - Faction/scenario briefings and a full translation sweep were not part of
   this pass; the existing quick-start coach and objectives strip remain.
+
+## 22. Phase 4 — faction and scenario briefings
+
+Commit: `feat: add bilingual faction and scenario briefings`.
+
+- **Flow.** START no longer launches the campaign. It opens a briefing modal
+  (SPEC §30 steps 4–5) with the selected scenario and faction; BACK TO MENU
+  returns to selection, BEGIN CAMPAIGN starts the run. The selection is kept
+  across a language switch, and the modal rebuilds in the new language.
+- **Faction briefing (SPEC §31).** `src/ui/briefing.ts` holds bilingual content
+  for the US, Israel and Iran: strategic situation, starting objectives,
+  strengths, weaknesses, political constraints, economic constraints, military
+  capabilities, available strategic actions, key threats and recommended
+  first-turn priorities. Copy names only orders the engine authorises and
+  describes the actual domestic, host-access, interceptor and Hormuz mechanics.
+- **Scenario briefing.** The Narrow Sea (pre-war, 30 turns, no automatic first
+  strike, four decisive outcomes plus settlement/exhaustion) and the five-turn
+  tutorial (scripted response, base access, interceptor attrition, Hormuz).
+- **Presentation.** The briefing uses the existing modal shell, section
+  headings and 44px footer actions; two-column strengths/weaknesses and
+  political/economic groups collapse to one column under 520px, and RTL uses
+  logical properties. No interface structure was replaced.
+- **Tests.** `src/ui/briefing.test.ts` checks that every playable faction and
+  every scenario in the game data has complete EN/FA content, that no faction
+  shares another's situation or first priority, and that every side lists at
+  least two weaknesses plus political and economic constraints.
+
+Verification: `tsc` exit 0, 35 files / 273 tests passed, `build` exit 0.
+
+Limitations:
+- The briefing was not viewed in a browser or with a Persian RTL pass, so
+  layout, wrapping and focus order are unverified.
+- Scenario briefing text is hand-written rather than derived from the scenario
+  JSON, so scenario balance changes may require copy updates.
+- Historical claims are limited to the game's own setting; no external
+  sourcing was added.
