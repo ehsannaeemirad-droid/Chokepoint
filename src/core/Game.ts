@@ -26,7 +26,8 @@ import type {
   UnitInstance,
   VictoryThresholds,
 } from './types';
-import { allUnitTypes, unitType } from './world';
+import { allUnitTypes, defenderOfNode, unitType } from './world';
+import { hostileTo } from '../combat/combat';
 import { DEFAULT_DOMESTIC_CFG, defaultDomesticState } from '../politics/domestic';
 import { DEFAULT_ESCALATION_CFG, defaultEscalationState } from '../politics/escalation';
 import { DEFAULT_ROE_CFG, defaultRoeState } from '../politics/roe';
@@ -230,6 +231,8 @@ export class Game {
         russia: { id: 'russia', stance: BALANCE.superpowerStanceStart, tier: 0 },
         china: { id: 'china', stance: BALANCE.superpowerStanceStart, tier: 0 },
       },
+      greatPowerFavors: { russia: 3, china: 3 },
+      iranProductionBoost: 0,
       pakistanTriggered: false,
       suezClosed: false,
       incirlikOpen: false,
@@ -286,8 +289,20 @@ export class Game {
 
   selectHex(col: number, row: number): void {
     const id = hexId(col, row);
+    const tile = this.map.hexAt(col, row);
+    const node = tile?.nodeId ? this.map.nodeById.get(tile.nodeId) : undefined;
+    const hostileNode = !!node && !!defenderOfNode(node) && hostileTo(this.snap.faction, defenderOfNode(node)!);
+    const hostileUnit = this.unitsAt(col, row).some(
+      (u) => u.faction !== this.snap.faction && hostileTo(this.snap.faction, u.faction) && u.revealed,
+    );
     const units = this.unitsAt(col, row).filter((u) => u.faction === this.snap.faction);
-    this.selection = { hexId: id, unitUid: units[0]?.uid ?? null, mode: 'idle' };
+    // A target-first click opens the location sheet, so the player can see every
+    // tool that can hit it. A friendly-only click still selects the unit.
+    this.selection = {
+      hexId: id,
+      unitUid: hostileNode || hostileUnit ? null : (units[0]?.uid ?? null),
+      mode: 'idle',
+    };
     this.emit();
   }
 

@@ -272,7 +272,8 @@ export type Order =
   | { kind: 'communicate' }
   | { kind: 'israel-initiative'; stance: IsraelStance }
   | { kind: 'talks'; stance: TalksStance }
-  | { kind: 'roe'; posture: RoePosture };
+  | { kind: 'roe'; posture: RoePosture }
+  | { kind: 'aid'; patron: 'russia' | 'china'; aid: 'missiles' | 'production' | 'intel' };
 
 export type IsraelStance = 'approved' | 'constrained' | 'accepted';
 export type TalksStance = 'pursue' | 'walk';
@@ -533,6 +534,10 @@ export interface GameSnapshot {
   iran: IranStock;
   meters: Meters;
   superpowers: Record<'russia' | 'china', SuperpowerState>;
+  /** Iran's spendable great-power favour points; absent on older saves. */
+  greatPowerFavors?: Record<'russia' | 'china', number>;
+  /** Turns of accelerated Iranian production bought from China. */
+  iranProductionBoost?: number;
   reinforcements: Reinforcement[];
   iranDomestic?: IranDomestic;
   pakistanTriggered: boolean;

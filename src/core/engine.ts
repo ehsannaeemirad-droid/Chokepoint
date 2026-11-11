@@ -36,6 +36,7 @@ import {
   updateSuperpowers,
 } from '../politics/politics';
 import { updateEscalation } from '../politics/escalation';
+import { accrueFavors, aidCost, applyAid, favorsOf } from '../politics/favors';
 import { COALITION_FACTIONS, ROE_POSTURES, activeRoe, roeEffectsText, updateRoe } from '../politics/roe';
 import { buildScorecard } from '../politics/scorecard';
 import { checkOutcome, updateVictoryClocks } from '../politics/victory';
@@ -158,6 +159,7 @@ export interface OrderReservations {
   tankers: number;
   rounds: Record<DeliveryClass, number>;
   sorties: Record<'drone' | 'ballistic', number>;
+  aid: boolean;
 }
 
 export function emptyReservations(): OrderReservations {
@@ -170,6 +172,7 @@ export function emptyReservations(): OrderReservations {
     tankers: 0,
     rounds: { drone: 0, fateh: 0, khorramshahr: 0, fattah: 0, asm: 0 },
     sorties: { drone: 0, ballistic: 0 },
+    aid: false,
   };
 }
 
@@ -224,6 +227,9 @@ export function reserveOrder(snap: GameSnapshot, reserved: OrderReservations, or
       return;
     case 'communicate':
       reserved.politicalWill += domesticCfg(snap).communicate.cost;
+      return;
+    case 'aid':
+      reserved.aid = true;
       return;
     default:
       return;
@@ -413,6 +419,20 @@ export function validateOrder(
       if (block) return block;
       return { ok: true };
     }
+    case 'aid': {
+      if (snap.faction !== 'iran') return reject('iran-aid-only', 'Only Iran can call in great-power support');
+      if (reserved.aid) return reject('aid-already-queued', 'Only one great-power request can be queued per turn');
+      const favors = favorsOf(snap);
+      const cost = aidCost(order.patron, order.aid);
+      if (favors[order.patron] < cost) {
+        return reject('not-enough-favors', `Not enough ${order.patron} favour points`, {
+          patron: order.patron,
+          cost,
+          available: favors[order.patron],
+        });
+      }
+      return { ok: true };
+    }
     case 'roe': {
       if (!COALITION_FACTIONS.has(snap.faction)) {
         return reject('coalition-roe-only', 'Only the coalition sets rules of engagement');
@@ -528,9 +548,18 @@ export function applyOrder(
       if (!unit) return;
       unit.col = order.col;
       unit.row = order.row;
+      const exposed = unit.faction === 'iran' && unitType(unit.typeId).category === 'missile';
+      if (exposed) {
+        // A launcher can relocate, but a convoy is easier to find than a cold
+        // hide: the move puts it on the coalition target picture.
+        unit.revealed = true;
+        unit.lastSeen = snap.turn;
+      }
       events.push({
-        text: `${unit.name} repositioned.`,
-        tone: 'info',
+        text: exposed
+          ? `${unit.name} repositioned; the move exposed its launch site to coalition reconnaissance.`
+          : `${unit.name} repositioned.`,
+        tone: exposed ? 'warn' : 'info',
         faction: unit.faction,
         focus: { col: order.col, row: order.row },
       });
@@ -615,7 +644,11 @@ export function applyOrder(
       }
       snap.iran.resources -= cost * order.count;
       // Output tracks the average condition of the surviving facilities.
-      const output = Math.max(1, Math.round(order.count * productionCapacity(map.nodes, snap, line)));
+      const boost = (snap.iranProductionBoost ?? 0) > 0 ? 1.5 : 1;
+      const output = Math.max(
+        1,
+        Math.round(order.count * productionCapacity(map.nodes, snap, line) * boost),
+      );
       // Production builds airframes and warheads separately, then mates them.
       const cls = deliveryClassFor(order.unitTypeId);
       if (cls) deliverMatedRounds(snap, cls, output);
@@ -679,6 +712,10 @@ export function applyOrder(
         tone: 'info',
         faction: 'usa',
       });
+      return;
+    }
+    case 'aid': {
+      applyAid(snap, order.patron, order.aid, events);
       return;
     }
     case 'communicate': {
@@ -866,6 +903,8 @@ function attritionPhase(
   updateIntelligence(snap);
   updateChokepoints(snap, map);
   updateSuperpowers(snap, events);
+  accrueFavors(snap);
+  if ((snap.iranProductionBoost ?? 0) > 0) snap.iranProductionBoost = (snap.iranProductionBoost ?? 1) - 1;
   updateEscalation(snap, events);
   updateDomestic(snap, events);
   updateIsraelInitiative(snap, events);

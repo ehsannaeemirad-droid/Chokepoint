@@ -1012,3 +1012,38 @@ Limitations:
   return HTTP 200.
 - A desktop-browser visual pass of the Pages URL timed out, so deployment is
   verified over HTTP and by asset delivery, not by a rendered-page screenshot.
+
+## 29. Target-first attacks, mobile launchers, fleet targeting, great-power aid
+
+- **Target-first attacks.** `attackersForHex()` reverses target discovery: every
+  own unit that can legally strike the selected facility/hex is listed in the
+  location sheet, with distance and weapon category, and each row queues the
+  existing strike order. The same helper keeps the map highlights and sheet in
+  agreement.
+- **Mobile launchers.** Fateh-110, Khorramshahr and Fattah launchers now have one
+  hex of movement. Relocating an Iranian missile unit marks it revealed and sets
+  `lastSeen`, because the convoy exposes the launch site; coalition aircraft can
+  now use a dedicated counter-battery target pass against those revealed crews.
+  The unit card warns about the exposure before the move is queued.
+- **US naval fleet.** The CSG remains visible to Iran and is named in the target
+  sheet as “Carrier Strike Group” rather than an anonymous hex. It is attackable
+  through the normal strike validation path.
+- **Great-power aid.** Iran earns Russian and Chinese favour points each turn
+  (faster once a patron reaches shield tier) and can spend them on Caspian/airbridge
+  missile shipments, a temporary production surge, or espionage that reveals all
+  hidden enemy units. The strategic panel shows point balances, costs and route
+  text; one request per turn is enforced by order reservations.
+
+Verification (executed):
+- `tsc --noEmit` exit 0.
+- `vitest run`: 41 files / 302 tests passed.
+- `pnpm run build` exit 0 (only the existing >500 kB chunk warning).
+- Dev-server browser check at 390 px: Iran strategic panel renders Russia/China
+  favour gauges and cost-gated aid buttons; no console/runtime errors.
+
+Limitations:
+- The target-first sheet is covered by helper tests and browser rendering of the
+  new panels, but the map-label click path was not exercised in this browser
+  session (the labels were not present in the current camera view).
+- The aid balance is a playable baseline; it has not been tuned by a dedicated
+  win-rate pass.

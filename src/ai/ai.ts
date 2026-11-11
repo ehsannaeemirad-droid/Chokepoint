@@ -5,7 +5,7 @@
  */
 import treeData from '../data/ai/trees.json';
 import { factionRng } from '../core/rng';
-import type { FactionId, GameSnapshot, ResolveEvent, SalvoSpecLike } from '../core/types';
+import type { FactionId, GameSnapshot, ResolveEvent, SalvoSpecLike, UnitInstance } from '../core/types';
 import { clamp, defenderOfNode, nodeState, removeUnit, unitType } from '../core/world';
 import { hexDistance } from '../map/hex';
 import { productionSites } from '../core/production';
@@ -612,6 +612,7 @@ function coalitionAi(ctx: AiContext, faction: 'usa' | 'israel'): boolean {
     }
   }
 
+  if (flown < doctrine.strikeCap) flown += coalitionCounterBattery(ctx, faction, aircraft, doctrine);
   if (flown < doctrine.strikeCap) flown += coalitionMaritime(ctx, doctrine);
 
   if (packages > 1 && flown > 0) {
@@ -624,6 +625,34 @@ function coalitionAi(ctx: AiContext, faction: 'usa' | 'israel'): boolean {
   }
   void iranLaunchPressure;
   return flown > 0;
+}
+
+function coalitionCounterBattery(
+  ctx: AiContext,
+  faction: 'usa' | 'israel',
+  aircraft: UnitInstance[],
+  doctrine: DoctrineProfile,
+): number {
+  const launchers = ctx.snap.units.filter(
+    (u) => u.faction === 'iran' && u.revealed && unitType(u.typeId).category === 'missile',
+  );
+  for (const launcher of launchers) {
+    for (const plane of aircraft) {
+      if (plane.magazine <= 0 || plane.cooldown > 0) continue;
+      if (hexDistance({ col: plane.col, row: plane.row }, { col: launcher.col, row: launcher.row }) > strikeRange(ctx.snap, plane)) continue;
+      if (!validateStrike(ctx.snap, ctx.map, plane, launcher.col, launcher.row).ok) continue;
+      ctx.events.push({
+        text: `${faction === 'usa' ? 'US' : 'Israeli'} aircraft hit a revealed Iranian launch crew (doctrine: ${doctrine.label}).`,
+        tone: 'good',
+        faction,
+        focus: { col: launcher.col, row: launcher.row },
+      });
+      const result = resolveStrike(ctx.snap, ctx.map, plane, launcher.col, launcher.row, undefined, ctx.rng);
+      ctx.events.push(...result.events);
+      return 1;
+    }
+  }
+  return 0;
 }
 
 function evaluate(_faction: FactionId, ctx: AiContext, treeName: string): void {

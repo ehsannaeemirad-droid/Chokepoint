@@ -40,6 +40,7 @@ const SCOPE: Record<Order['kind'], 'unit' | 'iran' | 'usa' | 'player' | 'coaliti
   'israel-initiative': 'player',
   talks: 'player',
   roe: 'coalition',
+  aid: 'iran',
 };
 
 const COALITION = new Set(['usa', 'israel']);

@@ -196,6 +196,10 @@ const LOG_PATTERNS: LogPattern[] = [
     template: '{name} به {target} حمله کرد (یکپارچگی {int}٪).',
   },
   {
+    pattern: /^(?<name>.+) struck enemy forces at (?<col>-?\d+),(?<row>-?\d+)\.$/,
+    template: '{name} به نیروهای دشمن در {col}،{row} حمله کرد.',
+  },
+  {
     pattern: /^(?<name>.+) struck (?<target>.+?) — surface plant wrecked, the halls (?<depth>\d+) m underground are untouched \((?<int>\d+)%\)$/,
     template: '{name} به {target} حمله کرد — تأسیسات سطحی ویران شد اما سالن‌های {depth} متری زیر زمین دست‌نخورده ماند ({int}٪)',
   },
@@ -255,6 +259,10 @@ const LOG_PATTERNS: LogPattern[] = [
   {
     pattern: /^(?<name>.+) repositioned\.$/,
     template: '{name} جابه‌جا شد.',
+  },
+  {
+    pattern: /^(?<name>.+) repositioned; the move exposed its launch site to coalition reconnaissance\.$/,
+    template: '{name} جابه‌جا شد؛ جابه‌جایی محل پرتاب را برای شناسایی ائتلاف آشکار کرد.',
   },
   // ---- politics -------------------------------------------------------------
   {
@@ -460,6 +468,14 @@ const LOG_PATTERNS: LogPattern[] = [
   {
     pattern: /^Underground production delivered \+(?<n>\d+) (?<what>.+)\.$/,
     template: 'تولید زیرزمینی {n} {what} تحویل داد.',
+  },
+  {
+    pattern: /^(?<side>US|Israeli) aircraft hit a revealed Iranian launch crew \(doctrine: (?<doctrine>.+)\)\.$/,
+    template: 'هواپیماهای {side} به خدمه پرتابگر ایرانی آشکارشده حمله کردند (دکترین: {doctrine}).',
+  },
+  {
+    pattern: /^A (?<patron>Russian|Chinese) (?:missile shipment|production package|intelligence package) (?:arrived )?(?:across the Caspian|by Chinese airbridge).*$/,
+    template: 'بسته پشتیبانی {patron} از مسیر تأمین ایران رسید.',
   },
 ];
 

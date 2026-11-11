@@ -5,13 +5,14 @@
  * The interface is bilingual (English / Persian). All chrome goes through
  * `t()`; map nodes and units use their localised data fields.
  */
-import { strikeTargetsFor, type StrikeTarget } from '../combat/targets';
+import { attackersForHex, strikeTargetsFor, type StrikeTarget } from '../combat/targets';
 import { FACTION_COLORS } from '../core/config';
 import { ISRAEL_AIRLIFT, REINFORCEMENTS, effectiveArrival } from '../core/engine';
 import { ARSENAL_UNCERTAINTY_PCT, arsenalRows, deliveryClassFor } from '../core/inventory';
 import { game, SCENARIOS, type Game, type InteractionMode } from '../core/Game';
 import type { FactionId, Order, PlayableFactionId, ResolveEvent, UnitInstance } from '../core/types';
-import { unitType } from '../core/world';
+import { defenderOfNode, unitType } from '../core/world';
+import { hostileTo } from '../combat/combat';
 import {
   getLang,
   localEffect,
@@ -32,6 +33,7 @@ import { escalationCfg } from '../politics/escalation';
 import { ROE_POSTURES, roeCfg } from '../politics/roe';
 import { initiativeCfg } from '../politics/initiative';
 import { talksCfg } from '../politics/talks';
+import { AID_COSTS, favorsOf, type AidKind, type Patron } from '../politics/favors';
 import { victoryPaths } from '../politics/victory';
 import { buildObjectives, previewOrderImpact, type ObjectiveRow } from './objectives';
 import { buildTurnReview, reportKey } from './review';
@@ -427,6 +429,11 @@ export class Ui {
       this.showToast(result.ok ? t('toast.communicate') : rejectionText(result), result.ok ? 'good' : 'warn');
       return;
     }
+    if (verb === 'aid' && a && b) {
+      const result = this.game.queueOrder({ kind: 'aid', patron: a as Patron, aid: b as AidKind });
+      this.showToast(result.ok ? t('toast.aid') : rejectionText(result), result.ok ? 'good' : 'warn');
+      return;
+    }
     if (verb === 'initiative' && a) {
       const result = this.game.queueOrder({ kind: 'israel-initiative', stance: a as 'approved' | 'constrained' | 'accepted' });
       this.showToast(result.ok ? t('toast.initiative') : rejectionText(result), result.ok ? 'good' : 'warn');
@@ -715,6 +722,9 @@ export class Ui {
       ]);
       pills.push([t('gauge.res'), `${Math.round(s.iran.resources)}`, t('tip.res')]);
       pills.push([t('gauge.will'), `${Math.round(s.resources.politicalWill)}`, t('tip.willIran')]);
+      const favors = favorsOf(s);
+      pills.push([t('gauge.ru'), `${favors.russia}`, t('tip.favors')]);
+      pills.push([t('gauge.cn'), `${favors.china}`, t('tip.favors')]);
     }
     return pills
       .map(
@@ -783,6 +793,8 @@ export class Ui {
         return fa ? 'عملیات واحد 8200' : 'Unit 8200 operation';
       case 'hold':
         return fa ? `${name} در موضع` : `${name} holds`;
+      case 'aid':
+        return fa ? `کمک ${order.patron === 'russia' ? 'روسیه' : 'چین'}` : `${order.patron === 'russia' ? 'Russia' : 'China'} aid`;
       default:
         return fa ? 'فرمان' : 'Order';
     }
@@ -849,6 +861,7 @@ export class Ui {
         <div class="stat wide"><span>${this.game.snap.faction === 'iran' ? t('sheet.stock') : t('sheet.munitions')}</span><b>${this.game.snap.faction === 'iran' ? stock : unit.magazine}</b></div>
       </div>
       ${unit.cooldown > 0 ? `<div class="warn-line">${t('sheet.rearming', { n: unit.cooldown })}</div>` : ''}
+      ${this.game.snap.faction === 'iran' && def.category === 'missile' ? `<div class="warn-line">${t('sheet.moveRisk')}</div>` : ''}
       ${hostWarn}
       ${active ? `<div class="warn-line">${t('sheet.tasked')}</div>` : ''}
       ${mode !== 'idle' ? `<div class="mode-hint">${mode === 'move' ? t('sheet.modeMove') : mode === 'strike' ? t('sheet.modeStrike') : t('sheet.modeSpecial')} <button data-action="cancel-mode">${t('btn.cancel')}</button></div>` : ''}
@@ -943,6 +956,7 @@ export class Ui {
         ${fa ? '' : `<p class="detail">${node.detail}${node.personnel ? ` · ${t('sheet.personnel', { n: node.personnel.toLocaleString() })}` : ''}</p>`}
         ${buriedWarn}
         ${unitChips}
+        ${this.attackersHtml(col, row, node.id)}
         <div class="actions"><button data-action="focus-node:${node.id}">${t('btn.centre')}</button><button data-action="panel:strategic">${t('btn.intel')}</button></div>
       `;
     }
@@ -960,7 +974,45 @@ export class Ui {
         <div class="stat wide"><span>${t('sheet.coord')}</span><b>${tile.lon.toFixed(1)}E ${tile.lat.toFixed(1)}N</b></div>
       </div>
       ${unitChips}
+      ${this.attackersHtml(col, row)}
     `;
+  }
+
+  /** Target-first view: all of the player's tools that can hit this location. */
+  private attackersHtml(col: number, row: number, nodeId?: string): string {
+    const snap = this.game.snap;
+    const node = nodeId ? this.game.map.nodeById.get(nodeId) : undefined;
+    const defender = node ? defenderOfNode(node) : null;
+    const hostile = node
+      ? !!defender && hostileTo(snap.faction, defender)
+      : this.game.unitsAt(col, row).some((u) => u.faction !== snap.faction && u.revealed && hostileTo(snap.faction, u.faction));
+    if (!hostile) return '';
+    const attackers = attackersForHex(
+      snap,
+      this.game.map,
+      col,
+      row,
+      nodeId,
+      (id) => {
+        const target = this.game.map.nodeById.get(id);
+        return target ? localName(target) : id;
+      },
+      (c, r) => t('target.hex', { col: c, row: r }),
+      (unit) => unitLabel(unit),
+    );
+    if (attackers.length === 0) {
+      return `<section class="targets"><h4>${t('sheet.attackers')}</h4><p class="note">${t('sheet.noAttackers')}</p></section>`;
+    }
+    const rows = attackers
+      .map(
+        ({ unit, dist }) => `<button class="target-row" data-action="attack:${unit.uid}:${col},${row}:${nodeId ?? ''}">
+          <span class="t-main"><b>${unitLabel(unit)}</b></span>
+          <span class="t-meta">${t('target.metaAttacker', { dist, weapon: categoryLabel(unitType(unit.typeId).category) })}</span>
+          <span class="t-go">${t('btn.strike')}</span>
+        </button>`,
+      )
+      .join('');
+    return `<section class="targets"><h4>${t('sheet.attackers')} <span>${attackers.length}</span></h4>${rows}</section>`;
   }
 
   // ------------------------------------------------------------------ panels
@@ -1074,7 +1126,23 @@ export class Ui {
         ['khorramshahr', localName(unitType('khorramshahr')), 25],
         ['fattah', localName(unitType('fattah')), 40],
       ];
-      factionSection += `<section class="panel-section"><h4>${t('panel.production', { n: Math.round(s.iran.resources) })}</h4>
+      const favors = favorsOf(s);
+      const aidRows = (['missiles', 'production', 'intel'] as const)
+        .map((aid) => {
+          const costRu = AID_COSTS.russia[aid];
+          const costCn = AID_COSTS.china[aid];
+          return `<div class="host-top"><b>${t(`aid.${aid}` as StringKey)}</b><span class="status open">${t('aid.cost', { ru: costRu, cn: costCn })}</span></div>
+            <div class="choice-row">
+              <button class="mini" data-action="aid:russia:${aid}" ${favors.russia < costRu ? 'disabled' : ''}>${t('aid.russia')} · ${costRu}</button>
+              <button class="mini" data-action="aid:china:${aid}" ${favors.china < costCn ? 'disabled' : ''}>${t('aid.china')} · ${costCn}</button>
+            </div>`;
+        })
+        .join('');
+      factionSection += `<section class="panel-section"><h4>${t('panel.aid')}</h4>
+        <small>${t('panel.aidHelp', { ru: favors.russia, cn: favors.china })}</small>
+        ${aidRows}
+      </section>
+      <section class="panel-section"><h4>${t('panel.production', { n: Math.round(s.iran.resources) })}</h4>
         ${lines
           .map(([id, label, cost]) => {
             const cls = deliveryClassFor(id);
@@ -1336,6 +1404,7 @@ export class Ui {
         return node ? localName(node) : nodeId;
       },
       (col, row) => t('target.hex', { col, row }),
+      (unit) => unitLabel(unit),
     );
   }
 

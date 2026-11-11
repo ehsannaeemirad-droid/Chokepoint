@@ -64,6 +64,10 @@ function labelFor(snap: GameSnapshot, map: TheaterMap, order: Order): string {
       return ISRAEL_AIRLIFT.label;
     case 'communicate':
       return fa ? 'پیام عمومی' : 'Public address';
+    case 'aid':
+      return fa
+        ? `کمک ${order.patron === 'russia' ? 'روسیه' : 'چین'} · ${order.aid}`
+        : `${order.patron === 'russia' ? 'Russia' : 'China'} aid · ${order.aid}`;
     case 'israel-initiative':
       return fa ? `دستور اسرائیل: ${order.stance}` : `Israel directive: ${order.stance}`;
     case 'talks':
