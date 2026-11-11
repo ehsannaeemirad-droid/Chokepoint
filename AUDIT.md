@@ -850,3 +850,35 @@ Limitations:
 - Battle-log narrative is translated at presentation through `i18n/log.ts` for
   known patterns; unmatched generated lines intentionally remain English.
 - No browser or RTL visual pass was performed.
+
+## 24. Phase 4 — stable order-rejection codes and Persian messages
+
+Commit: `feat: give order rejections stable codes and Persian messages`.
+
+- **Engine contract.** `src/core/rejection.ts` defines
+  `ORDER_REJECTION_CODES`, `OrderRejectCode`, `RejectParams` and `reject()`.
+  `OrderCheck` and `StrikeValidation` now carry `code` and optional `params`
+  while keeping the English `reason`, so existing tests, logs and AI callers
+  are unaffected. `Game.queueOrder` returns the same shape.
+- **Coverage.** Codes are attached in `validateOrder`, `validateStrike`,
+  congressional/ROE strike gates, and the initiative/talks validators.
+  Permission codes reuse `not-your-unit`, `wrong-faction`,
+  `wrong-unit-category` and `target-ineligible`, with `unknown-unit` mapped to
+  `select-unit`.
+- **Presentation.** `src/ui/reason.ts` resolves `reason.<code>` through the
+  dictionary with params (distance, cost, cooldown, host, production line) and
+  falls back to the English reason, then a caller fallback. Every toast in
+  `Ui.ts` and the turn-review validation list use it.
+- **Localisation.** All 73 codes have English and Persian messages, including
+  detailed cases such as no-fly zone, congressional restriction, city-strike
+  authorisation, initiative cooldown and Qatari talks state.
+
+Verification: `tsc` exit 0, 37 files / 282 tests passed, `build` exit 0.
+
+Limitations:
+- Log and outcome narrative remain translated through `i18n/log.ts` patterns;
+  rejections are the only engine text now keyed by stable code.
+- Codes live in the simulation contract, so adding a validation branch without
+  a code will still compile if it returns the optional-field interface; the
+  code union is enforced only where `reject()` is used.
+- No browser/RTL visual pass.
