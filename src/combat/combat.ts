@@ -11,6 +11,7 @@ import type { TheaterMap } from '../map/TheaterMap';
 import { BALANCE } from '../core/config';
 import { attackerLossChance, defenceLayers, detectRaid, engageOnce, suppressAfterImpact } from './airdefence';
 import { addCasualties, restrictionBlocksStrike } from '../politics/domestic';
+import { reject, type OrderRejectCode, type RejectParams } from '../core/rejection';
 import { roeBlocksStrike, roeDamageMultiplier } from '../politics/roe';
 import {
   addIranWarCost,
@@ -240,7 +241,9 @@ export function strikeRange(snap: GameSnapshot, unit: UnitInstance): number {
 
 export interface StrikeValidation {
   ok: boolean;
+  code?: OrderRejectCode;
   reason?: string;
+  params?: RejectParams;
 }
 
 export function validateStrike(
@@ -252,53 +255,60 @@ export function validateStrike(
   nodeId?: string,
 ): StrikeValidation {
   const def = unitType(unit.typeId);
-  if (unit.magazine <= 0) return { ok: false, reason: 'No munitions remaining' };
-  if (unit.cooldown > 0) return { ok: false, reason: `Rearming (${unit.cooldown} turns)` };
+  if (unit.magazine <= 0) return reject('no-munitions-remaining', 'No munitions remaining');
+  if (unit.cooldown > 0) {
+    return reject('rearming', `Rearming (${unit.cooldown} turns)`, { turns: unit.cooldown });
+  }
   if (def.category === 'defense' || def.category === 'production' || def.category === 'cyber') {
-    return { ok: false, reason: 'This unit cannot conduct strikes' };
+    return reject('cannot-strike', 'This unit cannot conduct strikes');
   }
   const dist = hexDistance({ col: unit.col, row: unit.row }, { col, row });
   const range = strikeRange(snap, unit);
-  if (dist > range) return { ok: false, reason: `Out of range (${dist}/${range} hexes)` };
+  if (dist > range) {
+    return reject('out-of-range', `Out of range (${dist}/${range} hexes)`, { dist, range });
+  }
 
   // Base access: offensive missions cannot launch from a restricted host.
   const origin = map.hexAt(unit.col, unit.row);
   if ((unit.faction === 'usa' || unit.faction === 'israel') && origin) {
     const host = snap.hosts[origin.owner];
     if (host && host.status !== 'open') {
-      return { ok: false, reason: `${host.name} ${host.status === 'closed' ? 'has closed its bases' : 'restricts offensive missions'}` };
+      return host.status === 'closed'
+        ? reject('host-closed', `${host.name} has closed its bases`, { host: host.name })
+        : reject('host-restricted', `${host.name} restricts offensive missions`, { host: host.name });
     }
   }
 
   const node = nodeId ? map.nodeById.get(nodeId) : undefined;
   const enemies = unitsAt(snap, col, row).filter((u) => hostileTo(unit.faction, u.faction));
   const hostileNode = node ? defenderOfNode(node) !== null && node.host !== origin?.owner : false;
-  if (!node && enemies.length === 0) return { ok: false, reason: 'No military target in that hex' };
+  if (!node && enemies.length === 0) return reject('no-target', 'No military target in that hex');
   if (node && !hostileNode && enemies.length === 0) {
-    return { ok: false, reason: 'That facility is not a hostile target' };
+    return reject('not-hostile', 'That facility is not a hostile target');
   }
 
   // Phase 2: congressional restrictions on US offensive operations.
   const congressionalBlock = restrictionBlocksStrike(snap, unit.faction, node);
-  if (congressionalBlock) return { ok: false, reason: congressionalBlock };
+  if (congressionalBlock) return congressionalBlock;
 
   // Improvement 6: the coalition rules-of-engagement posture can forbid
   // population-centre strikes under the constrained preset.
   const roeBlock = roeBlocksStrike(snap, unit.faction, node);
-  if (roeBlock) return { ok: false, reason: roeBlock };
+  if (roeBlock) return roeBlock;
 
   // Great-power red lines. Russia and China do not fight, but they can forbid.
   const coalition = unit.faction === 'usa' || unit.faction === 'israel';
   if (coalition && node?.host === 'iran') {
     // The no-fly zone restricts aircraft, not sea-launched missiles.
     if (noFlyZoneActive(snap) && def.category !== 'naval') {
-      return { ok: false, reason: 'Russia has imposed a no-fly zone over Iran' };
+      return reject('no-fly-zone', 'Russia has imposed a no-fly zone over Iran');
     }
     if (node.kind === 'urban' && snap.resources.politicalWill < BALANCE.congressCityStrikeWill) {
-      return {
-        ok: false,
-        reason: `Congress has not authorised strikes on Iranian cities (needs ${BALANCE.congressCityStrikeWill} will)`,
-      };
+      return reject(
+        'city-strike-will',
+        `Congress has not authorised strikes on Iranian cities (needs ${BALANCE.congressCityStrikeWill} will)`,
+        { cost: BALANCE.congressCityStrikeWill },
+      );
     }
   }
   return { ok: true };

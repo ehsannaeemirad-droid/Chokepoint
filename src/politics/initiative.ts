@@ -20,6 +20,7 @@ import { totalRounds } from '../core/inventory';
  * Stance orders have a cooldown. Everything here is deterministic arithmetic;
  * no RNG is consumed, so replays stay byte-identical.
  */
+import { reject, type Rejection } from '../core/rejection';
 import type { GameSnapshot, InitiativeConfig, IsraelInitiative, IsraelStance, ResolveEvent } from '../core/types';
 import { clamp } from '../core/world';
 
@@ -100,15 +101,24 @@ export function updateIsraelInitiative(snap: GameSnapshot, events: ResolveEvent[
 /**
  * Validation for `{ kind: 'israel-initiative' }`. US-only, cooldown-gated.
  */
-export function validateInitiativeOrder(snap: GameSnapshot, stance: IsraelStance): string | null {
+export function validateInitiativeOrder(snap: GameSnapshot, stance: IsraelStance): Rejection | null {
   const track = snap.israelInitiative;
-  if (!track) return 'No initiative track in this scenario';
-  if (snap.faction !== 'usa') return 'Only Washington can set the stance toward Israeli operations';
-  if (stance !== 'accepted' && track.stance === stance) return 'That stance is already in force';
+  if (!track) return reject('initiative-no-track', 'No initiative track in this scenario');
+  if (snap.faction !== 'usa') {
+    return reject('initiative-usa-only', 'Only Washington can set the stance toward Israeli operations');
+  }
+  if (stance !== 'accepted' && track.stance === stance) {
+    return reject('initiative-same', 'That stance is already in force');
+  }
   const cfg = initiativeCfg(snap);
   // The cooldown only applies once a directive has actually been sent.
   if (track.lastOrderTurn > 0 && snap.turn - track.lastOrderTurn < cfg.orderCooldown) {
-    return `Jerusalem is still reacting to the last directive (${cfg.orderCooldown - (snap.turn - track.lastOrderTurn)} turns)`;
+    const turns = cfg.orderCooldown - (snap.turn - track.lastOrderTurn);
+    return reject(
+      'initiative-cooldown',
+      `Jerusalem is still reacting to the last directive (${turns} turns)`,
+      { turns },
+    );
   }
   return null;
 }

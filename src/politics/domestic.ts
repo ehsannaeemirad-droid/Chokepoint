@@ -27,6 +27,7 @@
  * Everything here is deterministic: no RNG is consumed anywhere in this
  * module, so replays stay byte-identical.
  */
+import { reject, type Rejection } from '../core/rejection';
 import type { DomesticConfig, DomesticState, GameSnapshot, MapNodeDef, ResolveEvent, RestrictionLevel } from '../core/types';
 import { clamp } from '../core/world';
 
@@ -109,12 +110,14 @@ export function restrictionBlocksStrike(
   snap: GameSnapshot,
   unitFaction: string,
   node?: MapNodeDef,
-): string | null {
+): Rejection | null {
   if (unitFaction !== 'usa' || !snap.domestic) return null;
   const level = snap.domestic.restriction;
-  if (level === 'suspended') return 'Congress has suspended all US offensive strikes';
+  if (level === 'suspended') {
+    return reject('congress-suspended', 'Congress has suspended all US offensive strikes');
+  }
   if (level === 'restricted' && node && node.host === 'iran') {
-    return 'Congress has restricted US operations inside Iranian territory';
+    return reject('congress-restricted', 'Congress has restricted US operations inside Iranian territory');
   }
   return null;
 }

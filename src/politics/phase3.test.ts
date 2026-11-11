@@ -121,18 +121,18 @@ describe('the Israeli initiative track', () => {
     expect(game.queueOrder({ kind: 'israel-initiative', stance: 'constrained' }).ok).toBe(true);
     quietTurn(game);
     expect(israelPackages(game.snap)).toBe(0);
-    expect(validateInitiativeOrder(game.snap, 'approved')).toContain('reacting');
+    expect(validateInitiativeOrder(game.snap, 'approved')?.reason).toContain('reacting');
   });
 
   it('is US-only and cooldown-gated', () => {
     const iranGame = newGame('iran');
-    expect(validateInitiativeOrder(iranGame.snap, 'approved')).toContain('Washington');
+    expect(validateInitiativeOrder(iranGame.snap, 'approved')?.reason).toContain('Washington');
 
     const game = newGame();
     expect(game.queueOrder({ kind: 'israel-initiative', stance: 'approved' }).ok).toBe(true);
     quietTurn(game); // the directive applies at the end of the turn
     expect(game.snap.israelInitiative!.lastOrderTurn).toBe(1);
-    expect(validateInitiativeOrder(game.snap, 'accepted')).toContain('reacting');
+    expect(validateInitiativeOrder(game.snap, 'accepted')?.reason).toContain('reacting');
     expect(game.queueOrder({ kind: 'israel-initiative', stance: 'accepted' }).ok).toBe(false);
   });
 });
@@ -216,10 +216,10 @@ describe('the Qatari ceasefire talks', () => {
 
   it('rejects talks orders from the wrong side or state', () => {
     const game = newGame();
-    expect(validateTalksOrder(game.snap, 'pursue')).toContain('no standing offer');
+    expect(validateTalksOrder(game.snap, 'pursue')?.reason).toContain('no standing offer');
     game.snap.ceasefire!.state = 'offered';
     const iranGame = newGame('iran');
-    expect(validateTalksOrder(iranGame.snap, 'pursue')).toContain('Tehran');
+    expect(validateTalksOrder(iranGame.snap, 'pursue')?.reason).toContain('Tehran');
   });
 });
 

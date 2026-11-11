@@ -119,7 +119,7 @@ describe('great-power red lines', () => {
     const b2 = game.snap.units.find((u) => u.typeId === 'b2')!;
     const natanz = game.map.nodeHexOf('natanz')!;
     const result = validateStrike(game.snap, game.map, b2, natanz.col, natanz.row, 'natanz');
-    expect(result).toEqual({ ok: false, reason: expect.stringContaining('no-fly zone') });
+    expect(result).toMatchObject({ ok: false, reason: expect.stringContaining('no-fly zone') });
   });
 
   it('blocks air strikes on Iranian cities on low political will', () => {
@@ -135,7 +135,7 @@ describe('great-power red lines', () => {
     const b2 = game.snap.units.find((u) => u.typeId === 'b2')!;
     const tehran = game.map.nodeHexOf('tehran')!;
     const result = validateStrike(game.snap, game.map, b2, tehran.col, tehran.row, 'tehran');
-    expect(result).toEqual({ ok: false, reason: expect.stringContaining('Congress') });
+    expect(result).toMatchObject({ ok: false, reason: expect.stringContaining('Congress') });
   });
 
   it('updates great-power posture from coalition strikes on Iranian soil', () => {

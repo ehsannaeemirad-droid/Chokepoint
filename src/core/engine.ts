@@ -13,6 +13,7 @@ import { runAiPhase, runHostPostures } from '../ai/ai';
 import { maybeStartWar, readyReserves, regenerateUnderground } from './prewar';
 import { resolveCyber, resolveSabotage, resolveStrike, validateStrike } from '../combat/combat';
 import { canPlayerOrder } from './permissions';
+import { reject, type OrderRejectCode, type RejectParams } from './rejection';
 import { updateIntelligence } from './intel';
 import { updateIranDomestic } from '../politics/iranDomestic';
 import { addEscortCoverage, clearMines, isSeaHex, layMines, minefields, hexKey, MINE_SORTIE_MAX } from './maritime';
@@ -238,7 +239,9 @@ export function orderReservations(snap: GameSnapshot): OrderReservations {
 
 export interface OrderCheck {
   ok: boolean;
+  code?: OrderRejectCode;
   reason?: string;
+  params?: RejectParams;
 }
 
 export function validateOrder(
@@ -249,182 +252,218 @@ export function validateOrder(
   actor?: FactionId,
 ): OrderCheck {
   const permission = canPlayerOrder(snap, map, order, actor);
-  if (!permission.ok) return { ok: false, reason: permission.reason };
+  if (!permission.ok) {
+    const code = permission.code === 'unknown-unit' ? 'select-unit' : permission.code;
+    return reject(code, permission.reason);
+  }
 
   switch (order.kind) {
     case 'hold':
       return { ok: true };
     case 'move': {
       const unit = findUnit(snap, order.unitUid);
-      if (!unit) return { ok: false, reason: 'Select one of your units' };
+      if (!unit) return reject('select-unit', 'Select one of your units');
       const def = unitType(unit.typeId);
       const dist = hexDistance({ col: unit.col, row: unit.row }, { col: order.col, row: order.row });
-      if (dist > def.mov) return { ok: false, reason: `Too far: ${dist}/${def.mov} hexes` };
+      if (dist > def.mov) {
+        return reject('too-far', `Too far: ${dist}/${def.mov} hexes`, { dist, max: def.mov });
+      }
       const tile = map.hexAt(order.col, order.row);
-      if (!tile) return { ok: false, reason: 'Off map' };
+      if (!tile) return reject('off-map', 'Off map');
       if (def.category === 'naval' && !(tile.terrain === 'deep' || tile.terrain === 'coast')) {
-        return { ok: false, reason: 'Naval units must stay at sea' };
+        return reject('naval-at-sea', 'Naval units must stay at sea');
       }
       if (def.category === 'ground' && (tile.terrain === 'deep' || tile.terrain === 'coast')) {
-        return { ok: false, reason: 'Ground units cannot enter water' };
+        return reject('ground-water', 'Ground units cannot enter water');
       }
       return { ok: true };
     }
     case 'strike': {
       const unit = findUnit(snap, order.unitUid);
-      if (!unit) return { ok: false, reason: 'Select one of your units' };
+      if (!unit) return reject('select-unit', 'Select one of your units');
       if (reserved.units.has(unit.uid)) {
-        return { ok: false, reason: 'That unit has already been tasked this turn' };
+        return reject('unit-tasked', 'That unit has already been tasked this turn');
       }
       if (snap.faction === 'iran') {
         const cls = deliveryClassFor(unit.typeId);
         if (cls) {
           if (snap.iran.rounds[cls] - reserved.rounds[cls] <= 0) {
-            return { ok: false, reason: 'No munitions of that type remain' };
+            return reject('no-munitions', 'No munitions of that type remain');
           }
           const pool = DELIVERY_CLASS_INFO[cls].launcherPool;
           if (launcherSortiesLeft(snap.iran, pool) - reserved.sorties[pool] <= 0) {
-            return { ok: false, reason: 'No launcher sorties remain this turn' };
+            return reject('no-launchers', 'No launcher sorties remain this turn');
           }
         } else if (iranStockFor(snap, unit) <= 0) {
-          return { ok: false, reason: 'No munitions of that type remain' };
+          return reject('no-munitions', 'No munitions of that type remain');
         }
       }
       return validateStrike(snap, map, unit, order.col, order.row, order.nodeId);
     }
     case 'mine': {
       const unit = findUnit(snap, order.unitUid);
-      if (!unit) return { ok: false, reason: 'Select a mine warfare group' };
-      if (reserved.units.has(unit.uid)) return { ok: false, reason: 'That group has already been tasked this turn' };
-      if (!isSeaHex(map, order.col, order.row)) return { ok: false, reason: 'Mines can only be laid in water' };
+      if (!unit) return reject('select-mine-group', 'Select a mine warfare group');
+      if (reserved.units.has(unit.uid)) {
+        return reject('unit-tasked', 'That group has already been tasked this turn');
+      }
+      if (!isSeaHex(map, order.col, order.row)) return reject('mines-in-water', 'Mines can only be laid in water');
       const count = Math.max(1, Math.min(MINE_SORTIE_MAX, Math.floor(order.count)));
       const dist = hexDistance({ col: unit.col, row: unit.row }, { col: order.col, row: order.row });
-      if (dist > unitType(unit.typeId).rng) return { ok: false, reason: 'Lay point out of range' };
-      if (snap.iran.mines - reserved.mines < count) return { ok: false, reason: 'Not enough mines in the stockpile' };
+      if (dist > unitType(unit.typeId).rng) {
+        return reject('lay-out-of-range', 'Lay point out of range', { dist, range: unitType(unit.typeId).rng });
+      }
+      if (snap.iran.mines - reserved.mines < count) {
+        return reject('not-enough-mines', 'Not enough mines in the stockpile');
+      }
       return { ok: true };
     }
     case 'clear': {
       const unit = findUnit(snap, order.unitUid);
-      if (!unit) return { ok: false, reason: 'Select a naval unit' };
-      if (reserved.units.has(unit.uid)) return { ok: false, reason: 'That ship has already been tasked this turn' };
-      if (!isSeaHex(map, order.col, order.row)) return { ok: false, reason: 'Clearance happens at sea' };
+      if (!unit) return reject('select-naval', 'Select a naval unit');
+      if (reserved.units.has(unit.uid)) return reject('unit-tasked', 'That ship has already been tasked this turn');
+      if (!isSeaHex(map, order.col, order.row)) return reject('clearance-at-sea', 'Clearance happens at sea');
       const field = minefields(snap)[hexKey(order.col, order.row)];
-      if (!field || field.mines <= 0) return { ok: false, reason: 'No minefield in that hex' };
-      if (!field.detected) return { ok: false, reason: 'That minefield has not been located' };
+      if (!field || field.mines <= 0) return reject('no-minefield', 'No minefield in that hex');
+      if (!field.detected) return reject('minefield-unlocated', 'That minefield has not been located');
       return { ok: true };
     }
     case 'escort': {
       const unit = findUnit(snap, order.unitUid);
-      if (!unit) return { ok: false, reason: 'Select a naval unit' };
-      if (reserved.units.has(unit.uid)) return { ok: false, reason: 'That ship has already been tasked this turn' };
-      if ((snap.escortCoverage ?? 0) >= 3) return { ok: false, reason: 'Escort coverage is already at its limit' };
+      if (!unit) return reject('select-naval', 'Select a naval unit');
+      if (reserved.units.has(unit.uid)) return reject('unit-tasked', 'That ship has already been tasked this turn');
+      if ((snap.escortCoverage ?? 0) >= 3) return reject('escort-limit', 'Escort coverage is already at its limit');
       return { ok: true };
     }
     case 'produce': {
-      if (snap.faction !== 'iran') return { ok: false, reason: 'Only Iran produces munitions' };
+      if (snap.faction !== 'iran') return reject('iran-production-only', 'Only Iran produces munitions');
       const cost = productionCost(order.unitTypeId);
-      if (cost <= 0) return { ok: false, reason: 'Unknown production line' };
+      if (cost <= 0) return reject('unknown-production', 'Unknown production line');
       if (snap.iran.resources - reserved.iranResources < cost * order.count) {
-        return { ok: false, reason: 'Not enough war resources for that order' };
+        return reject('not-enough-resources', 'Not enough war resources for that order');
       }
       const line = lineForMunition(order.unitTypeId);
       if (!hasProductionCapacity(map.nodes, snap, line)) {
-        return { ok: false, reason: `No intact ${line} production line` };
+        return reject('no-production-line', `No intact ${line} production line`, { line });
       }
       return { ok: true };
     }
     case 'diplomacy': {
-      if (snap.faction !== 'usa') return { ok: false, reason: 'Only Washington can run this signalling campaign' };
+      if (snap.faction !== 'usa') {
+        return reject('usa-diplomacy-only', 'Only Washington can run this signalling campaign');
+      }
       if (snap.resources.politicalWill - reserved.politicalWill < 2) {
-        return { ok: false, reason: 'Not enough political will' };
+        return reject('not-enough-will', 'Not enough political will');
       }
       const host = snap.hosts[order.host];
-      if (!host) return { ok: false, reason: 'Not a host nation' };
-      if (host.status === 'closed') return { ok: false, reason: 'The base is already closed' };
+      if (!host) return reject('not-a-host', 'Not a host nation');
+      if (host.status === 'closed') return reject('base-closed', 'The base is already closed');
       return { ok: true };
     }
     case 'reinforce': {
-      if (snap.faction !== 'usa') return { ok: false, reason: 'Only the US can request CONUS reinforcements' };
-      const pkg = REINFORCEMENTS.find((r) => r.id === order.packageId);
-      if (!pkg) return { ok: false, reason: 'Unknown package' };
-      if (snap.resources.politicalWill - reserved.politicalWill < pkg.cost) {
-        return { ok: false, reason: `Needs ${pkg.cost} political will` };
+      if (snap.faction !== 'usa') {
+        return reject('usa-reinforce-only', 'Only the US can request CONUS reinforcements');
       }
-      if (snap.reinforcements.some((r) => r.id === pkg.id)) return { ok: false, reason: 'That package is already in transit' };
+      const pkg = REINFORCEMENTS.find((r) => r.id === order.packageId);
+      if (!pkg) return reject('unknown-package', 'Unknown package');
+      if (snap.resources.politicalWill - reserved.politicalWill < pkg.cost) {
+        return reject('needs-will', `Needs ${pkg.cost} political will`, { cost: pkg.cost });
+      }
+      if (snap.reinforcements.some((r) => r.id === pkg.id)) {
+        return reject('package-in-transit', 'That package is already in transit');
+      }
       if (transportModeOf(pkg) === 'airlift' && snap.resources.tankerSorties - reserved.tankers < 1) {
-        return { ok: false, reason: 'No tanker sorties left this turn' };
+        return reject('no-tankers', 'No tanker sorties left this turn');
       }
       return { ok: true };
     }
     case 'airlift': {
       if (snap.resources.tankerSorties - reserved.tankers < 1) {
-        return { ok: false, reason: 'No tanker sorties left this turn' };
+        return reject('no-tankers', 'No tanker sorties left this turn');
       }
       if (snap.resources.airlift - reserved.airlift < 5) {
-        return { ok: false, reason: 'No airlift capacity left this turn' };
+        return reject('no-airlift', 'No airlift capacity left this turn');
       }
       if (snap.resources.politicalWill - reserved.politicalWill < ISRAEL_AIRLIFT.cost) {
-        return { ok: false, reason: 'Not enough political will' };
+        return reject('not-enough-will', 'Not enough political will');
       }
       return { ok: true };
     }
     case 'communicate': {
-      if (snap.faction !== 'usa') return { ok: false, reason: 'Only Washington can address the American public' };
+      if (snap.faction !== 'usa') {
+        return reject('usa-communicate-only', 'Only Washington can address the American public');
+      }
       const cost = domesticCfg(snap).communicate.cost;
       if (snap.domestic && snap.domestic.cooldown > 0) {
-        return { ok: false, reason: `Public address recharging (${snap.domestic.cooldown} turns)` };
+        return reject('address-cooldown', `Public address recharging (${snap.domestic.cooldown} turns)`, {
+          turns: snap.domestic.cooldown,
+        });
       }
       if (snap.resources.politicalWill - reserved.politicalWill < cost) {
-        return { ok: false, reason: `Needs ${cost} political will` };
+        return reject('needs-will', `Needs ${cost} political will`, { cost });
       }
       return { ok: true };
     }
     case 'israel-initiative': {
       const block = validateInitiativeOrder(snap, order.stance);
-      if (block) return { ok: false, reason: block };
+      if (block) return block;
       return { ok: true };
     }
     case 'talks': {
       const block = validateTalksOrder(snap, order.stance);
-      if (block) return { ok: false, reason: block };
+      if (block) return block;
       return { ok: true };
     }
     case 'roe': {
       if (!COALITION_FACTIONS.has(snap.faction)) {
-        return { ok: false, reason: 'Only the coalition sets rules of engagement' };
+        return reject('coalition-roe-only', 'Only the coalition sets rules of engagement');
       }
-      if (!ROE_POSTURES.includes(order.posture)) return { ok: false, reason: 'Unknown posture' };
-      if (snap.roe?.posture === order.posture) return { ok: false, reason: 'That is already the standing posture' };
+      if (!ROE_POSTURES.includes(order.posture)) return reject('unknown-posture', 'Unknown posture');
+      if (snap.roe?.posture === order.posture) {
+        return reject('same-posture', 'That is already the standing posture');
+      }
       return { ok: true };
     }
     case 'special': {
       const unit = findUnit(snap, order.unitUid);
-      if (!unit) return { ok: false, reason: 'Select a special operations team' };
+      if (!unit) return reject('select-specops', 'Select a special operations team');
       if (reserved.units.has(unit.uid)) {
-        return { ok: false, reason: 'That team has already been tasked this turn' };
+        return reject('unit-tasked', 'That team has already been tasked this turn');
       }
-      if (unitType(unit.typeId).category !== 'specops') return { ok: false, reason: 'Not a special operations unit' };
+      if (unitType(unit.typeId).category !== 'specops') {
+        return reject('not-specops', 'Not a special operations unit');
+      }
       const nodeId = map.hexToNode.get(`${order.col},${order.row}`);
-      if (!nodeId) return { ok: false, reason: 'No facility in that hex' };
+      if (!nodeId) return reject('no-facility', 'No facility in that hex');
       const dist = hexDistance({ col: unit.col, row: unit.row }, { col: order.col, row: order.row });
-      if (dist > unitType(unit.typeId).rng) return { ok: false, reason: 'Target out of reach' };
-      if (nodeState(snap, nodeId).integrity <= 0) return { ok: false, reason: 'That facility is already destroyed' };
+      if (dist > unitType(unit.typeId).rng) {
+        return reject('target-out-of-reach', 'Target out of reach', {
+          dist,
+          range: unitType(unit.typeId).rng,
+        });
+      }
+      if (nodeState(snap, nodeId).integrity <= 0) {
+        return reject('facility-destroyed', 'That facility is already destroyed');
+      }
       return { ok: true };
     }
     case 'cyber': {
       const unit = findUnit(snap, order.unitUid);
-      if (!unit) return { ok: false, reason: 'Select a cyber unit' };
-      if (unit.cooldown > 0) return { ok: false, reason: `Cyber team rearming (${unit.cooldown} turns)` };
+      if (!unit) return reject('select-cyber', 'Select a cyber unit');
+      if (unit.cooldown > 0) {
+        return reject('cyber-rearming', `Cyber team rearming (${unit.cooldown} turns)`, {
+          turns: unit.cooldown,
+        });
+      }
       if (reserved.units.has(unit.uid)) {
-        return { ok: false, reason: 'That cyber team has already been tasked this turn' };
+        return reject('unit-tasked', 'That cyber team has already been tasked this turn');
       }
       if (snap.resources.politicalWill - reserved.politicalWill < CYBER_WILL_COST) {
-        return { ok: false, reason: `Needs ${CYBER_WILL_COST} political will` };
+        return reject('needs-will', `Needs ${CYBER_WILL_COST} political will`, { cost: CYBER_WILL_COST });
       }
       return { ok: true };
     }
     default:
-      return { ok: false, reason: 'Unknown order' };
+      return reject('unknown-order', 'Unknown order');
   }
 }
 

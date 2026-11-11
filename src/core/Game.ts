@@ -312,8 +312,8 @@ export class Game {
     return { col: col!, row: row! };
   }
 
-  queueOrder(order: Order): { ok: boolean; reason?: string } {
-    if (this.snap.status !== 'playing') return { ok: false, reason: 'The campaign is over' };
+  queueOrder(order: Order): OrderCheck {
+    if (this.snap.status !== 'playing') return reject('campaign-over', 'The campaign is over');
     const check = validateOrderSafe(this, order);
     if (!check.ok) return check;
     this.snap.orders.push(order);
@@ -376,7 +376,8 @@ export class Game {
   }
 }
 
-import { validateOrder } from './engine';
+import { validateOrder, type OrderCheck } from './engine';
+import { reject } from './rejection';
 
 function validateOrderSafe(game: Game, order: Order) {
   return validateOrder(game.snap, game.map, order, orderReservations(game.snap));

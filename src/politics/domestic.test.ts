@@ -175,7 +175,7 @@ describe('announced congressional restrictions', () => {
     game.endTurn();
     expect(game.snap.domestic!.restriction).toBe('suspended');
     expect(restrictionBlocksStrike(game.snap, 'israel')).toBeNull();
-    expect(restrictionBlocksStrike(game.snap, 'usa')).toContain('suspended');
+    expect(restrictionBlocksStrike(game.snap, 'usa')?.reason).toContain('suspended');
   });
 
   it('lifts a restriction only above threshold + hysteresis buffer', () => {

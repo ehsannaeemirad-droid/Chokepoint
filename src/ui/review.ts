@@ -12,6 +12,7 @@ import { unitType } from '../core/world';
 import { ISRAEL_AIRLIFT, REINFORCEMENTS } from '../core/engine';
 import { factionLabel, unitLabel } from './labels';
 import { previewOrderImpact } from './objectives';
+import { rejectionText } from './reason';
 
 export interface ReviewOrder {
   index: number;
@@ -105,7 +106,7 @@ export function buildTurnReview(snap: GameSnapshot, map: TheaterMap): TurnReview
   const orders: ReviewOrder[] = snap.orders.map((order, index) => {
     const errors: string[] = [];
     const check = validateOrder(snap, map, order);
-    if (!check.ok) errors.push(check.reason ?? t('toast.invalid'));
+    if (!check.ok) errors.push(rejectionText(check));
     const preview = previewOrderImpact(snap, order as { kind: string; host?: string; packageId?: string; posture?: string });
     return {
       index,

@@ -35,6 +35,7 @@ import { talksCfg } from '../politics/talks';
 import { victoryPaths } from '../politics/victory';
 import { buildObjectives, previewOrderImpact, type ObjectiveRow } from './objectives';
 import { buildTurnReview, reportKey } from './review';
+import { rejectionText } from './reason';
 import { factionLabel, unitLabel } from './labels';
 import { factionBriefing, scenarioBriefing, type Bi } from './briefing';
 import { deleteSave, downloadText, exportReplay, listSaves, SLOTS, type SlotId } from '../services/save';
@@ -381,7 +382,7 @@ export class Ui {
       if (!unit) return;
       const result = this.game.queueOrder({ kind: 'hold', unitUid: unit.uid });
       this.showToast(
-        result.ok ? t('toast.hold', { name: unitLabel(unit) }) : (result.reason ?? t('toast.cannotHold')),
+        result.ok ? t('toast.hold', { name: unitLabel(unit) }) : rejectionText(result, t('toast.cannotHold')),
         result.ok ? 'good' : 'warn',
       );
       return;
@@ -391,7 +392,7 @@ export class Ui {
       const unit = this.game.selectedUnit;
       if (!unit) return;
       const result = this.game.queueOrder({ kind: 'cyber', unitUid: unit.uid, col: unit.col, row: unit.row });
-      this.showToast(result.ok ? t('toast.cyberQueued') : (result.reason ?? t('toast.invalid')), result.ok ? 'good' : 'warn');
+      this.showToast(result.ok ? t('toast.cyberQueued') : rejectionText(result), result.ok ? 'good' : 'warn');
       return;
     }
     if (verb === 'remove-order') {
@@ -402,44 +403,44 @@ export class Ui {
     if (verb === 'diplomacy' && a) {
       const result = this.game.queueOrder({ kind: 'diplomacy', host: a as FactionId });
       this.showToast(
-        result.ok ? t('toast.signalled', { name: factionLabel(a) }) : (result.reason ?? t('toast.invalid')),
+        result.ok ? t('toast.signalled', { name: factionLabel(a) }) : rejectionText(result),
         result.ok ? 'good' : 'warn',
       );
       return;
     }
     if (verb === 'reinforce' && a) {
       const result = this.game.queueOrder({ kind: 'reinforce', packageId: a });
-      this.showToast(result.ok ? t('toast.reinforce') : (result.reason ?? t('toast.invalid')), result.ok ? 'good' : 'warn');
+      this.showToast(result.ok ? t('toast.reinforce') : rejectionText(result), result.ok ? 'good' : 'warn');
       return;
     }
     if (verb === 'airlift') {
       const result = this.game.queueOrder({ kind: 'airlift' });
-      this.showToast(result.ok ? t('toast.airlift') : (result.reason ?? t('toast.invalid')), result.ok ? 'good' : 'warn');
+      this.showToast(result.ok ? t('toast.airlift') : rejectionText(result), result.ok ? 'good' : 'warn');
       return;
     }
     if (verb === 'communicate') {
       const result = this.game.queueOrder({ kind: 'communicate' });
-      this.showToast(result.ok ? t('toast.communicate') : (result.reason ?? t('toast.invalid')), result.ok ? 'good' : 'warn');
+      this.showToast(result.ok ? t('toast.communicate') : rejectionText(result), result.ok ? 'good' : 'warn');
       return;
     }
     if (verb === 'initiative' && a) {
       const result = this.game.queueOrder({ kind: 'israel-initiative', stance: a as 'approved' | 'constrained' | 'accepted' });
-      this.showToast(result.ok ? t('toast.initiative') : (result.reason ?? t('toast.invalid')), result.ok ? 'good' : 'warn');
+      this.showToast(result.ok ? t('toast.initiative') : rejectionText(result), result.ok ? 'good' : 'warn');
       return;
     }
     if (verb === 'talks' && a) {
       const result = this.game.queueOrder({ kind: 'talks', stance: a as 'pursue' | 'walk' });
-      this.showToast(result.ok ? t('toast.talks') : (result.reason ?? t('toast.invalid')), result.ok ? 'good' : 'warn');
+      this.showToast(result.ok ? t('toast.talks') : rejectionText(result), result.ok ? 'good' : 'warn');
       return;
     }
     if (verb === 'roe' && a) {
       const result = this.game.queueOrder({ kind: 'roe', posture: a as 'constrained' | 'standard' | 'aggressive' });
-      this.showToast(result.ok ? t('toast.roe') : (result.reason ?? t('toast.invalid')), result.ok ? 'good' : 'warn');
+      this.showToast(result.ok ? t('toast.roe') : rejectionText(result), result.ok ? 'good' : 'warn');
       return;
     }
     if (verb === 'produce' && a) {
       const result = this.game.queueOrder({ kind: 'produce', unitTypeId: a, count: 1 });
-      this.showToast(result.ok ? t('toast.produce') : (result.reason ?? t('toast.invalid')), result.ok ? 'good' : 'warn');
+      this.showToast(result.ok ? t('toast.produce') : rejectionText(result), result.ok ? 'good' : 'warn');
       return;
     }
     if (verb === 'focus-node' && a) {

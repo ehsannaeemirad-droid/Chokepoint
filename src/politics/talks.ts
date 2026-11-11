@@ -20,6 +20,7 @@
  *   - Costly armistice: anything less — Iran claims the field, coalition loss.
  * The Iran player sees the mirror statuses of the same world state.
  */
+import { reject, type Rejection } from '../core/rejection';
 import type { CeasefireTalks, GameSnapshot, ResolveEvent, TalksConfig } from '../core/types';
 import { clamp, operationalGulfBases } from '../core/world';
 import type { TheaterMap } from '../map/TheaterMap';
@@ -126,12 +127,18 @@ export function updateTalks(snap: GameSnapshot, events: ResolveEvent[]): void {
 }
 
 /** Validation for `{ kind: 'talks' }`. Coalition players only. */
-export function validateTalksOrder(snap: GameSnapshot, stance: 'pursue' | 'walk'): string | null {
+export function validateTalksOrder(snap: GameSnapshot, stance: 'pursue' | 'walk'): Rejection | null {
   const talks = snap.ceasefire;
-  if (!talks) return 'No mediation track in this scenario';
-  if (snap.faction === 'iran') return 'Tehran cannot answer Doha here — the offer is to the coalition';
-  if (stance === 'pursue' && talks.state !== 'offered') return 'There is no standing offer to pursue';
-  if (stance === 'walk' && talks.state !== 'offered' && talks.state !== 'talks') return 'Nothing to walk away from';
+  if (!talks) return reject('talks-no-track', 'No mediation track in this scenario');
+  if (snap.faction === 'iran') {
+    return reject('talks-iran-only', 'Tehran cannot answer Doha here — the offer is to the coalition');
+  }
+  if (stance === 'pursue' && talks.state !== 'offered') {
+    return reject('talks-no-offer', 'There is no standing offer to pursue');
+  }
+  if (stance === 'walk' && talks.state !== 'offered' && talks.state !== 'talks') {
+    return reject('talks-nothing', 'Nothing to walk away from');
+  }
   return null;
 }
 

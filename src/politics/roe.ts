@@ -16,6 +16,7 @@
  * All numbers are scenario data (`campaign.roe` → `snap.roeCfg`). Nothing
  * here consumes the RNG, so replays stay byte-identical.
  */
+import { reject, type Rejection } from '../core/rejection';
 import type { GameSnapshot, MapNodeDef, ResolveEvent, RoeConfig, RoePosture, RoeState } from '../core/types';
 import { clamp } from '../core/world';
 
@@ -59,11 +60,11 @@ export function roeEscalationMultiplier(snap: GameSnapshot, attacker: string): n
  * when the posture forbids the mission, `null` otherwise. Applies to
  * coalition formations only; Iranian targeting is not the player's to set.
  */
-export function roeBlocksStrike(snap: GameSnapshot, unitFaction: string, node?: MapNodeDef): string | null {
+export function roeBlocksStrike(snap: GameSnapshot, unitFaction: string, node?: MapNodeDef): Rejection | null {
   if (!snap.roe || !COALITION_FACTIONS.has(unitFaction)) return null;
   if (!activeRoe(snap).urbanBlocked) return null;
   if (node && node.host === 'iran' && node.kind === 'urban') {
-    return 'Rules of engagement forbid strikes on Iranian population centres';
+    return reject('roe-urban', 'Rules of engagement forbid strikes on Iranian population centres');
   }
   return null;
 }
