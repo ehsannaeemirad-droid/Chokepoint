@@ -2003,3 +2003,12 @@ button:focus-visible, [role='button']:focus-visible, summary:focus-visible { out
   .briefing .modal-body { padding-bottom: 4px; }
   .brief-grid { grid-template-columns: 1fr; }
 }
+
+/* Strategic situation summary. */
+.situation-summary { border-inline-start: 2px solid var(--info); border-radius: 8px; padding: 8px 10px; background: rgba(255, 255, 255, 0.03); }
+.situation-summary.warn { border-inline-start-color: var(--warn); }
+.situation-summary.bad { border-inline-start-color: var(--alert); }
+.situation-summary p { margin: 4px 0 0; line-height: 1.45; }
+.situation-head { font-size: 12px; font-weight: 600; }
+.situation-summary b { color: var(--muted); font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; margin-inline-end: 4px; }
+.situation-metrics { color: var(--muted); font-size: 11px; }

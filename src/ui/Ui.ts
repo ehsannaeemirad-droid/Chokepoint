@@ -35,6 +35,7 @@ import { talksCfg } from '../politics/talks';
 import { victoryPaths } from '../politics/victory';
 import { buildObjectives, previewOrderImpact, type ObjectiveRow } from './objectives';
 import { buildTurnReview, reportKey } from './review';
+import { buildSituation } from './situation';
 import { rejectionText } from './reason';
 import { factionLabel, unitLabel } from './labels';
 import { factionBriefing, scenarioBriefing, type Bi } from './briefing';
@@ -1255,6 +1256,15 @@ export class Ui {
       victorySection = `<section class="panel-section"><h4>${t('panel.victoryPaths')}</h4>${pathRows}</section>`;
     }
 
+    const situation = buildSituation(s, this.game.map);
+    const summary = `<section class="panel-section situation-summary ${situation.tone}">
+      <h4>${t('panel.summary')}</h4>
+      <p class="situation-head">${situation.headline}</p>
+      <p class="situation-focus"><b>${t('situation.focus')}</b> ${situation.focus}</p>
+      <p class="situation-metrics">${situation.metrics.join(' · ')}</p>
+      <p class="situation-threat"><b>${t('situation.threat')}</b> ${situation.threat}</p>
+    </section>`;
+
     const warCost = `<section class="panel-section"><h4>${t('panel.warCost')}</h4>
       <div class="meter-row"><span>${t('panel.iranCost')}</span><div class="bar"><i style="width:${(s.meters.iranWarCost / s.meters.iranWarCostThreshold) * 100}%;background:var(--info)"></i></div><b>${Math.round(s.meters.iranWarCost)}/${s.meters.iranWarCostThreshold}</b></div>
       <div class="meter-row"><span>${t('panel.usWill')}</span><div class="bar"><i style="width:${s.resources.politicalWill}%;background:var(--warn)"></i></div><b>${Math.round(s.resources.politicalWill)}</b></div>
@@ -1264,6 +1274,7 @@ export class Ui {
       <div class="panel-body">
         <details class="panel-group" open>
           <summary>${t('panel.situation')}</summary>
+          ${summary}
           <section class="panel-section"><h4>${t('panel.basing')}</h4>${baseRows}</section>
           <section class="panel-section"><h4>${t('panel.hosts')}</h4>${hostRows}</section>
           ${warCost}
