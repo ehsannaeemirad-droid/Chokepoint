@@ -882,3 +882,30 @@ Limitations:
   a code will still compile if it returns the optional-field interface; the
   code union is enforced only where `reject()` is used.
 - No browser/RTL visual pass.
+
+## 25. Phase 4 — strategic situation summary
+
+Commit: `feat: add a live strategic situation summary`.
+
+- **Summary.** `src/ui/situation.ts` builds a short, deterministic reading:
+  turn and phase; the most urgent own objective (reusing `buildObjectives`, so
+  it cannot disagree with the strip); four live meters; and the strongest enemy
+  path with its progress.
+- **Faction-aware meters.** Coalition (US/Israel) sees Hormuz, oil, Congress and
+  political will; Iran sees domestic stability, war resources, mated rounds and
+  Hormuz. These are current snapshot values, not briefing copy.
+- **Presentation.** Rendered at the top of the Situation group, above basing and
+  hosts. The tone of the urgent objective sets a border accent (info/warn/bad).
+  Labels are EN/FA dictionary entries and the line uses the existing panel
+  structure, so mobile wrapping and RTL are inherited.
+- **Tests.** Both factions produce complete summaries; changing Hormuz and will
+  changes the metrics; a Persian render contains no untranslated summary line.
+
+Verification: `tsc` exit 0, 38 files / 286 tests passed, `build` exit 0.
+
+Limitations:
+- "Most urgent" is a deterministic heuristic (tone, then lowest progress), not
+  an AI recommendation; it does not rank by expected payoff.
+- Enemy pressure shows the existing enemy row only; it does not forecast the
+  next turn.
+- No browser or RTL visual pass.
