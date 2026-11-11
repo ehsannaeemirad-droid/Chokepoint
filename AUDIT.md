@@ -1037,18 +1037,28 @@ Limitations:
 - **Final bug fixes.** Missile launchers can no longer relocate onto water, a move
   now reserves the unit against a second task, the target-first list excludes
   units with any queued task, and malformed/unknown aid orders are rejected before
-  they reach the resolver.
+  they reach the resolver. Move reservations are covered across completion,
+  cancellation, resolve-time failure and invalid-order rejection.
 
 Verification (executed):
 - `tsc --noEmit` exit 0.
-- `vitest run`: 41 files / 305 tests passed.
+- `vitest run`: 41 files / 311 tests passed.
 - `pnpm run build` exit 0 (only the existing >500 kB chunk warning).
-- Dev-server browser check at 390 px: Iran strategic panel renders Russia/China
-  favour gauges and cost-gated aid buttons; no console/runtime errors.
+- Live Pages smoke test on `index-CA_v5sBi.js` at 1280×900 and 390×844: map-label
+  click opened “Tools that can strike this location”, listed 9 attackers, queued a
+  strike and a hold, and the tasked carrier was absent from the 8 remaining rows.
+  Zero console/runtime errors. See `docs/live-smoke.md`.
+
+Test-count reconciliation: 302 before the final edge fixes, 304 after the water
+and aid-validation tests, 305 after the reverse-target regression test at
+`841b52b`, and **311** after the six closure tests below (five reservation
+lifecycle cases plus malformed-aid no-mutation). The earlier 304 note was an
+intermediate count, not a second final state.
 
 Limitations:
-- The target-first sheet is covered by helper tests and browser rendering of the
-  new panels, but the map-label click path was not exercised in this browser
-  session (the labels were not present in the current camera view).
+- At the initial camera zoom, a few neighbouring labels overlap (for example
+  Bandar Abbas coastal storage over Bandar Abbas, and Kharg Island over Bushehr).
+  The smoke test used Kharg Island, which is clickable; collision-aware label
+  layout would be a UI polish item, not a gameplay defect.
 - The aid balance is a playable baseline; it has not been tuned by a dedicated
   win-rate pass.

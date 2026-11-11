@@ -1,0 +1,80 @@
+{
+  "liveUrl": "https://ehsannaeemirad-droid.github.io/Chokepoint/",
+  "consoleErrors": [],
+  "runtimeErrors": [],
+  "checks": {
+    "desktopLabels": 20,
+    "labelClicks": [
+      {
+        "nodeId": "kharg",
+        "text": "Kharg Island",
+        "real": true
+      },
+      {
+        "nodeId": "kharg",
+        "text": "Kharg Island",
+        "real": true
+      }
+    ],
+    "desktopAttackers": 9,
+    "ordersAfterQueue": [
+      "Carrier Strike Group → Kharg Island✕",
+      "Carrier Strike Group holds✕"
+    ],
+    "taskedUnitExcluded": true,
+    "reverseAttackersAfterTask": 8,
+    "mobileViewport": {
+      "heading": "Tools that can strike this location 9",
+      "rows": 9,
+      "labelCount": 15,
+      "sheetVisible": true,
+      "clicked": {
+        "nodeId": "kharg",
+        "text": "Kharg Island"
+      }
+    }
+  },
+  "probes": {
+    "waterRejected": {
+      "ok": false,
+      "code": "ground-water",
+      "reason": "That unit cannot enter water"
+    },
+    "malformedAid": {
+      "ok": false,
+      "code": "unknown-order",
+      "noMutation": true
+    },
+    "intel": {
+      "orderOk": true,
+      "intelTurn": 1,
+      "until": 3,
+      "turnAfter": 2,
+      "exactText": "100%",
+      "exact": true
+    },
+    "csg": {
+      "name": "Carrier Strike Group",
+      "attackable": true
+    },
+    "moveReservation": {
+      "moveOk": true,
+      "secondOk": false,
+      "secondCode": "unit-tasked",
+      "cancelOk": true,
+      "completionQueued": true,
+      "afterCompletion": 0
+    },
+    "failure": {
+      "orders": 0,
+      "dropped": true
+    },
+    "invalid": {
+      "ok": false,
+      "code": "too-far",
+      "orders": 0
+    }
+  },
+  "asset": "index-CA_v5sBi.js",
+  "htmlHash": 1009
+}

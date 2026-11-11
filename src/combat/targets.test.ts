@@ -4,7 +4,7 @@ import { applyOrder, validateOrder } from '../core/engine';
 import { Game } from '../core/Game';
 import { defenderOfNode, unitType } from '../core/world';
 import { hostileTo } from './combat';
-import type { ResolveEvent, UnitInstance } from '../core/types';
+import type { Order, ResolveEvent, UnitInstance } from '../core/types';
 import { applyAid, favorsOf } from '../politics/favors';
 import { nodeIntegrityEstimate, paidIntel, unitStrengthEstimate } from '../ui/fog';
 
@@ -65,10 +65,10 @@ describe('target-first attacker discovery', () => {
       }
     }
     expect(target).toBeTruthy();
-    const uid = attackers[0]!.unit.uid;
-    expect(game.queueOrder({ kind: 'hold', unitUid: uid }).ok).toBe(true);
+    const unit = attackers[0]!.unit;
+    expect(game.queueOrder({ kind: 'move', unitUid: unit.uid, col: unit.col, row: unit.row }).ok).toBe(true);
     const after = attackersForHex(game.snap, game.map, target!.col, target!.row, target!.nodeId);
-    expect(after.map((entry) => entry.unit.uid)).not.toContain(uid);
+    expect(after.map((entry) => entry.unit.uid)).not.toContain(unit.uid);
   });
 
   it('rejects a missile launcher moving onto water', () => {
@@ -134,6 +134,28 @@ describe('US naval fleet targeting', () => {
 });
 
 describe('great-power favours', () => {
+  it('rejects a malformed aid request without mutating state', () => {
+    const game = start('iran');
+    const before = JSON.stringify({
+      favors: favorsOf(game.snap),
+      rounds: game.snap.iran.rounds,
+      boost: game.snap.iranProductionBoost,
+      intelUntil: game.snap.iranIntelUntil,
+    });
+    const result = game.queueOrder({ kind: 'aid', patron: 'mars', aid: 'intel' } as unknown as Order);
+    expect(result.ok).toBe(false);
+    expect(result.code).toBe('unknown-order');
+    expect(game.snap.orders).toHaveLength(0);
+    expect(
+      JSON.stringify({
+        favors: favorsOf(game.snap),
+        rounds: game.snap.iran.rounds,
+        boost: game.snap.iranProductionBoost,
+        intelUntil: game.snap.iranIntelUntil,
+      }),
+    ).toBe(before);
+  });
+
   it('rejects an unaffordable aid request through the order path', () => {
     const game = start('iran');
     const result = game.queueOrder({ kind: 'aid', patron: 'russia', aid: 'production' });
@@ -164,6 +186,13 @@ describe('great-power favours', () => {
     expect(estimate.lo).toBe(estimate.hi);
     const node = game.map.nodes.find((n) => n.host === 'usa' || n.host === 'israel')!;
     expect(nodeIntegrityEstimate(game.snap, game.map, node.id)).toBeNull();
+    const until = game.snap.iranIntelUntil!;
+    game.snap.turn = until - 1;
+    expect(paidIntel(game.snap)).toBe(true);
+    game.snap.turn = until;
+    expect(paidIntel(game.snap)).toBe(true);
+    game.snap.turn = until + 1;
+    expect(paidIntel(game.snap)).toBe(false);
   });
 
   it('starts a temporary production surge', () => {

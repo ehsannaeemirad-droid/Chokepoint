@@ -1,5 +1,9 @@
 # Balance report — multi-seed win distribution
 
+> **Pre-fix directional baseline.** This report was generated before the coalition
+> counter-battery adjustment in `841b52b`. It is retained as a directional
+> baseline, not as a post-fix win-rate claim.
+
 Generated from fresh headless campaign runs (not hand-written). Rules and data version 1.0.0;
 scenario `campaign`, eight seeds per faction, 30-turn limit. The player policy is deliberately
 simple: every available aircraft strikes the nearest valid hostile node each turn; the US and

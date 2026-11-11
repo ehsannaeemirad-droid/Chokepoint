@@ -9,7 +9,7 @@
 import { describe, expect, it } from 'vitest';
 import { Game } from './Game';
 import { emptyReservations, orderReservations } from './engine';
-import { hexDistance } from '../map/hex';
+import { hexDistance, hexNeighbors } from '../map/hex';
 
 function iranAtWar(seed = 11): Game {
   const game = new Game();
@@ -17,6 +17,14 @@ function iranAtWar(seed = 11): Game {
   game.snap.warStarted = true;
   game.snap.phase = 'war';
   return game;
+}
+
+function adjacentLand(game: Game, unit: { col: number; row: number }) {
+  for (const hex of hexNeighbors(unit.col, unit.row)) {
+    const tile = game.map.hexAt(hex.col, hex.row);
+    if (tile && tile.terrain !== 'deep' && tile.terrain !== 'coast') return hex;
+  }
+  throw new Error('no adjacent land');
 }
 
 function targetFor(game: Game, unit: { col: number; row: number }) {
@@ -93,6 +101,67 @@ describe('unit and launcher reservations', () => {
     });
     expect(second.ok).toBe(false);
     expect(second.reason).toMatch(/already been tasked/i);
+  });
+
+  it('reserves a moved unit against a second task', () => {
+    const game = iranAtWar();
+    const launcher = game.snap.units.find((u) => u.faction === 'iran' && u.typeId === 'fateh110')!;
+    const dest = adjacentLand(game, launcher);
+    expect(game.queueOrder({ kind: 'move', unitUid: launcher.uid, col: dest.col, row: dest.row }).ok).toBe(true);
+    expect(orderReservations(game.snap).units.has(launcher.uid)).toBe(true);
+    const second = game.queueOrder({ kind: 'move', unitUid: launcher.uid, col: launcher.col, row: launcher.row });
+    expect(second.ok).toBe(false);
+    expect(second.code).toBe('unit-tasked');
+  });
+
+  it('clears the move reservation when the order is cancelled', () => {
+    const game = iranAtWar();
+    const launcher = game.snap.units.find((u) => u.faction === 'iran' && u.typeId === 'fateh110')!;
+    const dest = adjacentLand(game, launcher);
+    expect(game.queueOrder({ kind: 'move', unitUid: launcher.uid, col: dest.col, row: dest.row }).ok).toBe(true);
+    game.removeOrder(0);
+    expect(game.snap.orders).toHaveLength(0);
+    expect(orderReservations(game.snap).units.has(launcher.uid)).toBe(false);
+    expect(game.queueOrder({ kind: 'move', unitUid: launcher.uid, col: dest.col, row: dest.row }).ok).toBe(true);
+  });
+
+  it('clears the move reservation after a completed turn', () => {
+    const game = iranAtWar();
+    const launcher = game.snap.units.find((u) => u.faction === 'iran' && u.typeId === 'fateh110')!;
+    const dest = adjacentLand(game, launcher);
+    expect(game.queueOrder({ kind: 'move', unitUid: launcher.uid, col: dest.col, row: dest.row }).ok).toBe(true);
+    game.endTurn();
+    expect(game.snap.orders).toHaveLength(0);
+    expect(orderReservations(game.snap).units.has(launcher.uid)).toBe(false);
+  });
+
+  it('clears the move reservation when resolve-time validation drops it', () => {
+    const game = iranAtWar();
+    const launcher = game.snap.units.find((u) => u.faction === 'iran' && u.typeId === 'fateh110')!;
+    const dest = adjacentLand(game, launcher);
+    expect(game.queueOrder({ kind: 'move', unitUid: launcher.uid, col: dest.col, row: dest.row }).ok).toBe(true);
+    launcher.col += 8;
+    const { events } = game.endTurn();
+    expect(events.some((e) => e.text.startsWith('Order dropped:') && /too far/i.test(e.text))).toBe(true);
+    expect(game.snap.orders).toHaveLength(0);
+    expect(orderReservations(game.snap).units.has(launcher.uid)).toBe(false);
+  });
+
+  it('does not retain a reservation after an invalid order', () => {
+    const game = iranAtWar();
+    const launcher = game.snap.units.find((u) => u.faction === 'iran' && u.typeId === 'fateh110')!;
+    const result = game.queueOrder({
+      kind: 'move',
+      unitUid: launcher.uid,
+      col: launcher.col + 8,
+      row: launcher.row,
+    });
+    expect(result.ok).toBe(false);
+    expect(result.code).toBe('too-far');
+    expect(game.snap.orders).toHaveLength(0);
+    expect(orderReservations(game.snap).units.has(launcher.uid)).toBe(false);
+    const dest = adjacentLand(game, launcher);
+    expect(game.queueOrder({ kind: 'move', unitUid: launcher.uid, col: dest.col, row: dest.row }).ok).toBe(true);
   });
 
   it('reserves launcher sorties across different ballistic classes', () => {
