@@ -456,6 +456,141 @@ export const SCENARIO_BRIEFINGS: Record<string, ScenarioBriefing> = {
       },
     ],
   },
+  opening: {
+    title: { en: 'Opening Campaign', fa: 'کارزار آغازین' },
+    era: {
+      en: '28 February 2026 · war · 30 turns',
+      fa: '۲۸ فوریه ۲۰۲۶ · جنگ · ۳۰ نوبت',
+    },
+    situation: {
+      en: 'The first strikes have landed and the Gulf is closing to shipping. Both sides are below their pre-war stocks, air defences are alert and the diplomatic clock is already running. There is no quiet opening to shape.',
+      fa: 'نخستین حملات انجام شده و خلیج به روی کشتیرانی بسته می‌شود. هر دو طرف زیر ذخایر پیش از جنگ‌اند، پدافند هوایی در آماده‌باش است و ساعت دیپلماسی از قبل کار می‌کند. آغاز آرامی برای شکل دادن نمانده است.',
+    },
+    objectives: [
+      {
+        en: 'Coalition: keep the first-day advantage without losing basing or domestic support.',
+        fa: 'ائتلاف: برتری روز نخست را حفظ کنید بدون از دست دادن پایگاه‌ها یا حمایت داخلی.',
+      },
+      {
+        en: 'Iran: absorb the opening, keep launchers alive and make the coalition pay for every sortie.',
+        fa: 'ایران: ضربه آغازین را جذب کنید، پرتابگرها را زنده نگه دارید و هر پرواز ائتلاف را گران کنید.',
+      },
+      {
+        en: 'Hormuz starts disrupted: escort, mine clearance and production choices now set the tempo.',
+        fa: 'هرمز از ابتدا مختل است: اسکورت، مین‌روبی و تولید اکنون ریتم را تعیین می‌کنند.',
+      },
+    ],
+    ending: [
+      {
+        en: 'The same four Iranian paths and domestic collapse still decide the campaign.',
+        fa: 'همان چهار مسیر ایرانی و فروپاشی داخلی همچنان کارزار را تعیین می‌کنند.',
+      },
+      {
+        en: 'Opening losses are not refunded: every interceptor and mated round carries forward.',
+        fa: 'تلفات آغازین بازگردانده نمی‌شود: هر رهگیر و هر مهمات جفت‌شده به جلو منتقل می‌شود.',
+      },
+    ],
+    firstTurn: [
+      {
+        en: 'Check which bases are still operational and whether host access has already tightened.',
+        fa: 'بررسی کنید کدام پایگاه‌ها هنوز فعال‌اند و آیا دسترسی میزبان از قبل محدود شده است.',
+      },
+      {
+        en: 'Decide whether to spend the first turn on damage, escort, or preserving stocks.',
+        fa: 'تصمیم بگیرید نوبت اول را صرف آسیب، اسکورت یا حفظ ذخایر کنید.',
+      },
+    ],
+  },
+  attrition: {
+    title: { en: 'Attrition Campaign', fa: 'کارزار فرسایشی' },
+    era: {
+      en: '24 March 2026 · war · 20 turns',
+      fa: '۲۴ مارس ۲۰۲۶ · جنگ · ۲۰ نوبت',
+    },
+    situation: {
+      en: 'A month of exchange has ground both sides down. Iranian launchers and stocks are thinner, Gulf bases are damaged, host governments are losing patience and Hormuz is half-strangled. Every sortie now trades against exhaustion.',
+      fa: 'یک ماه تبادل آتش هر دو طرف را فرسوده است. پرتابگرها و ذخایر ایران کمتر شده، پایگاه‌های خلیج آسیب دیده‌اند، دولت‌های میزبان صبر خود را از دست می‌دهند و هرمز نیمه‌خفه شده است. هر پرواز اکنون با فرسودگی معامله می‌شود.',
+    },
+    objectives: [
+      {
+        en: 'Coalition: restore access and sustainment before domestic pressure or damaged bases decide the war.',
+        fa: 'ائتلاف: پیش از آنکه فشار داخلی یا پایگاه‌های آسیب‌دیده جنگ را تعیین کنند، دسترسی و تدارک را بازگردانید.',
+      },
+      {
+        en: 'Iran: trade surviving stocks for time and keep the oil-shock path alive.',
+        fa: 'ایران: ذخایر بازمانده را با زمان معامله کنید و مسیر شوک نفتی را زنده نگه دارید.',
+      },
+      {
+        en: 'Production and launcher budgets matter more than single dramatic strikes.',
+        fa: 'تولید و بودجه پرتابگرها از حملات نمایشی تک‌تک مهم‌ترند.',
+      },
+    ],
+    ending: [
+      {
+        en: 'Twenty turns remain; thresholds are unchanged but the starting position is already depleted.',
+        fa: 'بیست نوبت باقی است؛ آستانه‌ها تغییر نکرده‌اند اما وضعیت آغازین از قبل تحلیل رفته است.',
+      },
+      {
+        en: 'A negotiated armistice may be closer than a decisive military result.',
+        fa: 'آتش‌بس مذاکره‌شده ممکن است به نتیجه نظامی قاطع نزدیک‌تر باشد.',
+      },
+    ],
+    firstTurn: [
+      {
+        en: 'Inspect damaged nodes and choose which production or basing capability must be preserved.',
+        fa: 'تأسیسات آسیب‌دیده را بررسی کنید و انتخاب کنید کدام توان تولید یا پایگاه باید حفظ شود.',
+      },
+      {
+        en: 'Check host threat levels: another closure can remove your best launch options.',
+        fa: 'سطح تهدید میزبان‌ها را بررسی کنید: بسته شدن دیگری می‌تواند بهترین گزینه‌های پرتاب را حذف کند.',
+      },
+    ],
+  },
+  renewed: {
+    title: { en: 'Renewed Conflict', fa: 'درگیری تجدیدشده' },
+    era: {
+      en: '15 September 2026 · war · 24 turns',
+      fa: '۱۵ سپتامبر ۲۰۲۶ · جنگ · ۲۴ نوبت',
+    },
+    situation: {
+      en: 'The agreement failed and the war has restarted. Iran rebuilt production and refilled its launchers during the pause; the coalition’s domestic patience and Gulf access did not recover. Old red lines are closer and the room for error is smaller.',
+      fa: 'توافق شکست خورد و جنگ دوباره آغاز شد. ایران در دوران آتش‌بس تولید را بازسازی کرد و پرتابگرهایش را پر کرد؛ صبر داخلی ائتلاف و دسترسی خلیج بازنگشت. خطوط سرخ قدیمی نزدیک‌ترند و مجال خطا کمتر است.',
+    },
+    objectives: [
+      {
+        en: 'Coalition: prevent a reconstituted Iranian salvo from deciding the war in the first exchanges.',
+        fa: 'ائتلاف: جلوگیری از آنکه رگبار بازسازی‌شده ایران در تبادل‌های نخست جنگ را تعیین کند.',
+      },
+      {
+        en: 'Iran: convert rebuilt capacity into leverage before the coalition finds its footing.',
+        fa: 'ایران: توان بازسازی‌شده را پیش از آنکه ائتلاف جای پای خود را پیدا کند به اهرم تبدیل کنید.',
+      },
+      {
+        en: 'Escalation is already high: nuclear and leadership red lines are closer than at the opening.',
+        fa: 'تشدید تنش از قبل بالاست: خطوط سرخ هسته‌ای و رهبری از آغاز نزدیک‌ترند.',
+      },
+    ],
+    ending: [
+      {
+        en: 'The same outcome paths apply, but a fast decision is more likely than a long war.',
+        fa: 'همان مسیرهای پایان اعمال می‌شوند، اما تصمیم سریع از جنگ طولانی محتمل‌تر است.',
+      },
+      {
+        en: 'Reconstituted stocks can still run out: production and launchers are not unlimited.',
+        fa: 'ذخایر بازسازی‌شده هم می‌توانند تمام شوند: تولید و پرتابگرها نامحدود نیستند.',
+      },
+    ],
+    firstTurn: [
+      {
+        en: 'Identify the rebuilt production lines and launchers before spending munitions elsewhere.',
+        fa: 'پیش از خرج کردن مهمات در جای دیگر، خطوط تولید و پرتابگرهای بازسازی‌شده را شناسایی کنید.',
+      },
+      {
+        en: 'Check escalation and host access before ordering another high-signature strike.',
+        fa: 'پیش از فرمان یک حمله پرنشانه دیگر، تشدید تنش و دسترسی میزبان را بررسی کنید.',
+      },
+    ],
+  },
 };
 
 export function factionBriefing(faction: PlayableFactionId): FactionBriefing {

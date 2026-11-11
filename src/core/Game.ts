@@ -3,6 +3,7 @@
  * The only mutable game state lives in `snap`, which is plain JSON.
  */
 import scenarioData from '../data/scenarios.json';
+import { LATE_SCENARIOS } from '../data/lateScenarios';
 import { TheaterMap } from '../map/TheaterMap';
 import { hexId, hexDistance, type HexCoord } from '../map/hex';
 import { saveGame, loadGame, type SlotId } from '../services/save';
@@ -32,9 +33,10 @@ import { DEFAULT_ROE_CFG, defaultRoeState } from '../politics/roe';
 import { DEFAULT_SCORECARD_CFG } from '../politics/scorecard';
 import { DEFAULT_INITIATIVE_CFG, defaultIsraelInitiative } from '../politics/initiative';
 import { DEFAULT_TALKS_CFG, defaultCeasefireTalks } from '../politics/talks';
-import type { InitiativeConfig, TalksConfig } from './types';
+import type { InitiativeConfig, Meters, Resources, TalksConfig } from './types';
+import { DATA_VERSION, RULES_VERSION, SCENARIO_VERSION } from './versions';
 
-interface DeployEntry {
+export interface DeployEntry {
   type: string;
   lon: number;
   lat: number;
@@ -43,6 +45,7 @@ interface DeployEntry {
 
 export interface ScenarioDef {
   id: string;
+  version?: number;
   name: string;
   brief: string;
   turns: number;
@@ -59,12 +62,18 @@ export interface ScenarioDef {
   hosts: Record<string, number>;
   iran: IranStock;
   initialHormuz: number;
+  /** Optional per-node starting integrity for later-war scenarios. */
+  nodeIntegrity?: Record<string, number>;
+  /** Optional overrides applied on top of the standard starting resources. */
+  resources?: Partial<Resources>;
+  /** Optional overrides applied on top of the standard starting meters. */
+  meters?: Partial<Meters>;
   startDate?: string;
   warStarted?: boolean;
   phase?: 'prewar' | 'war';
 }
 
-export const SCENARIOS = scenarioData as unknown as Record<string, ScenarioDef>;
+export const SCENARIOS = { ...scenarioData, ...LATE_SCENARIOS } as unknown as Record<string, ScenarioDef>;
 
 export type InteractionMode = 'idle' | 'move' | 'strike' | 'special';
 
@@ -82,6 +91,8 @@ export class Game {
   selection: Selection = { hexId: null, unitUid: null, mode: 'idle' };
   lastEvents: ResolveEvent[] = [];
   lastResolvedTurn = 0;
+  /** Replay playback disables writes so it cannot replace the live autosave. */
+  persist = true;
 
   private listeners = new Set<() => void>();
   private uidCounter = 0;
@@ -103,7 +114,8 @@ export class Game {
     const nodes: Record<string, NodeState> = {};
     for (const node of this.map.nodes) {
       const maxIntegrity = node.maxIntegrity ?? 100;
-      nodes[node.id] = { id: node.id, integrity: maxIntegrity, maxIntegrity, closedUntilTurn: 0, owner: node.host };
+      const integrity = scenario.nodeIntegrity?.[node.id] ?? maxIntegrity;
+      nodes[node.id] = { id: node.id, integrity, maxIntegrity, closedUntilTurn: 0, owner: node.host };
     }
 
     const hosts: Record<string, HostState> = {};
@@ -150,6 +162,9 @@ export class Game {
 
     return {
       version: 1,
+      rulesVersion: RULES_VERSION,
+      dataVersion: DATA_VERSION,
+      scenarioVersion: scenario.version ?? SCENARIO_VERSION,
       scenarioId: scenario.id,
       faction,
       seed,
@@ -185,6 +200,7 @@ export class Game {
         politicalWill: BALANCE.politicalWillStart,
         tankerSorties: 6,
         airlift: BALANCE.sharedAirliftCapacity,
+        ...(scenario.resources ?? {}),
       },
       iran: structuredClone(scenario.iran),
       meters: {
@@ -207,6 +223,7 @@ export class Game {
         maxOccupationStreak: 0,
         oilShockStreak: 0,
         domesticPressureStreak: 0,
+        ...(scenario.meters ?? {}),
       },
       reinforcements: [],
       superpowers: {
@@ -221,7 +238,7 @@ export class Game {
         { turn: 1, text: scenario.brief, tone: 'info' },
         {
           turn: 1,
-          text: `You command ${FACTION_LABELS[faction]}. ${scenario.tutorial ? 'Tutorial: follow the highlighted guidance for five turns.' : 'Thirty turns. Every interceptor and every missile is scarce.'}`,
+          text: `You command ${FACTION_LABELS[faction]}. ${scenario.tutorial ? 'Tutorial: follow the highlighted guidance for five turns.' : `${scenario.turns} turns. Every interceptor and every missile is scarce.`}`,
           tone: 'info',
         },
       ],
@@ -231,6 +248,7 @@ export class Game {
       indiaPressureApplied: false,
       qatarMediationTurn: 0,
       orderLog: [],
+      history: [],
     };
   }
 
@@ -334,16 +352,33 @@ export class Game {
   endTurn(): { events: ResolveEvent[]; resolvedTurn: number } {
     if (this.snap.status !== 'playing') return { events: [], resolvedTurn: this.snap.turn };
     const resolvedTurn = this.snap.turn;
-    this.snap.orderLog.push({ turn: resolvedTurn, orders: clone(this.snap.orders) });
+    const resolvedOrders = clone(this.snap.orders);
+    this.snap.orderLog.push({ turn: resolvedTurn, orders: resolvedOrders });
     const result = runTurn(this.snap, this.map);
     for (const event of result.events) {
       this.snap.log.push({ turn: resolvedTurn, text: event.text, tone: event.tone, faction: event.faction });
     }
     if (this.snap.log.length > 400) this.snap.log.splice(0, this.snap.log.length - 400);
+    this.snap.history = this.snap.history ?? [];
+    this.snap.history.push({
+      turn: resolvedTurn,
+      orders: resolvedOrders,
+      events: clone(result.events),
+      status: this.snap.status,
+      outcome: this.snap.outcome,
+      summary: {
+        hormuz: Math.round(this.snap.meters.hormuz),
+        oilPrice: Math.round(this.snap.meters.oilPrice),
+        politicalWill: Math.round(this.snap.resources.politicalWill),
+        iranWarCost: Math.round(this.snap.meters.iranWarCost),
+        nuclearEscalation: Math.round(this.snap.meters.nuclearEscalation),
+        stability: Math.round(this.snap.iranDomestic?.stability ?? 0),
+      },
+    });
     this.lastEvents = result.events;
     this.lastResolvedTurn = resolvedTurn;
     this.selection.mode = 'idle';
-    saveGame('auto', this.snap);
+    if (this.persist) saveGame('auto', this.snap);
     this.emit();
     return { events: result.events, resolvedTurn };
   }

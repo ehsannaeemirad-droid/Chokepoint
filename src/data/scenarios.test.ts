@@ -52,12 +52,42 @@ describe('arsenal reconciliation', () => {
     }
   });
 
-  it('keeps airframes and warheads empty at start so rounds are fully mated', () => {
-    for (const id of Object.keys(SCENARIOS)) {
+  it('keeps the pre-war and tutorial starts fully mated', () => {
+    for (const id of ['campaign', 'tutorial']) {
       const iran = SCENARIOS[id]!.iran;
       expect(iran.airframes).toEqual({ drone: 0, missile: 0 });
       expect(iran.warheads).toEqual({ conventional: 0 });
     }
+  });
+
+  it('gives each later-war scenario a distinct start, not a relabelled campaign', () => {
+    const campaign = SCENARIOS.campaign!;
+    for (const id of ['opening', 'attrition', 'renewed']) {
+      const scenario = SCENARIOS[id]!;
+      expect(scenario.startDate, id).toBeTruthy();
+      expect(scenario.startDate, id).not.toBe(campaign.startDate);
+      expect(scenario.phase, id).toBe('war');
+      expect(scenario.initialHormuz, id).not.toBe(campaign.initialHormuz);
+      expect(totalRounds(scenario.iran), id).not.toBe(totalRounds(campaign.iran));
+      expect(scenario.hosts.qatar, id).not.toBe(campaign.hosts.qatar);
+    }
+    const attrition = SCENARIOS.attrition!;
+    expect(attrition.nodeIntegrity?.natanz).toBeLessThan(100);
+    expect(attrition.iran.launchers.drone).toBeLessThan(campaign.iran.launchers.drone);
+    const renewed = SCENARIOS.renewed!;
+    expect(renewed.iran.resources).toBeGreaterThan(campaign.iran.resources);
+  });
+
+  it('applies later-war node damage and resource overrides in the snapshot', () => {
+    const game = new Game();
+    game.start('attrition', 'usa', 11);
+    expect(game.snap.phase).toBe('war');
+    expect(game.snap.startDate).toBe('2026-03-24');
+    expect(game.snap.nodes.natanz!.integrity).toBeLessThan(game.snap.nodes.natanz!.maxIntegrity);
+    expect(game.snap.resources.politicalWill).toBe(42);
+    expect(game.snap.meters.oilPrice).toBe(119);
+    expect(game.snap.rulesVersion).toBeTruthy();
+    expect(game.snap.scenarioVersion).toBeGreaterThan(0);
   });
 
   it('keeps the tutorial structurally smaller, not just relabelled', () => {

@@ -39,7 +39,8 @@ import { buildSituation } from './situation';
 import { rejectionText } from './reason';
 import { factionLabel, unitLabel } from './labels';
 import { factionBriefing, scenarioBriefing, type Bi } from './briefing';
-import { deleteSave, downloadText, exportReplay, listSaves, SLOTS, type SlotId } from '../services/save';
+import { deleteSave, downloadText, listSaves, SLOTS, type SlotId } from '../services/save';
+import { parseReplay, playReplay, serializeReplay, type PlaybackResult, type ReplayFile } from '../services/replay';
 import { Minimap } from './Minimap';
 import { bus, focusHex, zoomBy } from './bus';
 import { filterNodes, NAV_KINDS, nextOwnUid, nextThreatUid, nodeCatalog, type NavEntry, type NavKind } from './nav';
@@ -201,7 +202,8 @@ export class Ui {
   private cinTimer = 0;
   private cinEvents: ResolveEvent[] = [];
   private cinIndex = 0;
-  private modalKind: 'menu' | 'outcome' | 'review' | 'briefing' | null = null;
+  private modalKind: 'menu' | 'outcome' | 'review' | 'briefing' | 'replay' | null = null;
+  private replayView: { replay: ReplayFile; playback: PlaybackResult } | null = null;
   private reviewOpen = false;
   private lastFocused: HTMLElement | null = null;
   private reportCategory: StringKey | null = null;
@@ -297,6 +299,7 @@ export class Ui {
     if (this.modalKind === 'menu') this.openMenu();
     else if (this.modalKind === 'outcome') this.openOutcome();
     else if (this.modalKind === 'briefing') this.openBriefing();
+    else if (this.modalKind === 'replay') this.openReplay();
   }
 
   private handle(action: string): void {
@@ -494,10 +497,11 @@ export class Ui {
       return;
     }
     if (verb === 'export-replay') {
-      downloadText(`chokepoint-replay-turn-${this.game.snap.turn}.json`, exportReplay(this.game.snap));
+      downloadText(`chokepoint-replay-turn-${this.game.snap.turn}.json`, serializeReplay(this.game.snap));
       this.showToast(t('toast.replayExported'), 'good');
       return;
     }
+    if (verb === 'import-replay') return this.importReplay();
     if (verb === 'scenario') {
       this.menuScenario = a ?? 'campaign';
       this.openMenu();
@@ -1608,6 +1612,94 @@ export class Ui {
     `);
   }
 
+  /** Import a replay file and open its inspection view. */
+  private importReplay(): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json,.json';
+    input.addEventListener('change', () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      void file.text().then((text) => this.loadReplay(text));
+    });
+    input.click();
+  }
+
+  private loadReplay(text: string): void {
+    const parsed = parseReplay(text);
+    if (!parsed.ok) {
+      const key = `replay.issue.${parsed.issue.kind}` as StringKey;
+      this.showToast(t(key, { turn: parsed.issue.turn ?? 0 }), 'warn');
+      return;
+    }
+    this.replayView = { replay: parsed.replay, playback: playReplay(parsed.replay) };
+    this.openReplay();
+  }
+
+  /** Replay comparison and turn/event inspection. */
+  private openReplay(): void {
+    const view = this.replayView;
+    if (!view) {
+      this.openMenu();
+      return;
+    }
+    const { replay, playback } = view;
+    const scenario = SCENARIOS[replay.scenarioId];
+    const fa = getLang() === 'fa';
+    const statusLabel = (status: string): string => t(`replay.status.${status}` as StringKey);
+    const orderLine = (order: Order): string => {
+      const bits = [t(`order.${order.kind}` as StringKey)];
+      if ('col' in order && 'row' in order) bits.push(`${order.col},${order.row}`);
+      if ('nodeId' in order && order.nodeId) bits.push(order.nodeId);
+      return bits.join(' · ');
+    };
+    const turnRows = playback.turns
+      .map((turn) => {
+        const orders = turn.orders.length
+          ? `<ul class="replay-list">${turn.orders.map((order) => `<li>${orderLine(order)}</li>`).join('')}</ul>`
+          : `<p class="modal-note">${t('replay.noOrders')}</p>`;
+        const events = turn.events.length
+          ? `<ul class="replay-list">${turn.events
+              .map((event) => `<li>${fa ? faLog(event.text) ?? event.text : event.text}</li>`)
+              .join('')}</ul>`
+          : `<p class="modal-note">${t('replay.noEvents')}</p>`;
+        return `<details class="replay-turn" ${turn.matches ? '' : 'open'}>
+          <summary><b>${t('replay.turn', { n: turn.turn })}</b>
+            <span class="status ${turn.matches ? 'open' : 'closed'}">${turn.matches ? t('replay.match') : t('replay.mismatch')}</span>
+          </summary>
+          <h4>${t('replay.orders')}</h4>${orders}
+          <h4>${t('replay.events')}</h4>${events}
+        </details>`;
+      })
+      .join('');
+    const recorded = replay.turns[replay.turns.length - 1]?.summary;
+    const comparison = recorded
+      ? `<div class="replay-compare">
+          <div><span>${t('replay.recorded')}</span><b>${statusLabel(replay.status)}</b></div>
+          <div><span>${t('replay.reproduced')}</span><b>${statusLabel(playback.status)}</b></div>
+          <div><span>${t('replay.final')}</span><b>${playback.summary.hormuz}% · ${playback.summary.politicalWill}</b></div>
+        </div>`
+      : '';
+    this.modalKind = 'replay';
+    this.openModal(`
+      <div class="modal-card replay">
+        <header><h2>${t('replay.title')}</h2><button data-action="close-modal" aria-label="${t('btn.close')}">✕</button></header>
+        <div class="modal-body">
+          <p class="modal-note">${scenario ? (fa ? SCENARIO_FA[scenario.id] ?? scenario.name : scenario.name) : replay.scenarioId} · ${shortFaction(replay.faction)} · ${t('replay.seed', { n: replay.seed })}</p>
+          <p class="modal-note">${t('replay.versions', { rules: replay.rulesVersion, data: replay.dataVersion, scenario: replay.scenarioVersion })}</p>
+          <p class="replay-verdict ${playback.ok ? 'good' : 'bad'}">${playback.ok ? t('replay.matchAll') : t('replay.mismatchAt', { n: playback.issue?.turn ?? playback.turn })}</p>
+          ${comparison}
+          <h3>${t('replay.turns', { n: playback.turns.length })}</h3>
+          ${turnRows || `<p class="modal-note">${t('replay.noTurns')}</p>`}
+          <div class="actions">
+            <button data-action="import-replay">${t('menu.importReplay')}</button>
+            <button data-action="close-modal">${t('btn.close')}</button>
+          </div>
+        </div>
+      </div>
+    `);
+  }
+
   private openMenu(): void {
     const saves = listSaves();
     const slotRows = SLOTS.map((slot, index) => {
@@ -1660,7 +1752,10 @@ export class Ui {
           <section>
             <h3>${t('menu.replay')}</h3>
             <p class="modal-note">${t('menu.replayNote')}</p>
-            <button data-action="export-replay">${t('btn.exportReplay')}</button>
+            <div class="choice-row">
+              <button data-action="export-replay">${t('btn.exportReplay')}</button>
+              <button data-action="import-replay">${t('menu.importReplay')}</button>
+            </div>
           </section>
           <section>
             <h3>${t('menu.language')}</h3>

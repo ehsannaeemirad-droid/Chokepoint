@@ -87,6 +87,10 @@ function normalizeSnapshot(snapshot: GameSnapshot): GameSnapshot {
     if (r.delayTurns === undefined) r.delayTurns = 0;
   }
   if (snapshot.warStarted === undefined) snapshot.warStarted = true;
+  if (!snapshot.rulesVersion) snapshot.rulesVersion = 'legacy';
+  if (!snapshot.dataVersion) snapshot.dataVersion = 'legacy';
+  if (snapshot.scenarioVersion === undefined) snapshot.scenarioVersion = 0;
+  if (!Array.isArray(snapshot.history)) snapshot.history = [];
   if (snapshot.phase === undefined) snapshot.phase = snapshot.warStarted ? 'war' : 'prewar';
   if (snapshot.resources.interceptorsUSAReserve === undefined) snapshot.resources.interceptorsUSAReserve = 0;
   if (snapshot.resources.interceptorsIsraelReserve === undefined) snapshot.resources.interceptorsIsraelReserve = 0;
@@ -102,23 +106,6 @@ export function listSaves(): Array<{ slot: SlotId; label: string; savedAt: numbe
 
 export function deleteSave(slot: SlotId): void {
   localStorage.removeItem(keyFor(slot));
-}
-
-export function exportReplay(snapshot: GameSnapshot): string {
-  return JSON.stringify(
-    {
-      kind: 'chokepoint-replay',
-      version: 4,
-      scenarioId: snapshot.scenarioId,
-      faction: snapshot.faction,
-      seed: snapshot.seed,
-      orderLog: snapshot.orderLog,
-      finalTurn: snapshot.turn,
-      status: snapshot.status,
-    },
-    null,
-    2,
-  );
 }
 
 export function downloadText(filename: string, text: string): void {

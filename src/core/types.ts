@@ -475,7 +475,31 @@ export interface IranDomestic {
   negotiationPosition: number;
 }
 
+/** Compact state fingerprint used to compare a replay with its recording. */
+export interface TurnSummary {
+  hormuz: number;
+  oilPrice: number;
+  politicalWill: number;
+  iranWarCost: number;
+  nuclearEscalation: number;
+  stability: number;
+}
+
+/** One resolved turn, kept for replay inspection and comparison. */
+export interface TurnRecord {
+  turn: number;
+  orders: Order[];
+  events: ResolveEvent[];
+  status: GameStatus;
+  outcome: string;
+  summary?: TurnSummary;
+}
+
 export interface GameSnapshot {
+  rulesVersion?: string;
+  dataVersion?: string;
+  scenarioVersion?: number;
+  history?: TurnRecord[];
   version: 1;
   scenarioId: string;
   faction: PlayableFactionId;

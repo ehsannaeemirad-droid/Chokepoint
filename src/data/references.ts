@@ -10,6 +10,8 @@
  * because what is sourced there is the site's role, not a quantity.
  */
 import type { HistoricalReference } from '../core/provenance';
+import { DELIVERY_CLASSES } from '../core/inventory';
+import { LATE_SCENARIOS } from './lateScenarios';
 
 const REVIEWED = '2026-11-09';
 const PREWAR = '2026-02-27';
@@ -447,3 +449,93 @@ export const REFERENCES: HistoricalReference[] = [
       'Congress 60 at start, falling with casualties and escalation, recovering on quiet turns. Restrictions at 35, suspension at 20.',
   }),
 ];
+
+// ---- later-war scenarios (Phase 5) -----------------------------------------
+// Alternate starts are game abstractions: their dates and depletion are the
+// scenario design, not a published order of battle.
+for (const scenario of Object.values(LATE_SCENARIOS)) {
+  const validAt = scenario.startDate ?? PREWAR;
+  const tag = scenario.id;
+  for (const cls of DELIVERY_CLASSES) {
+    REFERENCES.push(
+      ref({
+        id: `ref-${tag}-arsenal-${cls}`,
+        subjectId: `${tag}:arsenal:${cls}`,
+        category: 'arsenal',
+        validAt,
+        value: scenario.iran.rounds[cls],
+        unit: 'mated_rounds',
+        evidenceType: 'game-abstraction',
+        confidence: 'low',
+        notes: `${scenario.name}: mated ${cls} rounds at the scenario start. The later-war inventory is a design assumption, not a published count.`,
+        gameMapping: `${scenario.iran.rounds[cls]} mated ${cls} rounds available at turn 1; launchers, production and expenditure follow the normal rules.`,
+      }),
+    );
+  }
+  for (const pool of ['drone', 'ballistic'] as const) {
+    REFERENCES.push(
+      ref({
+        id: `ref-${tag}-launchers-${pool}`,
+        subjectId: `${tag}:launchers:${pool}`,
+        category: 'launcher',
+        validAt,
+        value: scenario.iran.launchers[pool],
+        unit: 'launch_platforms',
+        evidenceType: 'game-abstraction',
+        confidence: 'low',
+        notes: `${scenario.name}: surviving ${pool} launch platforms after the preceding campaign period.`,
+        gameMapping: `${scenario.iran.launchers[pool]} ${pool} launchers at start; the launcher budget is spent per turn.`,
+      }),
+    );
+  }
+  REFERENCES.push(
+    ref({
+      id: `ref-${tag}-nuclear-material`,
+      subjectId: `${tag}:nuclear-material`,
+      category: 'nuclear-material',
+      validAt,
+      value: scenario.iran.nuclearMaterial,
+      unit: 'warhead_equivalents',
+      evidenceType: 'game-abstraction',
+      confidence: 'low',
+      notes: 'No warhead-grade material is fielded in this scenario; capability is represented by the nuclear programme and escalation meters.',
+      gameMapping: 'nuclearMaterial 0; intact enrichment sites and the escalation ladder carry the latency instead.',
+    }),
+    ref({
+      id: `ref-${tag}-resources`,
+      subjectId: `${tag}:resources`,
+      category: 'scenario',
+      validAt,
+      value: scenario.iran.resources,
+      unit: 'war_resources',
+      evidenceType: 'game-abstraction',
+      confidence: 'low',
+      notes: `${scenario.name}: production resources, adjusted to reflect the war economy at this date.`,
+      gameMapping: `${scenario.iran.resources} starting resources with the standard per-turn income.`,
+    }),
+    ref({
+      id: `ref-${tag}-initial-hormuz`,
+      subjectId: `${tag}:initial-hormuz`,
+      category: 'scenario',
+      validAt,
+      value: scenario.initialHormuz,
+      unit: 'percent_disruption',
+      evidenceType: 'game-abstraction',
+      confidence: 'low',
+      notes: `${scenario.name}: opening disruption on the 0-100 index; later-war shipping conditions are a scenario choice.`,
+      gameMapping: `Initial Hormuz disruption ${scenario.initialHormuz}. Values above 60 trigger logistics delays.`,
+    }),
+    ref({
+      id: `ref-${tag}-hosts`,
+      subjectId: `${tag}:hosts`,
+      category: 'scenario',
+      validAt,
+      value: 8,
+      unit: 'host_nations',
+      evidenceType: 'game-abstraction',
+      confidence: 'low',
+      notes: `${scenario.name}: eight host states with elevated threat perception after weeks of war.`,
+      gameMapping: `Host threat seeds are listed in lateScenarios.ts; access closes through the normal politics rules.`,
+    }),
+  );
+}
