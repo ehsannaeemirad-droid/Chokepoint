@@ -869,7 +869,7 @@ Commit: `feat: give order rejections stable codes and Persian messages`.
   dictionary with params (distance, cost, cooldown, host, production line) and
   falls back to the English reason, then a caller fallback. Every toast in
   `Ui.ts` and the turn-review validation list use it.
-- **Localisation.** All 73 codes have English and Persian messages, including
+- **Localisation.** All 71 codes have English and Persian messages, including
   detailed cases such as no-fly zone, congressional restriction, city-strike
   authorisation, initiative cooldown and Qatari talks state.
 

@@ -367,7 +367,7 @@ export class Ui {
       if (!Number.isFinite(col) || !Number.isFinite(row)) return;
       const result = this.game.queueOrder({ kind: 'strike', unitUid: unit.uid, col: col!, row: row!, nodeId });
       if (!result.ok) {
-        this.showToast(result.reason ?? t('toast.invalid'), 'warn');
+        this.showToast(rejectionText(result), 'warn');
         return;
       }
       const node = nodeId ? this.game.map.nodeById.get(nodeId) : undefined;
