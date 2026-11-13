@@ -1249,3 +1249,16 @@ Fix:
 
 Verification: `tsc --noEmit` exit 0; `vitest run` 43 files / 319 tests passed;
 `pnpm run build` exit 0.
+
+## 36. Pages deployment gate
+
+Commit: `ci: gate Pages deploy on tests`.
+
+`pages.yml` built and published without running the test suite, so a regression
+that compiles could still ship. The build job now runs `pnpm test` between
+`pnpm install --frozen-lockfile` and `pnpm run build`; a failing test fails the
+job and the `deploy` job (which `needs: build`) never runs.
+
+Verification: `pnpm run typecheck` exit 0, `pnpm test` 43 files / 319 tests
+passed, `pnpm run build` exit 0 locally; the gate itself is confirmed by the
+first CI run after the push (§37).
