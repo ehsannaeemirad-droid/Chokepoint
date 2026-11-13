@@ -1149,3 +1149,72 @@ Verification: `tsc --noEmit` exit 0; `vitest run src/map/labelLayout.test.ts`
 Limitations: the rendered positions were not inspected in a browser; only the
 pure layout is asserted. Collision handling shifts a label down, so a dense
 coastal cluster now extends further south rather than hiding labels.
+
+## 33. Phase 3 defect — Iranian campaigns were seed-independent
+
+Commit: `fix: make the Iranian balance campaign consume the seed`.
+
+Reported symptom: seeds 11, 22 and 33 produced byte-identical Iranian rows
+(won / turn 30 / oil 69 / hormuz 10 / 72 drones / 52 ballistic / 4 mines / 269
+interceptors / will 50), which was read as the Iranian AI ignoring the seeded
+RNG.
+
+**The diagnosed cause is different, and worth recording precisely.** There is no
+`Math.random()` in the game logic (§29, `src/core/rng.ts` states the rule), and
+the AI already derives every roll from `factionRng(snap.seed, snap.turn,
+faction)`. What actually happened: in the `faction: 'iran'` row set the *player*
+is Iran, and the harness's player policy only issued strikes with
+`category === 'air'` units. Iran opens with launchers, not aircraft, so the
+policy queued nothing; `maybeStartWar` needs a hostile order, so `warStarted`
+stayed false for all 30 turns; `runTurn` then took its pre-war branch
+("Pre-war turn: opposing forces hold fire") and skipped `runAiPhase` entirely.
+No AI decision was made, so no seeded roll was consumed, and all three seeds
+resolved the same untouched snapshot. The Iranian AI path was never reached —
+it is not seed-blind.
+
+Trace evidence, from an instrumented run of `Game.start('campaign', 'iran',
+seed)` with `endTurn()` only: every turn logged "Pre-war turn: opposing forces
+hold fire", `warStarted === false`, stock frozen at its starting 72 drones, and
+the final line was a settlement at turn 30 with identical margins for both seeds.
+
+Fix, confined to the balance harness (no engine rule, number, win rate or
+scenario starting state was changed):
+
+- `issueIranSalvo` is the Iranian player policy: it queues a missile strike with
+  the first in-range launcher, so the campaign opens, the war starts and the AI
+  phase runs with its per-turn seed.
+- The old assertion was vacuous — it compared a `Set` of `status:turn` against
+  `> 0`, which is true for any non-empty set. It is replaced by the intended
+  check over `status:turn:droneRounds:ballisticRounds:politicalWill` requiring
+  more than one distinct signature.
+
+Resulting rows (unchanged for USA/Israel, and now divergent for Iran):
+
+| faction | seed | status | turn | drones | ballistic | will |
+|---|---|---|---|---|---|---|
+| iran | 11 | lost | 30 | 252 | 196 | 18 |
+| iran | 22 | won | 30 | 252 | 196 | 38 |
+| iran | 33 | lost | 30 | 252 | 196 | 22 |
+
+USA rows remain `284/241/28`, `238/221/22`, `82/73/30` and Israel rows
+`330/265/34`, `320/257/28`, `298/238/24` — identical to the pre-change report,
+because only the Iranian policy was added.
+
+Negative control: restoring the old passive policy in a throwaway copy of the
+test makes the new assertion fail with `expected 1 to be greater than 1`; the
+fix makes it pass. The copy was deleted.
+
+Verification: `tsc --noEmit` exit 0; `vitest run src/ai/balance.test.ts` 3 tests
+passed.
+
+Limitations: `droneRounds` and `ballisticRounds` are still identical across the
+three Iranian seeds — Iranian production is deterministic by design, so the
+divergence comes from outcomes and political will, not from stock levels. A
+passive Iranian player still coasts to a turn-30 settlement, because nothing
+fires automatically before the player opens the war (SPEC: the first move is the
+player's); that is a design property, not a seed defect.
+
+## 34. Phase 6 — skipped
+
+Phase 6 is optional; per the plan for this pass it was not attempted. Nothing in
+this log is evidence for it.

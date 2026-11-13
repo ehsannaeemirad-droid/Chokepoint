@@ -45,6 +45,36 @@ function issueStrike(game: Game, faction: Faction): void {
 }
 
 /**
+ * Iranian player policy: open with the missile force the way an Iranian
+ * commander would.
+ *
+ * Without an opening order the campaign never leaves the pre-war phase —
+ * `maybeStartWar` needs a hostile order — so `runAiPhase` is skipped for all
+ * 30 turns and every seed resolves an identical untouched snapshot. The
+ * Iranian rows were byte-identical across seeds for that reason, not because
+ * the AI ignored the seed: the AI never ran.
+ */
+function issueIranSalvo(game: Game): void {
+  const targets = game.map.nodes.filter((node) => {
+    const defender = defenderOfNode(node);
+    return !!defender && hostileTo('iran', defender);
+  });
+  const launchers = game.snap.units.filter(
+    (u) => u.faction === 'iran' && unitType(u.typeId).category === 'missile' && u.cooldown === 0,
+  );
+  for (const unit of launchers) {
+    for (const target of targets) {
+      const hex = game.map.nodeHexOf(target.id);
+      if (!hex) continue;
+      if (hexDistance({ col: unit.col, row: unit.row }, hex) > strikeRange(game.snap, unit)) continue;
+      const order = { kind: 'strike' as const, unitUid: unit.uid, col: hex.col, row: hex.row, nodeId: target.id };
+      if (!validateStrike(game.snap, game.map, unit, hex.col, hex.row, target.id).ok) continue;
+      if (game.queueOrder(order).ok) return;
+    }
+  }
+}
+
+/**
  * A defensive player policy: constrain ROE, keep the airlift running, escort
  * shipping and clear located mines. This exercises the mechanics a real player
  * has that the pure strike policy ignores.
@@ -75,7 +105,8 @@ function play(faction: Faction, seed: number, defensive = false): Row {
   game.start('campaign', faction, seed);
   let guard = 0;
   while (game.snap.status === 'playing' && guard < 32) {
-    issueStrike(game, faction);
+    if (faction === 'iran') issueIranSalvo(game);
+    else issueStrike(game, faction);
     if (defensive) issueDefensiveOrders(game, faction);
     game.endTurn();
     guard++;
@@ -142,9 +173,13 @@ describe('multi-seed AI balance', () => {
       expect(row.hormuz).toBeLessThanOrEqual(100);
     }
 
-    // Different doctrines should not collapse into one identical Iranian war.
-    const iranianRows = rows.filter((r) => r.faction === 'iran');
-    expect(new Set(iranianRows.map((r) => `${r.status}:${r.turn}`)).size).toBeGreaterThan(0);
+    // An Iranian campaign must actually differ by seed. This used to pass while
+    // every row was identical, because the assertion compared a set with itself.
+    const iranRows = rows.filter((r) => r.faction === 'iran');
+    const signatures = new Set(
+      iranRows.map((r) => `${r.status}:${r.turn}:${r.droneRounds}:${r.ballisticRounds}:${r.politicalWill}`),
+    );
+    expect(signatures.size).toBeGreaterThan(1);
   }, 120_000);
 
   it('runs a defensive player policy and reports the difference', () => {
