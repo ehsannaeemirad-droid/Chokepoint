@@ -1262,3 +1262,120 @@ job and the `deploy` job (which `needs: build`) never runs.
 Verification: `pnpm run typecheck` exit 0, `pnpm test` 43 files / 319 tests
 passed, `pnpm run build` exit 0 locally; the gate itself is confirmed by the
 first CI run after the push (§37).
+
+## 37. Final report and ship
+
+Shipped on 2026-11-13 from `C:\Chokepoint` to
+`https://github.com/ehsannaeemirad-droid/Chokepoint` (`main`),
+`1307c83..d1d9ec0`.
+
+### Baseline
+
+| Item | Value |
+|---|---|
+| Baseline SHA | `1307c83` ("test: close live target-first and reservation audit gaps") |
+| Re-verified | 2026-11-13, `C:\Chokepoint` |
+| Gate at baseline | typecheck exit 0 · 41 files / **311 tests** passed · build exit 0 |
+| Final gate | typecheck exit 0 · 43 files / **319 tests** passed · build exit 0 |
+
+The eight additional tests are the three new suites' cases:
+`src/ui/actions.test.ts` (3), `src/map/labelLayout.test.ts` (4) and the SPEC §27
+case in `src/politics/victory.test.ts` (1).
+
+### Phase status
+
+- **Phase 2 — closed.** Present and tested in the tree: order permissions
+  (`core/permissions.ts`), projected-order validation and reservations,
+  logistics and transport modes, intelligence (`core/intel.ts`), diplomatic
+  state, domestic politics and escalation, victory evaluation. Verified by the
+  existing suites; nothing in this pass changed it beyond the terminal status
+  enumeration noted in §35.
+- **Phase 3 — the seed-insensitivity defect is fixed, and the diagnosis was
+  corrected.** The Iranian AI was never seed-blind; the balance harness's
+  Iranian *player* policy never issued an order, so the war never started and
+  `runAiPhase` was skipped for all 30 turns (§33). After the fix the measured
+  distribution is: seed 11 lost / turn 30 / 252 drones / 196 ballistic / will 18;
+  seed 22 won / 30 / 252 / 196 / 38; seed 33 lost / 30 / 252 / 196 / 22. USA and
+  Israel rows are unchanged. Negative control: the old policy plus the new
+  assertion fails with `expected 1 to be greater than 1`.
+  The §27 passive-settlement violation found while checking this is fixed in
+  §35: a war that never started now ends `drawn`, not `won`.
+- **Phase 4 — three gaps closed.** `mine`/`clear`/`escort` are reachable from the
+  unit action sheet (§30), `previewOrderImpact` no longer falls through to an
+  English stub for those kinds (§31), and initial-zoom label collisions are
+  resolved by layout (§32).
+- **Phase 5 — already closed, unchanged.** Replay (`src/services/replay.ts`,
+  versioned playback), later-war scenarios and the scenario versioning were not
+  touched; `replay.test.ts` and the scenario suites still pass.
+- **Phase 6 — skipped.** Optional per SPEC Part J, deferred for scope and time
+  (§34).
+
+### Deployment
+
+| Item | Value |
+|---|---|
+| Live site | https://ehsannaeemirad-droid.github.io/Chokepoint/ |
+| CI run | https://github.com/ehsannaeemirad-droid/Chokepoint/actions/runs/43416682484 |
+| Pages run | https://github.com/ehsannaeemirad-droid/Chokepoint/actions/runs/43416682469 |
+| CI result | `verify` job success, 11:23:30–11:23:53 UTC (23 s); steps: install 38–39, typecheck 39–42, test 42–47, build 47–51 |
+| Pages result | success, 11:23:30–11:24:10 UTC (40 s), build then deploy |
+| Gate | `pnpm test` now runs in the Pages build job (§36), so a failing test blocks the deploy |
+
+Live verification (method and result): `curl` of the Pages URL returned
+**HTTP 200**, 1,009 bytes, and the document contains `<title>Chokepoint</title>`
+with the built assets referenced — `./assets/index-DhxtyWFv.js`,
+`./assets/phaser-C831z-fk.js`, `./assets/index-C-qriafA.css`. The JS bundle hash
+differs from the pre-change `index-CA_v5sBi.js`, so the served build is the one
+produced from `d1d9ec0`. **Not checked:** the site was not loaded in a browser,
+so runtime behaviour, console errors and layout on the live origin are unverified
+for this deployment.
+
+### Known limitations (not solved here)
+
+- Iranian air-defence intrinsic percentage (§10).
+- Fattah performance's ±40% disputed band (§11).
+- Sealift compression.
+- Iranian production abstraction (§19) and its deterministic output — the
+  identical `droneRounds`/`ballisticRounds` across seeds in §33 come from this.
+- No browser or RTL visual pass for this pass's three UI changes (§30–§32).
+- The live site's runtime behaviour after deployment is unverified (above).
+- Aid balance remains untuned; there has been no dedicated win-rate pass.
+
+### Decisions made autonomously, with the alternatives rejected
+
+1. **Step C diagnosis (re-diagnosis of a reported engine defect).** The brief
+   said the Iranian AI was not consuming the seeded RNG and named `Math.random`,
+   hardcoded ordering or deterministic target selection as candidate causes.
+   None existed: `src/core/rng.ts` is the only randomness source and the AI
+   already called `factionRng(seed, turn, faction)`. The rows were identical
+   because the war never started. Rejected alternatives: (a) changing engine
+   RNG plumbing to "make the seed matter" — it would have altered numbers for no
+   reason, since the plumbing was already correct; (b) making the engine start
+   the war automatically for an Iranian player — that contradicts SPEC's "the
+   first move is yours". Chosen: fix the harness policy, leaving engine
+   behaviour, numbers and scenario state untouched, and prove the assertion can
+   fail.
+2. **Passive-Iranian settlement.** `status` was `won` at the bell on stabilised
+   meters, which violates SPEC §27. Rejected alternatives: (a) returning `lost`
+   — semantically wrong, no one lost; (b) leaving `won` and only documenting it —
+   contradicts the spec. Chosen: a new terminal `drawn` status, neutral in the
+   UI, applied only when `warStarted` is false at the bell, so every campaign
+   that actually ran scores exactly as before.
+3. **Sheet actions extracted to a module.** The three buttons had to be testable
+   without a browser and jsdom is not a dependency. Rejected: adding jsdom
+   (new dependency, larger blast radius) or asserting on HTML strings from
+   `Ui.ts` (needs a full DOM shell). Chosen: a pure `src/ui/actions.ts` list that
+   the UI renders.
+4. **Label collision handled in layout, not by camera zoom.** Rejected: raising
+   the initial zoom or hiding non-strategic labels (both change what the player
+   sees by default). Chosen: deterministic downward displacement, first label in
+   a cluster anchored.
+5. **`node_modules` reinstalled rather than copied.** The `robocopy` move left
+   pnpm's linked store broken (vitest could not resolve `std-env`). Also used
+   `/E` instead of `/MIR`: mirroring would have deleted `.freebuff`, the
+   workspace's own project marker.
+6. **Repository-local git identity.** The machine's global identity is still the
+   placeholder `Your Name <you@example.com>`, which would have mis-attributed
+   every commit. Set `user.name`/`user.email` in `.git/config` only (to
+   `EhsanRad <ehsan.naeemirad@email.com>`, matching the repository's history) and
+   deliberately left the global config alone.
