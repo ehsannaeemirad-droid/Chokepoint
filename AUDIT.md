@@ -1214,10 +1214,10 @@ passive Iranian player still coasts to a turn-30 settlement, because nothing
 fires automatically before the player opens the war (SPEC: the first move is the
 player's); that is a design property, not a seed defect.
 
-## 34. Phase 6 — skipped
+## 34. Phase 6 — deferred
 
-Phase 6 is optional; per the plan for this pass it was not attempted. Nothing in
-this log is evidence for it.
+Phase 6 (scenario editor, custom conditions, additional actors) not attempted —
+optional per SPEC Part J, deferred for scope and time.
 
 ## 35. Passive-Iranian settlement — the outcome was a victory
 
