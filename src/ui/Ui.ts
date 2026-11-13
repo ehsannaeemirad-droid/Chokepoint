@@ -42,6 +42,7 @@ import { AID_COSTS, favorsOf, type AidKind, type Patron } from '../politics/favo
 import { victoryPaths } from '../politics/victory';
 import { buildObjectives, previewOrderImpact, type ObjectiveRow } from './objectives';
 import { buildTurnReview, reportKey } from './review';
+import { buildReport } from './report';
 import { buildSituation } from './situation';
 import { rejectionText } from './reason';
 import { factionLabel, unitLabel } from './labels';
@@ -191,6 +192,11 @@ function template(): string {
 `;
 }
 
+/** Engine lines render through the Persian template pass when needed. */
+function faLine(text: string): string {
+  return getLang() === 'fa' ? (faLog(text) ?? text) : text;
+}
+
 const TUTORIAL_HINTS: Record<number, StringKey> = {
   1: 'tutorial.1',
   2: 'tutorial.2',
@@ -214,6 +220,8 @@ export class Ui {
   private tipHideTimer = 0;
   private cinTimer = 0;
   private cinEvents: ResolveEvent[] = [];
+  private cinMinor: ResolveEvent[] = [];
+  private minorShown = false;
   private cinIndex = 0;
   private modalKind: 'menu' | 'outcome' | 'review' | 'briefing' | 'replay' | null = null;
   private replayView: { replay: ReplayFile; playback: PlaybackResult } | null = null;
@@ -1743,9 +1751,33 @@ export class Ui {
       list.appendChild(note);
     }
 
-    this.cinEvents = events.length ? events : [{ text: t('cin.none'), tone: 'info' }];
+    // Rank the stream before showing it: majors lead, the rest is available
+    // under a disclosure instead of padding the report.
+    const report = buildReport(events);
+    const ranked = report.majorCount > 0;
+    this.cinMinor = ranked ? report.minor : [];
+    this.minorShown = false;
+    const majors = ranked ? report.groups.flatMap((group) => group.events) : events;
+    this.cinEvents = majors.length > 0 ? majors : [];
     this.cinIndex = 0;
     this.reportCategory = null;
+
+    if (ranked && report.headline) {
+      const head = document.createElement('div');
+      head.className = 'cin-headline';
+      const label = document.createElement('b');
+      label.textContent = t('report.headline');
+      const line = document.createElement('span');
+      line.textContent = faLine(report.headline.text);
+      head.append(label, line);
+      list.appendChild(head);
+    }
+    if (ranked) {
+      const counts = document.createElement('p');
+      counts.className = 'cin-counts';
+      counts.textContent = t('report.counts', { major: report.majorCount, minor: report.minor.length });
+      list.appendChild(counts);
+    }
     if (this.reducedMotion) {
       this.revealAll();
       return;
@@ -1787,7 +1819,7 @@ export class Ui {
     line.className = `cin-line ${event.tone}`;
     // Phase 6: engine lines render through the Persian template pass when the
     // interface is Persian; unmatched lines keep the English original.
-    line.textContent = getLang() === 'fa' ? faLog(event.text) ?? event.text : event.text;
+    line.textContent = faLine(event.text);
     list.appendChild(line);
     list.scrollTop = list.scrollHeight;
   }
@@ -1799,6 +1831,10 @@ export class Ui {
       const event = this.cinEvents[this.cinIndex++];
       if (event) this.appendCinematicLine(event);
     }
+    this.appendMinorBlock();
+    if (this.cinEvents.length === 0 && this.cinMinor.length === 0) {
+      this.appendCinematicLine({ text: t('cin.none'), tone: 'info' });
+    }
     const skip = this.root.querySelector('#cin-skip') as HTMLButtonElement | null;
     if (skip) {
       skip.disabled = true;
@@ -1808,10 +1844,39 @@ export class Ui {
     if (cont) cont.disabled = false;
   }
 
+  /** Everything that happened but was not worth interrupting for. */
+  private appendMinorBlock(): void {
+    if (this.minorShown || this.cinMinor.length === 0) return;
+    this.minorShown = true;
+    const list = document.getElementById('cin-list');
+    if (!list) return;
+    const details = document.createElement('details');
+    details.className = 'cin-minor';
+    const summary = document.createElement('summary');
+    summary.textContent = t('report.minor', { n: this.cinMinor.length });
+    details.appendChild(summary);
+    for (const event of this.cinMinor) {
+      const line = document.createElement('p');
+      line.className = `cin-line ${event.tone}`;
+      line.textContent = faLine(event.text);
+      details.appendChild(line);
+    }
+    list.appendChild(details);
+  }
+
   private closeCinematic(): void {
     window.clearTimeout(this.cinTimer);
+    const hadReport = this.cinEvents.length > 0 || this.cinMinor.length > 0;
     this.revealAll();
     $('#cinematic').classList.remove('active');
+    // One line to keep the player oriented once the report is dismissed; the
+    // log keeps the detail.
+    if (hadReport) {
+      this.showToast(
+        t('report.settled', { major: this.cinEvents.length, minor: this.cinMinor.length }),
+        'info',
+      );
+    }
     if (this.game.snap.status !== 'playing') {
       this.openOutcome();
     } else {

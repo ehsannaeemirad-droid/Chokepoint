@@ -773,6 +773,10 @@ const DICT = {
   'cin.resolution': ['TURN {n} · RESOLUTION', 'نوبت {n} · گزارش'],
   'cin.skip': ['SKIP', 'پرش'],
   'cin.none': ['No engagements this turn.', 'این نوبت درگیری‌ای رخ نداد.'],
+  'report.headline': ['Most important', 'مهم‌ترین'],
+  'report.counts': ['{major} major · {minor} minor changes', '{major} تحول مهم · {minor} تغییر جزئی'],
+  'report.minor': ['Minor updates ({n})', 'به‌روزرسانی‌های جزئی ({n})'],
+  'report.settled': ['Turn settled: {major} major, {minor} minor — details in the log.', 'نوبت ثبت شد: {major} مهم، {minor} جزئی — جزئیات در گزارش.'],
   'cin.note': [
     'Resolution lines render through Persian templates.',
     'خطوط گزارش از الگوهای فارسی رد می‌شوند.',

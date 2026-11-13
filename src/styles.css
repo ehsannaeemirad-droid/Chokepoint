@@ -1378,7 +1378,9 @@ button.primary:active {
   align-items: center;
   justify-content: center;
   background: rgba(4, 6, 8, 0.45);
-  z-index: 15;
+  /* Above the panels, layer bar, coach and review modal: while the report is
+     open it is the only thing to read. */
+  z-index: 28;
   pointer-events: none;
   padding: 12px;
 }
@@ -1390,7 +1392,7 @@ button.primary:active {
 
 .cin-card {
   width: min(560px, 100%);
-  max-height: 62vh;
+  max-height: 72vh;
   display: flex;
   flex-direction: column;
   background: rgba(12, 15, 19, 0.96);
@@ -1447,6 +1449,61 @@ button.primary:active {
 }
 .cin-line.info {
   color: #b9d6e8;
+}
+
+/* Phase 6: the ranked report header and the collapsed bookkeeping. */
+.cin-headline {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 157, 157, 0.28);
+  border-left: 3px solid rgba(255, 157, 157, 0.7);
+  border-radius: 6px;
+  background: rgba(255, 157, 157, 0.07);
+  animation: cin-in 0.22s ease-out;
+}
+.cin-headline b {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+.cin-headline span {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #ffe1e1;
+}
+.cin-counts {
+  margin: 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+.cin-minor {
+  margin-top: 6px;
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+}
+.cin-minor summary {
+  cursor: pointer;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 4px 0;
+}
+.cin-minor .cin-line {
+  font-size: 12px;
+  color: #a9bccb;
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cin-line,
+  .cin-headline {
+    animation: none;
+  }
 }
 
 @keyframes cin-in {

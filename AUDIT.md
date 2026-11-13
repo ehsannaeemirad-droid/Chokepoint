@@ -1592,3 +1592,52 @@ Caveats: coalition weapons still rely on their `note` text and have no weapon
 records yet; ranges are theatre hexes on a compressed map, which the document
 states explicitly rather than implying a km-per-hex conversion. Phase 6 (turn
 report, notifications, animation) remains undone.
+
+## 43. End-of-turn report, notifications and polish (Phase 6)
+
+The resolution overlay printed the engine's event stream in order, grouped by
+whichever category appeared next. A turn that produced 23 lines — four
+munitions impacting, a launch detected, three sorties striking, rearming, a
+production tick and a supply note — read as one undifferentiated list, with the
+one development that mattered buried in the middle.
+
+- **The report is ranked before it is shown.** `src/ui/report.ts` keeps every
+  event but classifies each as a major development or bookkeeping. Good and bad
+  outcomes are major by construction; information lines are major only when they
+  change the player's picture (escalation crossing a line, a host closing its
+  bases, new intelligence). The rest is still listed — under a collapsed "Minor
+  updates (n)" disclosure — so nothing is hidden, it just stops competing for
+  attention.
+- **One headline, then fixed-order groups.** The worst development is promoted to
+  a headline block above the counts; major events are grouped into missiles / air
+  defence / maritime / logistics / politics / consequences in a fixed reading
+  order, so the same category does not appear twice in a turn and the order does
+  not change between turns.
+- **Notifications.** Dismissing the report now leaves one line — "Turn settled:
+  9 major, 14 minor — details in the log" — so the player keeps their bearings
+  without rereading the overlay. This sits alongside the existing alert row,
+  which handles standing conditions rather than events.
+- **Layering bug, found by looking.** The overlay was at `z-index: 15`, below the
+  map layer bar (21) and coach card (22) raised in Phase 2; the layer bar and
+  panel tabs drew straight through the report. The overlay is now 28, above every
+  panel but the modal, and the card is 72vh instead of 62vh so the report uses
+  the screen it is occupying.
+- **Motion** is a 220ms fade-and-rise per line while the turn resolves, and the
+  `@media (prefers-reduced-motion: reduce)` block disables it; lines in the minor
+  disclosure do not animate, since they appear all at once.
+
+Verification: typecheck 0, `pnpm test` 48 files / 359 tests (new: 6 tests covering
+importance, headline ranking, fixed group order, merging a category that repeats
+with other events between, and that minor lines are never dropped), build 0. In
+the dev server, resolving turn 1 of the USA campaign produced a report reading
+"Most important — 1 Houthi missiles impact at Ras Tanura Terminal", "9 major · 14
+minor changes", groups "Missile and drone activity" and "Other developments", and
+all 23 events still present (9 majors + 14 under the disclosure). Persian mode
+shows the same structure right-to-left with translated headings and counts. The
+toast reads "Turn settled: 9 major, 14 minor — details in the log."
+
+Caveats: the ranking is heuristic, driven by event tone and wording rather than
+a structured severity the engine emits — a future engine-side `severity` field
+would remove the guesswork. The Persian headline keeps English proper nouns and
+the engine's mixed phrasing ("1 فروند Houthi missiles ..."), which is a limitation
+of the existing Persian template pass, not of this report.
