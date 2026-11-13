@@ -597,8 +597,7 @@ REFERENCES.push(
     subjectId: 'fattah',
     category: 'weapon',
     validAt: PREWAR,
-    min: 1400,
-    max: 1400,
+    value: 1400,
     unit: 'km_range',
     evidenceType: 'disputed',
     confidence: 'low',
@@ -655,6 +654,367 @@ REFERENCES.push(
       'IRGC-N small craft and fast attack craft are widely reported; their numbers and readiness are not published with any confidence.',
     gameMapping:
       'Range 3, adds 5% Hormuz disruption per surviving group. It stands for a harassing presence rather than a counted flotilla.',
+  }),
+);
+
+// ---- coalition and proxy systems (Phase 5b) --------------------------------
+// The same treatment for the other side of the map. Aircraft and interceptors
+// are recorded by published combat radius or engagement range; units that are
+// formations rather than airframes (a carrier group, a special-operations team,
+// a signals unit) are labelled abstractions instead of being given a fake range.
+REFERENCES.push(
+  ref({
+    id: 'ref-weapon-f35a',
+    subjectId: 'f35a',
+    category: 'weapon',
+    validAt: PREWAR,
+    value: 1093,
+    unit: 'km_radius',
+    evidenceType: 'reported-estimate',
+    confidence: 'high',
+    sourceName: 'Lockheed Martin F-35 Fast Facts',
+    sourceUrl: 'https://www.lockheedmartin.com/content/dam/lockheed-martin/aero/documents/F-35/F35FastFacts3_2020.pdf',
+    sourcePublishedAt: '2020-03-09',
+    notes:
+      'Combat radius on internal fuel is published as greater than 590 nm / 1,093 km on the USAF profile, with a 2,200 km range. Radius, not range: the aircraft must come home.',
+    gameMapping:
+      'Range 24 hexes is a theatre radius with tanker support, not 1,093 km converted one-to-one. Stealth 0.45 raises the chance a raid goes undetected; penetration 2 reflects a small internal payload.',
+  }),
+  ref({
+    id: 'ref-weapon-f15e',
+    subjectId: 'f15e',
+    category: 'weapon',
+    validAt: PREWAR,
+    value: 1270,
+    unit: 'km_radius',
+    evidenceType: 'reported-estimate',
+    confidence: 'high',
+    sourceName: 'US Air Force F-15E fact sheet',
+    sourceUrl: 'https://www.af.mil/About-Us/Fact-Sheets/Display/Article/104471/f-15e-strike-eagle/',
+    sourceUndated: true,
+    notes:
+      'Published combat radius on an air-interdiction profile is about 687 nm / 1,270 km with conformal tanks; ferry range is roughly 3,900 km. The Air Force fact sheet itself carries no publication date.',
+    gameMapping:
+      'Range 24 hexes. Penetration 6 against 2 for the F-35A: the Strike Eagle carries the heavy load and pays for it with a much larger radar signature.',
+  }),
+  ref({
+    id: 'ref-weapon-b2',
+    subjectId: 'b2',
+    category: 'weapon',
+    validAt: PREWAR,
+    value: 9600,
+    unit: 'km_range',
+    evidenceType: 'reported-estimate',
+    confidence: 'high',
+    sourceName: 'US Air Force B-2 fact sheet',
+    sourceUrl: 'https://www.af.mil/About-Us/Fact-Sheets/Display/Article/104482/b-2-spirit/',
+    sourceUndated: true,
+    notes:
+      'Unrefuelled range is given as approximately 6,000 nm / 9,600 km, with a 18,000 kg payload. Sorties in this scenario are flown from Diego Garcia with tanker support.',
+    gameMapping:
+      'Range 40 hexes is the whole theatre, standing in for a Diego Garcia rotation rather than an unrefuelled radius. Penetration 60 is the bunker-buster special case; one airframe per four turns keeps a strategic asset scarce.',
+  }),
+  ref({
+    id: 'ref-weapon-b52',
+    subjectId: 'b52',
+    category: 'weapon',
+    validAt: PREWAR,
+    value: 14080,
+    unit: 'km_range',
+    evidenceType: 'reported-estimate',
+    confidence: 'high',
+    sourceName: 'Federation of American Scientists',
+    sourceUrl: 'https://nuke.fas.org/guide/usa/bomber/b-52.htm',
+    sourcePublishedAt: '2000-04-23',
+    notes:
+      'Unrefuelled combat range is given as in excess of 8,800 miles / 14,080 km, with up to 20 air-launched cruise missiles carried. The figure predates the current H-model upgrades but the airframe has not changed.',
+    gameMapping:
+      'Range 34 hexes: the aircraft fires standoff cruise missiles from outside Iranian air-defence range, which is why its penetration value is low relative to its attack strength.',
+  }),
+  ref({
+    id: 'ref-weapon-csg',
+    subjectId: 'csg',
+    category: 'weapon',
+    validAt: PREWAR,
+    value: 14,
+    unit: 'game_hex_range',
+    evidenceType: 'game-abstraction',
+    confidence: 'low',
+    notes:
+      'A carrier strike group is a formation, not a weapon: its reach depends on the air wing, the escorts and the sea room. No single published range describes it, so none is asserted.',
+    gameMapping:
+      'Range 14 hexes, intercept 0.7 against drones and cruise missiles, coverage 2: the group is modelled as a mobile airbase with Aegis area defence, which is what the campaign needs it to be.',
+  }),
+  ref({
+    id: 'ref-weapon-patriot',
+    subjectId: 'patriot',
+    category: 'weapon',
+    validAt: PREWAR,
+    min: 20,
+    max: 30,
+    unit: 'km_range',
+    evidenceType: 'reported-estimate',
+    confidence: 'medium',
+    sourceName: 'Missile Defense Advocacy Alliance',
+    sourceUrl: 'https://www.missiledefenseadvocacy.org/defense-systems/patriot-advanced-capability-3-missile/',
+    sourcePublishedAt: '2020-08-28',
+    notes:
+      'PAC-3 CRI is listed at about 20 km against ballistic targets and PAC-3 MSE at about 30 km, while the radar detects beyond 100 km (CRS, 2026). Interceptor reach, not radar reach, is what bounds a battery.',
+    gameMapping:
+      'Coverage 4 hexes and intercept 0.65 against drones, cruise and ballistic missiles; each engagement spends one round from the shared interceptor stock. Rounds are the real constraint, not the launcher.',
+  }),
+  ref({
+    id: 'ref-weapon-thaad',
+    subjectId: 'thaad',
+    category: 'weapon',
+    validAt: PREWAR,
+    min: 150,
+    max: 200,
+    unit: 'km_range',
+    evidenceType: 'reported-estimate',
+    confidence: 'high',
+    sourceName: 'Congressional Research Service IF12645',
+    sourceUrl: 'https://www.congress.gov/crs-product/IF12645',
+    sourcePublishedAt: '2026-06-23',
+    notes:
+      'CRS reports THAAD engaging targets at 150-200 km, with a battery of six launchers and 48 interceptors. It covers the middle tier: ballistic missiles in or just outside the atmosphere.',
+    gameMapping:
+      'Coverage 6 hexes, intercept 0.8, ballistic targets only, two rounds per engagement. The 48-round battery load is abstracted into the shared interceptor pool rather than tracked per battery.',
+  }),
+  ref({
+    id: 'ref-weapon-mq9',
+    subjectId: 'mq9',
+    category: 'weapon',
+    validAt: PREWAR,
+    value: 1851,
+    unit: 'km_range',
+    evidenceType: 'reported-estimate',
+    confidence: 'high',
+    sourceName: 'US Air Force MQ-9 fact sheet',
+    sourceUrl: 'https://www.creech.af.mil/About-Us/Fact-Sheets/Display/Article/669890/mq-9-reaper-fact-sheet/',
+    sourceUndated: true,
+    notes:
+      'Range is given as 1,150 miles / 1,000 nm on 200 knots, with a ceiling up to 50,000 ft. Endurance, not speed, is the defining figure.',
+    gameMapping:
+      'Range 14 hexes. The unit exists mainly for its sensor: it reveals hidden Iranian launchers for a turn, and its light munitions are secondary.',
+  }),
+  ref({
+    id: 'ref-weapon-sof',
+    subjectId: 'sof',
+    category: 'weapon',
+    validAt: PREWAR,
+    value: 1,
+    unit: 'game_hex_range',
+    evidenceType: 'game-abstraction',
+    confidence: 'low',
+    notes:
+      'Special-operations teams are reported to operate inside Iran, but no open source describes their reach or manning in a way that could be turned into a range.',
+    gameMapping:
+      'Adjacent-hex sabotage only: one hex of reach, resolved as an abstract operation rather than a modelled raid.',
+  }),
+  ref({
+    id: 'ref-weapon-iron-dome',
+    subjectId: 'iron_dome',
+    category: 'weapon',
+    validAt: PREWAR,
+    min: 4,
+    max: 70,
+    unit: 'km_range',
+    evidenceType: 'reported-estimate',
+    confidence: 'medium',
+    sourceName: 'BBC News',
+    sourceUrl: 'https://www.bbc.co.uk/news/world-middle-east-20385306',
+    sourcePublishedAt: '2024-10-16',
+    notes:
+      'Tamir is described as engaging rockets inside roughly 70 km; no minimum is published, so the 4 km floor is a modelling choice, not a sourced figure. Only threats judged to hit built-up areas are engaged.',
+    gameMapping:
+      'Coverage 3 hexes, intercept 0.85 against drones and cruise missiles, one round per engagement: the highest single-shot probability in the game, paired with the shortest reach.',
+  }),
+  ref({
+    id: 'ref-weapon-davids-sling',
+    subjectId: 'davids_sling',
+    category: 'weapon',
+    validAt: PREWAR,
+    min: 40,
+    max: 300,
+    unit: 'km_range',
+    evidenceType: 'reported-estimate',
+    confidence: 'high',
+    sourceName: 'CSIS Missile Threat',
+    sourceUrl: 'https://missilethreat.csis.org/defsys/davids-sling/',
+    sourcePublishedAt: '2021-07-13',
+    notes:
+      'The Stunner interceptor is reported to engage at 40-300 km and up to 15 km altitude, with no warhead: it destroys by direct impact.',
+    gameMapping:
+      'Coverage 5 hexes, intercept 0.7 against cruise and ballistic missiles. The middle tier between Iron Dome and Arrow, as in the real architecture.',
+  }),
+  ref({
+    id: 'ref-weapon-arrow2',
+    subjectId: 'arrow2',
+    category: 'weapon',
+    validAt: PREWAR,
+    value: 100,
+    unit: 'km_range',
+    evidenceType: 'reported-estimate',
+    confidence: 'medium',
+    sourceName: 'CSIS Missile Threat',
+    sourceUrl: 'https://missilethreat.csis.org/defsys/arrow-2/',
+    sourceUndated: true,
+    notes:
+      'Arrow-2 is reported with a maximum intercept range of about 100 km and an engagement altitude around 50 km, using a fragmentation warhead in the upper atmosphere.',
+    gameMapping:
+      'Coverage 8 hexes, intercept 0.65 against ballistic missiles; it is the layer most likely to be saturated by a large salvo.',
+  }),
+  ref({
+    id: 'ref-weapon-arrow3',
+    subjectId: 'arrow3',
+    category: 'weapon',
+    validAt: PREWAR,
+    value: 2400,
+    unit: 'km_range',
+    evidenceType: 'reported-estimate',
+    confidence: 'medium',
+    sourceName: 'BBC News',
+    sourceUrl: 'https://www.bbc.co.uk/news/world-middle-east-20385306',
+    sourcePublishedAt: '2024-10-16',
+    notes:
+      'Arrow-3 is described as intercepting outside the atmosphere at a reported 2,400 km flyout, which is engagement geometry rather than the distance it can defend.',
+    gameMapping:
+      'Coverage 8 hexes and the only layer with a non-zero hypersonic intercept, standing for the exo-atmospheric shot rather than a 2,400 km defended area.',
+  }),
+  ref({
+    id: 'ref-weapon-iron-beam',
+    subjectId: 'iron_beam',
+    category: 'weapon',
+    validAt: PREWAR,
+    min: 2,
+    max: 10,
+    unit: 'km_range',
+    evidenceType: 'reported-estimate',
+    confidence: 'low',
+    sourceName: 'The Indian Express',
+    sourceUrl: 'https://indianexpress.com/article/explained/everyday-explainers/israels-air-defence-system-iron-dome-arrow-david-sling-9600057/',
+    sourcePublishedAt: '2024-10-02',
+    notes:
+      'Iron Beam is reported for rockets at up to about 10 km. Performance against larger rockets, and behaviour in bad weather, remain claims rather than measured public figures.',
+    gameMapping:
+      'Coverage 2 hexes with a high intercept probability and no interceptor expenditure: a short-range complement to Iron Dome, deliberately the smallest footprint on the map.',
+  }),
+  ref({
+    id: 'ref-weapon-f15i',
+    subjectId: 'f15i',
+    category: 'weapon',
+    validAt: PREWAR,
+    value: 1270,
+    unit: 'km_radius',
+    evidenceType: 'reported-estimate',
+    confidence: 'medium',
+    sourceName: 'US Air Force F-15E fact sheet',
+    sourceUrl: 'https://www.af.mil/About-Us/Fact-Sheets/Display/Article/104471/f-15e-strike-eagle/',
+    sourceUndated: true,
+    notes:
+      'The F-15I Ra’am is the Israeli F-15E variant. Performance is taken from the US aircraft; Israeli-specific modifications and loadouts are not public.',
+    gameMapping:
+      'Range 33 hexes: a longer theatre reach than the US F-15E because Israeli sorties here are modelled with tanker support from home bases.',
+  }),
+  ref({
+    id: 'ref-weapon-f35i',
+    subjectId: 'f35i',
+    category: 'weapon',
+    validAt: PREWAR,
+    value: 1093,
+    unit: 'km_radius',
+    evidenceType: 'reported-estimate',
+    confidence: 'medium',
+    sourceName: 'Lockheed Martin F-35 Fast Facts',
+    sourceUrl: 'https://www.lockheedmartin.com/content/dam/lockheed-martin/aero/documents/F-35/F35FastFacts3_2020.pdf',
+    sourcePublishedAt: '2020-03-09',
+    notes:
+      'The F-35I Adir is the Israeli F-35A, so the published USAF-profile radius of 1,093 km is used. Israeli-specific systems are not public.',
+    gameMapping:
+      'Range 31 hexes with the same stealth value as the US aircraft; the extra reach stands for basing geometry, not a different airframe.',
+  }),
+  ref({
+    id: 'ref-weapon-merkava',
+    subjectId: 'merkava',
+    category: 'weapon',
+    validAt: PREWAR,
+    value: 1,
+    unit: 'game_hex_range',
+    evidenceType: 'game-abstraction',
+    confidence: 'low',
+    notes:
+      'A tank brigade’s relevant reach in this theatre is a ground frontage, not a range; no published figure is asserted.',
+    gameMapping:
+      'One hex: a ground holding unit that anchors a front and cannot strike across the theatre.',
+  }),
+  ref({
+    id: 'ref-weapon-unit8200',
+    subjectId: 'unit8200',
+    category: 'weapon',
+    validAt: PREWAR,
+    value: 10,
+    unit: 'game_hex_range',
+    evidenceType: 'game-abstraction',
+    confidence: 'low',
+    notes:
+      'Signals-intelligence reach is not publicly describable in kilometres; the unit’s effect is modelled rather than measured.',
+    gameMapping:
+      'Ten hexes of intelligence reach: reveals and degrades Iranian networks without inflicting damage.',
+  }),
+  ref({
+    id: 'ref-weapon-houthi-drone',
+    subjectId: 'houthi_drone',
+    category: 'weapon',
+    validAt: PREWAR,
+    min: 1000,
+    max: 2500,
+    unit: 'km_range',
+    evidenceType: 'reported-estimate',
+    confidence: 'medium',
+    sourceName: 'CSIS Missile Threat',
+    sourceUrl: 'https://missilethreat.csis.org/missile/shahed-131-and-136/',
+    sourcePublishedAt: '2026-05-22',
+    notes:
+      'Houthi one-way attack drones are Iranian Shahed-family airframes, so the Shahed range band is used; local assembly and modification are reported but not measured.',
+    gameMapping:
+      'Range 22 hexes from Yemen covers the southern Gulf and the Red Sea approaches. The cell regenerates slowly: it is a harassment capability, not a decisive one.',
+  }),
+  ref({
+    id: 'ref-weapon-houthi-missile',
+    subjectId: 'houthi_missile',
+    category: 'weapon',
+    validAt: PREWAR,
+    min: 1000,
+    max: 1500,
+    unit: 'km_range',
+    evidenceType: 'reported-estimate',
+    confidence: 'low',
+    sourceName: 'CSIS Missile Threat',
+    sourceUrl: 'https://missilethreat.csis.org/country/iran/',
+    sourcePublishedAt: '2018-06-14',
+    notes:
+      'Burkan and Hatem variants are Iranian-derived with reported ranges in the low thousands of kilometres. Warhead and accuracy figures are claimed rather than verified.',
+    gameMapping:
+      'Range 34 hexes reaches Israel and the central Gulf. Low accuracy is expressed as a high interception chance rather than a separate CEP value.',
+  }),
+  ref({
+    id: 'ref-weapon-houthi-asm',
+    subjectId: 'houthi_asm',
+    category: 'weapon',
+    validAt: PREWAR,
+    min: 120,
+    max: 300,
+    unit: 'km_range',
+    evidenceType: 'reported-estimate',
+    confidence: 'medium',
+    sourceName: 'CSIS Missile Threat',
+    sourceUrl: 'https://missilethreat.csis.org/country/iran/',
+    sourcePublishedAt: '2018-06-14',
+    notes:
+      'Anti-ship variants derived from the Noor and Ghadir families, reported in the low hundreds of kilometres, which is enough to threaten the Bab al-Mandeb approaches.',
+    gameMapping:
+      'Range 8 hexes from the Yemeni coast; each battery in range adds disruption to Red Sea shipping rather than to Hormuz.',
   }),
 );
 

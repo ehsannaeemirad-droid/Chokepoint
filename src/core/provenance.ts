@@ -36,6 +36,12 @@ export interface HistoricalReference {
   validAt: string;
   /** ISO date of the publication the estimate came from, when there is one. */
   sourcePublishedAt?: string;
+  /**
+   * True when the source is a standing reference page (a service fact sheet)
+   * that carries no publication date. Recorded rather than guessed, so the
+   * document can say "no date shown" instead of inventing one.
+   */
+  sourceUndated?: boolean;
   /** Central value, when the source or the model supplies one. */
   value?: number;
   /** Range form, for estimates that are only known as a band. */

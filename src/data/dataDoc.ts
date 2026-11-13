@@ -48,6 +48,7 @@ const CATEGORY_TITLE: Record<HistoricalReference['category'], string> = {
 export function prettyUnit(unit?: string): string {
   if (!unit) return '';
   if (unit === 'km_range') return 'km';
+  if (unit === 'km_radius') return 'km radius';
   if (unit === 'game_hex_range') return 'hex';
   return unit;
 }
@@ -67,7 +68,11 @@ function valueText(ref: HistoricalReference): string {
 
 function sourceText(ref: HistoricalReference): string {
   if (!ref.sourceName) return 'game abstraction';
-  const date = ref.sourcePublishedAt ? ` (${ref.sourcePublishedAt})` : '';
+  const date = ref.sourcePublishedAt
+    ? ` (${ref.sourcePublishedAt})`
+    : ref.sourceUndated
+      ? ' (no date shown)'
+      : '';
   return `${ref.sourceName}${date}`;
 }
 

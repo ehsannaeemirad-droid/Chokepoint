@@ -1641,3 +1641,48 @@ a structured severity the engine emits — a future engine-side `severity` field
 would remove the guesswork. The Persian headline keeps English proper nouns and
 the engine's mixed phrasing ("1 فروند Houthi missiles ..."), which is a limitation
 of the existing Persian template pass, not of this report.
+
+## 44. Coalition and proxy provenance (Phase 5b)
+
+Section 42 gave the Iranian side sourced weapon records and left the other
+twenty-one units with nothing but a `note` string. That gap is now closed, and
+the way it is closed varies on purpose with what is actually published.
+
+- **Aircraft** carry a combat radius or an unrefuelled range: F-35A 1,093 km
+  radius (Lockheed F-35 Fast Facts, 2020-03-09), F-15E 1,270 km radius, B-2
+  9,600 km, B-52H 14,080 km (FAS, 2000-04-23), MQ-9 1,851 km. The Israeli F-15I
+  and F-35I reuse the US airframe figures and say so, because their modifications
+  are not public.
+- **Air defence** is recorded as engagement range, which is what bounds a
+  battery: THAAD 150-200 km (CRS IF12645, 2026-06-23, with its 48-round battery
+  load noted), David's Sling 40-300 km (CSIS), Arrow-3 2,400 km flyout (BBC),
+  Iron Beam ~10 km, Iron Dome ~70 km, Arrow-2 ~100 km. The 4 km floor on Iron
+  Dome is labelled a modelling choice rather than a sourced figure, since none
+  is published.
+- **Five formation units are abstractions**, not estimates: the carrier strike
+  group, special-operations team, Merkava brigade, Unit 8200 and the Iranian
+  mine layer/FAC group. A formation has no single published range, and inventing
+  one would have been the easy lie.
+- **Houthi cells** are recorded as Iranian-derived (Shahed band for the drone
+  cell, Burkan/Hatem band for the missile cell) with low confidence, because
+  local modification is reported but not measured.
+- **A new honest field.** Five sources are standing service fact sheets with no
+  publication date. Rather than invent a date, `HistoricalReference` gained
+  `sourceUndated`, which the generated document renders as "(no date shown)".
+  The provenance test now requires either a real date or the explicit undated
+  flag plus a URL, and accepts a single published figure as well as a band (a
+  combat radius is one number; a family range is a band).
+- **Coverage is enforced for every faction**: the test walks `units.json` across
+  USA, Israel, Iran and Houthi and fails if any unit lacks a weapon record.
+
+Verification: typecheck 0, `pnpm test` 48 files / 359 tests, build 0. `docs/DATA.md`
+regenerated (five "(no date shown)" entries). In the dev server, selecting a THAAD
+battery shows "Published value 150-200 km", "Confidence High", the CRS note about
+the 48-round battery, the game mapping and "Source: Congressional Research Service
+IF12645 - 2026-06-23".
+
+Caveats: the 2000 FAS page is the dated source for the B-52 rather than the
+current Air Force fact sheet, which carries no date; aircraft ranges are theatre
+radii under tanker support, not the published radius converted to hexes, and each
+mapping says so. Interceptor engagement ranges for Patriot come from an advocacy
+organisation's summary of public figures, hence the medium confidence.

@@ -19,7 +19,7 @@ import {
 import { REFERENCES } from './references';
 import unitData from './units.json';
 
-const IRAN_UNITS = (unitData as Record<string, Array<{ id: string }>>).iran ?? [];
+const ALL_UNITS = Object.values(unitData as Record<string, Array<{ id: string }>>).flat();
 
 const EVIDENCE_TYPES: EvidenceType[] = ['verified', 'reported-estimate', 'disputed', 'game-abstraction'];
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -87,17 +87,24 @@ describe('coverage walk', () => {
     }
   });
 
-  it('covers every Iranian weapon system with a weapon record', () => {
-    expect(IRAN_UNITS.length).toBeGreaterThan(5);
-    for (const unit of IRAN_UNITS) requireRef(unit.id, 'weapon');
+  it('covers every modelled unit with a weapon record', () => {
+    expect(ALL_UNITS.length).toBeGreaterThan(15);
+    for (const unit of ALL_UNITS) requireRef(unit.id, 'weapon');
   });
 
-  it('records ranges as published bands, never an invented single figure', () => {
+  it('records ranges as published figures, never an invented single number', () => {
     for (const ref of REFERENCES.filter((r) => r.category === 'weapon')) {
       expect(ref.gameMapping.length, `${ref.id} mapping too thin`).toBeGreaterThan(30);
       if (ref.evidenceType === 'game-abstraction') continue;
-      expect(ref.min, `${ref.id} has no lower bound`).toBeDefined();
-      expect(ref.max, `${ref.id} has no upper bound`).toBeDefined();
+      // Either a band the sources disagree over, or one figure a source prints.
+      const banded = ref.min !== undefined && ref.max !== undefined;
+      expect(banded || ref.value !== undefined, `${ref.id} records no published figure`).toBe(true);
+      if (banded) expect(ref.min!, `${ref.id} band is inverted`).toBeLessThan(ref.max!);
+      if (ref.sourceUndated) {
+        // A standing fact sheet with no publication date; the URL must be real.
+        expect(ref.sourceUrl, `${ref.id} is undated but cites no page`).toMatch(/^https:\/\//);
+        continue;
+      }
       expect(ref.sourcePublishedAt, `${ref.id} has no publication date`).toMatch(ISO_DATE);
     }
   });
