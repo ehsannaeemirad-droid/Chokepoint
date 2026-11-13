@@ -111,6 +111,7 @@ button.primary:active {
   right: 0;
   z-index: 6;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   padding: calc(var(--safe-top) + 8px) 10px 8px;
@@ -253,7 +254,7 @@ button.primary:active {
 /* ------------------------------------------------------------- tutorial card */
 .tutorial-banner {
   position: absolute;
-  top: calc(var(--safe-top) + 64px);
+  top: calc(var(--safe-top, 0px) + var(--topbar-h, 96px) + 10px);
   left: 8px;
   right: 8px;
   z-index: 4;
@@ -1206,7 +1207,8 @@ button.primary:active {
   justify-content: center;
   background: rgba(4, 6, 8, 0.72);
   backdrop-filter: blur(3px);
-  z-index: 20;
+  /* Above the map layer bar and coach card, below the toast and tooltip. */
+  z-index: 26;
   padding: 10px;
   padding-bottom: calc(var(--safe-bottom) + 10px);
 }
@@ -1654,10 +1656,28 @@ html[dir='rtl'] .map-controls {
     grid-template-columns: 44px auto auto 1fr auto;
     grid-template-areas:
       'menu turn faction . lang'
-      'gauges gauges gauges hormuz hormuz';
+      'gauges gauges gauges hormuz hormuz'
+      'alerts alerts alerts alerts alerts'
+      'obj obj obj obj obj';
     align-items: center;
     gap: 4px 8px;
     padding-bottom: 8px;
+  }
+
+  .topbar > .alerts {
+    grid-area: alerts;
+  }
+
+  .topbar > .objectives-strip {
+    grid-area: obj;
+    width: auto;
+  }
+
+  .command-bar button {
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    padding-inline: 6px;
   }
 
   .topbar > .icon-btn:not(.lang-btn) {
@@ -1886,12 +1906,12 @@ html[dir='rtl'] .nav-drawer {
 }
 
 /* ---- Objectives strip ---- */
+/* The strip is a row of the header, so the header can never paint over it. */
 .objectives-strip {
-  position: absolute;
-  top: 52px;
-  left: 8px;
-  right: 8px;
-  z-index: 20;
+  flex: 1 0 100%;
+  min-width: 0;
+  position: relative;
+  margin-top: 2px;
   pointer-events: none;
 }
 .objectives-strip .obj-inner {
@@ -1951,7 +1971,6 @@ html[dir='rtl'] .nav-drawer {
 .obj-row.info .obj-bar i { background: var(--info, #3c8dbc); }
 .obj-row.enemy { opacity: 0.85; border-style: dashed; }
 @media (max-width: 560px) {
-  .objectives-strip { left: 4px; right: 4px; top: 48px; }
   .obj-row { min-width: 100px; max-width: 140px; }
 }
 
@@ -2079,15 +2098,21 @@ button:focus-visible, [role='button']:focus-visible, summary:focus-visible { out
 }
 
 @media (max-width: 560px) {
+  /* Above the sheet, below the objectives: never over another control. */
   .layer-bar {
-    top: auto;
-    bottom: 152px;
+    flex-wrap: nowrap;
+    align-items: center;
+    min-height: 38px;
+    max-height: 38px;
+    top: calc(var(--safe-top, 0px) + var(--topbar-h, 96px) + 8px);
+    bottom: auto;
     left: 8px;
-    right: 8px;
+    /* Stop short of the right-hand map controls. */
+    right: 60px;
     transform: none;
     flex-direction: row;
     gap: 2px;
-    max-height: none;
+    max-height: 38px;
     overflow-x: auto;
     overflow-y: hidden;
     border-radius: 999px;
@@ -2193,3 +2218,132 @@ button:focus-visible, [role='button']:focus-visible, summary:focus-visible { out
     bottom: 200px;
   }
 }
+
+/* ---- Phase 2: strategic shell ------------------------------------------- */
+.alerts[hidden] {
+  display: none;
+}
+
+.alerts {
+  flex: 0 0 100%;
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-top: 2px;
+}
+.alerts::-webkit-scrollbar {
+  display: none;
+}
+
+.alert-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+  padding: 3px 8px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  color: var(--info);
+}
+
+.alert-chip i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.alert-chip.alert {
+  color: var(--alert);
+}
+
+.alert-chip.warn {
+  color: var(--warn);
+}
+
+.alert-chip.more {
+  border-style: dashed;
+  color: var(--dim);
+}
+
+/* Gauge tone: a pill that is running out reads as a warning at a glance. */
+.pill.tone-warn {
+  border-color: rgba(224, 168, 0, 0.5);
+}
+
+.pill.tone-warn b {
+  color: var(--warn);
+}
+
+.pill.tone-alert {
+  border-color: rgba(211, 47, 47, 0.6);
+  background: rgba(211, 47, 47, 0.1);
+}
+
+.pill.tone-alert b {
+  color: var(--alert);
+}
+
+/* Category tabs replace the one-long-scroll strategic panel. */
+.panel-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  gap: 2px;
+  padding: 6px 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--line);
+  background: rgba(16, 20, 25, 0.98);
+}
+.panel-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.panel-tab {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 6px 9px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dim);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.panel-tab.active {
+  color: var(--text);
+  background: rgba(60, 141, 188, 0.18);
+  border-color: rgba(60, 141, 188, 0.5);
+}
+
+/* Secondary facility data collapses so the essentials stay on top. */
+.sheet-more {
+  margin: 2px 0 4px;
+}
+
+.sheet-more summary {
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--dim);
+  cursor: pointer;
+}
+
+.sheet-more .detail {
+  margin: 0 0 4px;
+}
+

@@ -491,6 +491,17 @@ const DICT = {
 
   'aria.objectives': ['Campaign objectives', 'اهداف کارزار'],
   'aria.layers': ['Map layers', 'لایه‌های نقشه'],
+  'sheet.moreDetail': ['Intel detail', 'جزئیات اطلاعاتی'],
+  'alert.will': ['Political will is nearly spent', 'اراده سیاسی در آستانه اتمام است'],
+  'alert.interceptors': ['Interceptor stocks running low', 'موجودی رهگیرها کم است'],
+  'alert.hormuz': ['Hormuz disruption above 70%', 'اختلال هرمز از ۷۰٪ گذشته است'],
+  'alert.escalation': ['Escalation near the top of the ladder', 'تشدید تنش نزدیک بالاترین پله است'],
+  'alert.pressure': ['Domestic pressure is close to collapse', 'فشار داخلی نزدیک فروپاشی است'],
+  'alert.hostThreat': [
+    'A host government may close its bases',
+    'یک دولت میزبان ممکن است پایگاه‌ها را ببندد',
+  ],
+  'alert.oil': ['Oil price above the shock threshold', 'قیمت نفت از آستانه شوک گذشته است'],
   'layer.political': ['POLITICAL', 'سیاسی'],
   'layer.military': ['MILITARY', 'نظامی'],
   'layer.intelligence': ['INTEL', 'اطلاعات'],

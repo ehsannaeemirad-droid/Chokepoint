@@ -46,6 +46,7 @@ import { parseReplay, playReplay, serializeReplay, type PlaybackResult, type Rep
 import { Minimap } from './Minimap';
 import { bus, focusHex, layerChanged, zoomBy } from './bus';
 import { DEFAULT_LAYER, isMapLayerId, layerDef, MAP_LAYERS, type MapLayerId } from '../map/layers';
+import { activeTab, gaugeTone, shellAlerts, visibleTabs, type StrategicTab } from './shell';
 import { filterNodes, NAV_KINDS, nextOwnUid, nextThreatUid, nodeCatalog, type NavEntry, type NavKind } from './nav';
 import { modeOf, sheetActions, SHEET_ACTION_LABEL } from './actions';
 
@@ -127,9 +128,9 @@ function template(): string {
     <b id="hormuz-val">0%</b>
   </div>
   <button class="icon-btn lang-btn" data-action="lang:${fa ? 'en' : 'fa'}" data-tip="${t('tip.lang')}">${fa ? 'EN' : 'فا'}</button>
+  <div id="alerts" class="alerts" role="status" aria-live="polite" hidden></div>
+  <div id="objectives-strip" class="objectives-strip" role="region" aria-label="${t('aria.objectives')}"></div>
 </header>
-
-<div id="objectives-strip" class="objectives-strip" role="region" aria-label="${t('aria.objectives')}"></div>
 <div id="impact-preview" class="impact-preview" hidden></div>
 <div id="coach" class="coach" hidden></div>
 <div id="tutorial-banner" class="tutorial-banner"></div>
@@ -221,6 +222,8 @@ export class Ui {
   private forcesVisited: string[] = [];
   private minimap: Minimap | null = null;
   private coachDismissed = false;
+  /** Active strategic-panel category. */
+  private strategicTab: StrategicTab = 'situation';
 
   private get reducedMotion(): boolean {
     try {
@@ -252,6 +255,7 @@ export class Ui {
 
   // ------------------------------------------------------------------ wiring
   private bind(): void {
+    window.addEventListener('resize', () => this.syncChromeMetrics());
     this.root.addEventListener('click', (event) => {
       const target = (event.target as HTMLElement).closest('[data-action]') as HTMLElement | null;
       if (!target) return;
@@ -339,6 +343,12 @@ export class Ui {
       layerChanged(a);
       this.renderLayers();
       this.showToast(t(layerDef(a).hint), 'info');
+      return;
+    }
+    if (verb === 'panel-tab' && a) {
+      this.strategicTab = a as StrategicTab;
+      const panel = document.getElementById('panel-strategic');
+      if (panel) panel.innerHTML = this.strategicHtml();
       return;
     }
     if (verb === 'zoom-in') return zoomBy(1.25);
@@ -658,6 +668,8 @@ export class Ui {
     this.renderImpactPreview();
     this.renderCoach();
     this.renderLayers();
+    this.renderAlerts();
+    this.syncChromeMetrics();
 
     const hormuz = Math.round(s.meters.hormuz);
     const bar = $('#hormuz-bar');
@@ -724,38 +736,82 @@ export class Ui {
       </div>`;
   }
 
+  /**
+   * Top-bar gauges. Every pill carries a tone derived from the same number the
+   * player reads, so a resource that is running out is visible without a click.
+   */
   private gaugesHtml(): string {
     const s = this.game.snap;
-    const pills: Array<[string, string, string]> = [];
+    type Gauge = { label: string; value: number; tip: string; warn: number; alert: number };
+    const pills: Gauge[] = [];
+    const none = { warn: -1, alert: -1 };
     if (s.faction === 'usa') {
-      pills.push([t('gauge.int'), `${Math.round(s.resources.interceptorsUSA)}`, t('tip.intUS')]);
-      pills.push([t('gauge.will'), `${Math.round(s.resources.politicalWill)}`, t('tip.willUS')]);
-      pills.push([t('gauge.lift'), `${Math.round(s.resources.airlift)}`, t('tip.lift')]);
-      pills.push([t('gauge.congress'), `${Math.round(s.domestic?.congress ?? 0)}`, t('tip.congress')]);
-      pills.push([t('gauge.econ'), `${Math.round(s.domestic?.economy ?? 0)}`, t('tip.econ')]);
+      pills.push({ label: t('gauge.int'), value: Math.round(s.resources.interceptorsUSA), tip: t('tip.intUS'), warn: 30, alert: 12 });
+      pills.push({ label: t('gauge.will'), value: Math.round(s.resources.politicalWill), tip: t('tip.willUS'), warn: 40, alert: 20 });
+      pills.push({ label: t('gauge.lift'), value: Math.round(s.resources.airlift), tip: t('tip.lift'), warn: 3, alert: 1 });
+      pills.push({ label: t('gauge.congress'), value: Math.round(s.domestic?.congress ?? 0), tip: t('tip.congress'), warn: 40, alert: 25 });
+      // The economy index starts low in this theatre, so only a collapse warns.
+      pills.push({ label: t('gauge.econ'), value: Math.round(s.domestic?.economy ?? 0), tip: t('tip.econ'), warn: 3, alert: 1 });
     } else if (s.faction === 'israel') {
-      pills.push([t('gauge.int'), `${Math.round(s.resources.interceptorsIsrael)}`, t('tip.intIL')]);
-      pills.push([t('gauge.tank'), `${Math.round(s.resources.tankerSorties)}`, t('tip.tank')]);
-      pills.push([t('gauge.will'), `${Math.round(s.resources.politicalWill)}`, t('tip.willIL')]);
+      pills.push({ label: t('gauge.int'), value: Math.round(s.resources.interceptorsIsrael), tip: t('tip.intIL'), warn: 30, alert: 12 });
+      pills.push({ label: t('gauge.tank'), value: Math.round(s.resources.tankerSorties), tip: t('tip.tank'), warn: 3, alert: 1 });
+      pills.push({ label: t('gauge.will'), value: Math.round(s.resources.politicalWill), tip: t('tip.willIL'), warn: 40, alert: 20 });
     } else {
-      pills.push([t('gauge.drone'), `${Math.round(s.iran.rounds.drone)}`, t('tip.drone')]);
-      pills.push([
-        t('gauge.ball'),
-        `${Math.round(s.iran.rounds.fateh + s.iran.rounds.khorramshahr + s.iran.rounds.fattah)}`,
-        t('tip.ball'),
-      ]);
-      pills.push([t('gauge.res'), `${Math.round(s.iran.resources)}`, t('tip.res')]);
-      pills.push([t('gauge.will'), `${Math.round(s.resources.politicalWill)}`, t('tip.willIran')]);
+      pills.push({ label: t('gauge.drone'), value: Math.round(s.iran.rounds.drone), tip: t('tip.drone'), warn: 30, alert: 10 });
+      pills.push({
+        label: t('gauge.ball'),
+        value: Math.round(s.iran.rounds.fateh + s.iran.rounds.khorramshahr + s.iran.rounds.fattah),
+        tip: t('tip.ball'),
+        warn: 15,
+        alert: 5,
+      });
+      pills.push({ label: t('gauge.res'), value: Math.round(s.iran.resources), tip: t('tip.res'), warn: 40, alert: 15 });
+      pills.push({ label: t('gauge.will'), value: Math.round(s.resources.politicalWill), tip: t('tip.willIran'), warn: 40, alert: 20 });
       const favors = favorsOf(s);
-      pills.push([t('gauge.ru'), `${favors.russia}`, t('tip.favors')]);
-      pills.push([t('gauge.cn'), `${favors.china}`, t('tip.favors')]);
+      pills.push({ label: t('gauge.ru'), value: favors.russia, tip: t('tip.favors'), ...none });
+      pills.push({ label: t('gauge.cn'), value: favors.china, tip: t('tip.favors'), ...none });
     }
     return pills
-      .map(
-        ([label, value, tip]) =>
-          `<div class="pill" data-tip="${tip}"><span>${label}</span><b>${value}</b></div>`,
-      )
+      .map((pill) => {
+        const tone = gaugeTone(pill.value, pill.warn, pill.alert);
+        return `<div class="pill tone-${tone}" data-tip="${pill.tip}"><span>${pill.label}</span><b>${pill.value}</b></div>`;
+      })
       .join('');
+  }
+
+  /**
+   * The top bar and objectives strip change height with language and width, so
+   * everything pinned beneath them reads their measured height instead of a
+   * hard-coded offset.
+   */
+  private syncChromeMetrics(): void {
+    const bar = this.root.querySelector('.topbar') as HTMLElement | null;
+    const strip = document.getElementById('objectives-strip');
+    const root = document.documentElement;
+    if (bar) root.style.setProperty('--topbar-h', `${Math.round(bar.getBoundingClientRect().height)}px`);
+    if (strip) root.style.setProperty('--obj-h', `${Math.round(strip.getBoundingClientRect().height)}px`);
+  }
+
+  /** One line of the most urgent warnings; silence when nothing is wrong. */
+  private renderAlerts(): void {
+    const el = document.getElementById('alerts');
+    if (!el) return;
+    const alerts = shellAlerts(this.game.snap);
+    if (alerts.length === 0) {
+      el.hidden = true;
+      el.innerHTML = '';
+      return;
+    }
+    el.hidden = false;
+    const shown = alerts.slice(0, 2);
+    const rest = alerts.length - shown.length;
+    el.innerHTML =
+      shown
+        .map(
+          (alert) =>
+            `<span class="alert-chip ${alert.tone}"><i></i>${t(alert.key, alert.params)}</span>`,
+        )
+        .join('') + (rest > 0 ? `<span class="alert-chip more">+${rest}</span>` : '');
   }
 
   private tutorialHtml(): string {
@@ -986,7 +1042,9 @@ export class Ui {
         </div>
         <div class="meter-row"${fogEst ? ` data-tip="${t('tip.fog')}"` : ''}><span>${t('sheet.integrity')}</span><div class="bar"><i style="width:${integrityBar}%;background:${integrityBar > 60 ? 'var(--ok)' : integrityBar > 25 ? 'var(--warn)' : 'var(--alert)'}"></i></div><b>${integrityText}</b></div>
         <p class="effect">${localEffect(node)}</p>
-        ${fa ? '' : `<p class="detail">${node.detail}${node.personnel ? ` · ${t('sheet.personnel', { n: node.personnel.toLocaleString() })}` : ''}</p>`}
+        ${fa ? '' : `<details class="sheet-more"><summary>${t('sheet.moreDetail')}</summary>
+          <p class="detail">${node.detail}${node.personnel ? ` · ${t('sheet.personnel', { n: node.personnel.toLocaleString() })}` : ''}</p>
+        </details>`}
         ${buriedWarn}
         ${unitChips}
         ${this.attackersHtml(col, row, node.id)}
@@ -1397,36 +1455,35 @@ export class Ui {
       <div class="meter-row"><span>${t('panel.usWill')}</span><div class="bar"><i style="width:${s.resources.politicalWill}%;background:var(--warn)"></i></div><b>${Math.round(s.resources.politicalWill)}</b></div>
     </section>`;
 
+    // Categories, not one long scroll: the panel shows one section at a time and
+    // only offers the categories that actually have content for this faction.
+    const groups: Record<StrategicTab, string> = {
+      situation: `${summary}
+        <section class="panel-section"><h4>${t('panel.basing')}</h4>${baseRows}</section>
+        <section class="panel-section"><h4>${t('panel.hosts')}</h4>${hostRows}</section>
+        ${warCost}`,
+      military: `<section class="panel-section"><h4>${t('panel.programme')}</h4>${facilities}</section>
+        ${victorySection}`,
+      economy: `<section class="panel-section"><h4>${t('panel.hormuz')}</h4>${hormuzCalc}</section>
+        ${factionSection}`,
+      diplomacy: `${phase3Section}`,
+      politics: `${domesticSection}${roeSection}${escalationSection}`,
+    };
+    const tabs = visibleTabs(groups);
+    const current = activeTab(tabs, this.strategicTab);
+    const tabBar =
+      tabs.length > 1
+        ? `<nav class="panel-tabs" role="tablist">${tabs
+            .map(
+              (tab) =>
+                `<button role="tab" class="panel-tab${tab === current ? ' active' : ''}" data-action="panel-tab:${tab}" aria-selected="${tab === current}" aria-pressed="${tab === current}">${t(`panel.${tab}` as StringKey)}</button>`,
+            )
+            .join('')}</nav>`
+        : '';
+
     return `<header class="panel-head"><h3>${t('panel.strategic')}</h3><button data-action="panel:strategic" aria-label="${t('btn.close')}">✕</button></header>
-      <div class="panel-body">
-        <details class="panel-group" open>
-          <summary>${t('panel.situation')}</summary>
-          ${summary}
-          <section class="panel-section"><h4>${t('panel.basing')}</h4>${baseRows}</section>
-          <section class="panel-section"><h4>${t('panel.hosts')}</h4>${hostRows}</section>
-          ${warCost}
-        </details>
-        <details class="panel-group">
-          <summary>${t('panel.military')}</summary>
-          <section class="panel-section"><h4>${t('panel.programme')}</h4>${facilities}</section>
-          ${victorySection}
-        </details>
-        <details class="panel-group">
-          <summary>${t('panel.economy')}</summary>
-          <section class="panel-section"><h4>${t('panel.hormuz')}</h4>${hormuzCalc}</section>
-          ${factionSection}
-        </details>
-        <details class="panel-group">
-          <summary>${t('panel.diplomacy')}</summary>
-          ${phase3Section}
-        </details>
-        <details class="panel-group">
-          <summary>${t('panel.politics')}</summary>
-          ${domesticSection}
-          ${roeSection}
-          ${escalationSection}
-        </details>
-      </div>`;
+      ${tabBar}
+      <div class="panel-body">${current ? groups[current] : ''}</div>`;
 
   }
 

@@ -1442,3 +1442,55 @@ made on a phone, in Persian/RTL, or against the deployed site.
 Not done: Phase 2 (full interface redesign), Phase 4 (defensive-network
 attributes, detection vs interception), Phase 5 (missile data sourcing and
 provenance), Phase 6 (end-of-turn report, notifications, animation pass).
+
+## 40. Strategic shell (Phase 2)
+
+The top bar had one scrolling row of gauges and no notion of urgency, the
+strategic panel was a five-group accordion that still had to be scrolled past
+to reach anything, and the objectives strip floated at a hard-coded `top: 52px`
+over a bar that grows to four rows on a phone.
+
+- **Top bar.** The objectives strip is now a row of the header itself, so the
+  header can never paint over it and the strip's height is part of the bar's.
+  `--topbar-h` is measured after every render and on resize and anchors the
+  tutorial card and the layer switcher, which no longer guess an offset.
+  A new warning row surfaces at most two derived alerts plus a count: spent
+  political will, low interceptors, Hormuz above 70, escalation near the top of
+  the ladder, domestic pressure at the collapse threshold, a host at the brink,
+  and the oil price crossing its victory threshold. The rules live in
+  `src/ui/shell.ts` and only read published state.
+- **Gauges.** Each pill carries a tone (`ok`/`warn`/`alert`) from thresholds on
+  its own number, so a resource that is running out is visible without opening
+  anything. The economy index starts low in this theatre, so it only warns on a
+  collapse instead of glowing red on turn one.
+- **Categories.** The strategic panel now shows one category at a time —
+  Situation, Military, Economy and logistics, Diplomacy, Politics and
+  escalation — as tabs, and only offers categories that actually have content
+  for the current faction. The section markup is unchanged; only the grouping
+  and the tab bar are new.
+- **Hierarchy.** Secondary facility text moved behind a collapsed "Intel detail"
+  disclosure, so name, integrity, effect and the strike list stay above the fold.
+- **Layering fixes.** The modal was below the map layer bar and the coach card
+  (z-index 20 against 21/22), so an open dialog could be drawn under them; the
+  modal now sits at 26. A hidden alert row and two legacy mobile rules that
+  forced the strip to a 58 px column and offset it by 48 px are gone.
+
+Verification: typecheck 0, `pnpm test` 45 files / 338 tests, build 0 (11 new
+tests in `src/ui/shell.test.ts` cover the gauge thresholds, every alert rule,
+and tab selection). In the running dev server: at 390x844 the header contains
+the strip, the layer row sits below the header, clear of the sheet and the
+right-hand controls, with no horizontal overflow; at 1280x800 the strip is one
+row inside the header and the layer column clears the bar, sheet and controls.
+Setting will to 18 and pressure to 95 produced two alert chips and a "+1" with
+the header growing 124 to 156 px, and the WILL pill switching to `tone-alert`.
+Switching to Persian set `dir="rtl"`, translated the alerts, kept the strip
+inside the header and produced no horizontal overflow. Category tabs were
+clicked: Situation showed Gulf basing, Host nations and War cost; Military
+swapped to Iran's programme and Victory paths. No phone, no touch gestures and
+no screenshot pass were possible in this session (the app window was covered, so
+captures were refused); the layout evidence above is measured geometry, not
+pixels.
+
+Still not done: Phase 4 (defensive-network attributes, detection vs
+interception), Phase 5 (missile data provenance), Phase 6 (end-of-turn report,
+notifications, animation pass).
