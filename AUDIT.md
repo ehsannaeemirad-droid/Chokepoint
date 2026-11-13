@@ -1379,3 +1379,25 @@ for this deployment.
    every commit. Set `user.name`/`user.email` in `.git/config` only (to
    `EhsanRad <ehsan.naeemirad@email.com>`, matching the repository's history) and
    deliberately left the global config alone.
+
+## 38. Post-report head
+
+§37 was written before its own commit, so its "shipped" range stopped at
+`d1d9ec0`. The shipped history is `1307c83..6420a36`; the commits after
+`d1d9ec0` are documentation-only (`docs: final project report and ship`, this
+note) and do not change the built output — the deployed bundle hash stays
+`index-DhxtyWFv.js`.
+
+Runs for head `6420a36` (all success):
+
+| Workflow | Run | Result | Duration |
+|---|---|---|---|
+| CI | https://github.com/ehsannaeemirad-droid/Chokepoint/actions/runs/43417141109 | success | 11:26:56–11:27:31 UTC (35 s) |
+| Deploy to GitHub Pages | https://github.com/ehsannaeemirad-droid/Chokepoint/actions/runs/43417141112 | success | 11:26:56–11:27:36 UTC (40 s) |
+
+The live site was re-checked after that deploy: HTTP 200, 1,009 bytes,
+`<title>Chokepoint</title>`, `./assets/index-DhxtyWFv.js`. Runs for any
+documentation-only commit made after this note follow the same two workflows and
+are listed at
+https://github.com/ehsannaeemirad-droid/Chokepoint/actions — they were not
+inspected individually, and this note makes no claim about them.
