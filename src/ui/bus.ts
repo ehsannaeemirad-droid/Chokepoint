@@ -18,6 +18,11 @@ export interface ZoomDetail {
   factor: number;
 }
 
+/** Switch the strategic map layer (political, military, intelligence, ...). */
+export function layerChanged(id: string): void {
+  bus.dispatchEvent(new CustomEvent('layer', { detail: { id } }));
+}
+
 /** Multiply the camera zoom by `factor`, keeping the screen centre anchored. */
 export function zoomBy(factor: number): void {
   bus.dispatchEvent(new CustomEvent<ZoomDetail>('zoom', { detail: { factor } }));

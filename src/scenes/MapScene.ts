@@ -10,6 +10,7 @@ import { ChunkRenderer } from '../map/ChunkRenderer';
 import { MapMarkers } from '../map/MapMarkers';
 import { hexToWorld, worldToHex, type HexCoord } from '../map/hex';
 import { mapPixelSize } from '../map/TheaterMap';
+import { isMapLayerId } from '../map/layers';
 import { perf } from '../perf';
 import { bus, showToast, type FocusDetail } from '../ui/bus';
 
@@ -73,6 +74,12 @@ export class MapScene extends Phaser.Scene {
     bus.addEventListener('pan', ((event: Event) => {
       const { dx, dy } = (event as CustomEvent<{ dx: number; dy: number }>).detail;
       this.panBy(dx, dy);
+    }) as EventListener);
+    bus.addEventListener('layer', ((event: Event) => {
+      const { id } = (event as CustomEvent<{ id: string }>).detail;
+      if (!isMapLayerId(id)) return;
+      this.chunkRenderer.setLayer(id);
+      this.markers.setLayer(id);
     }) as EventListener);
 
     this.scale.on('resize', () => this.cam.setSize(this.scale.width, this.scale.height));

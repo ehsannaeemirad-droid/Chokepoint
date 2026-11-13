@@ -8,8 +8,9 @@ import type { Game } from '../core/Game';
 import type { MapNodeDef, NodeKind, UnitInstance } from '../core/types';
 import { strikeTargetsFor } from '../combat/targets';
 import { langRevision, localName } from '../i18n';
-import { hexCorners, hexDistance, hexesInRange } from './hex';
+import { HEX_W, hexCorners, hexDistance, hexesInRange, hexToWorld } from './hex';
 import { spreadLabels, type LabelBox } from './labelLayout';
+import { DEFAULT_LAYER, layerDef, type LayerDef, type MapLayerId } from './layers';
 import type { TheaterMap } from './TheaterMap';
 
 const NODE_COLORS: Record<NodeKind, string> = {
@@ -29,6 +30,7 @@ export class MapMarkers {
   private labels = new Map<string, HTMLElement>();
   private signature = '';
   private staticLayer: Phaser.GameObjects.Graphics;
+  private layer: LayerDef = layerDef(DEFAULT_LAYER);
 
   constructor(
     scene: Phaser.Scene,
@@ -40,8 +42,16 @@ export class MapMarkers {
     this.labelLayer = document.getElementById('node-labels') ?? document.body;
   }
 
+  /** Switch the strategic layer; the overlay is redrawn on the next frame. */
+  setLayer(id: MapLayerId): void {
+    if (this.layer.id === id) return;
+    this.layer = layerDef(id);
+    this.signature = '';
+  }
+
   private staticSignature(cam: Phaser.Cameras.Scene2D.Camera): string {
     return [
+      this.layer.id,
       cam.worldView.x.toFixed(1),
       cam.worldView.y.toFixed(1),
       cam.worldView.width.toFixed(1),
@@ -153,6 +163,22 @@ export class MapMarkers {
       });
     }
 
+    // --- air-defence coverage (strategic layer) ------------------------------
+    if (this.layer.coverage) {
+      for (const unit of this.game.visibleUnits()) {
+        if (unitCategory(this.game, unit) !== 'defense') continue;
+        const reach = unitRng(this.game, unit);
+        if (reach <= 0) continue;
+        const world = hexToWorld(unit.col, unit.row);
+        const radius = reach * HEX_W * 0.92;
+        const color = hexToNumber(FACTION_COLORS[unit.faction] ?? COLORS.textDim);
+        this.g.fillStyle(color, 0.07);
+        this.g.fillCircle(world.x, world.y, radius);
+        this.g.lineStyle(1.5 / zoom, color, 0.4);
+        this.g.strokeCircle(world.x, world.y, radius);
+      }
+    }
+
     this.updateLabels(cam);
   }
 
@@ -257,7 +283,9 @@ export class MapMarkers {
       const tile = this.map.hexAt(hex.col, hex.row);
       if (!tile) continue;
       const visible = rectContains(view, tile.x, tile.y, 40);
-      const showLabel = visible && (node.strategic || zoom > 0.85);
+      // Analytical layers keep every facility named so the layer is readable
+      // without zooming; the political view stays uncluttered.
+      const showLabel = visible && (node.strategic || this.layer.emphasiseNodes || zoom > 0.85);
       if (!showLabel) continue;
       shown.add(node.id);
       let el = this.labels.get(node.id);

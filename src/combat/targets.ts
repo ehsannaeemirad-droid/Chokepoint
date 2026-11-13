@@ -89,6 +89,96 @@ export function strikeTargetsFor(
   return targets.sort((x, y) => x.dist - y.dist);
 }
 
+/** Why a force cannot strike this location right now. */
+export type StrikeBlockReason =
+  | 'cannot-strike'
+  | 'tasked'
+  | 'rearming'
+  | 'no-munitions'
+  | 'no-launchers'
+  | 'out-of-range'
+  | 'not-a-target';
+
+export interface StrikeCandidate {
+  unit: UnitInstance;
+  available: boolean;
+  reason?: StrikeBlockReason;
+  dist: number;
+}
+
+/** Categories that can never conduct a strike (mirrors the engine's rule). */
+const STRIKE_FORBIDDEN = new Set(['defense', 'production', 'cyber']);
+
+/**
+ * Every one of the player's units, judged against one target: available forces
+ * first (nearest first), then the forces that cannot act, each with the reason.
+ *
+ * The point of this list is that a player never has to guess why an order is
+ * refused. `attackersForHex` is the available-only projection of it, so the two
+ * can never disagree.
+ */
+export function strikeCandidates(
+  snap: GameSnapshot,
+  map: TheaterMap,
+  col: number,
+  row: number,
+  nodeId?: string,
+  labelFor: (nodeId: string) => string = (id) => id,
+  hexLabel: (col: number, row: number) => string = (c, r) => `${c},${r}`,
+  unitLabel?: (unit: UnitInstance) => string,
+): StrikeCandidate[] {
+  const tasked = new Set(
+    snap.orders.filter((o) => 'unitUid' in o).map((o) => (o as { unitUid: string }).unitUid),
+  );
+  const out: StrikeCandidate[] = [];
+  for (const unit of snap.units) {
+    if (unit.faction !== snap.faction) continue;
+    const dist = hexDistance({ col: unit.col, row: unit.row }, { col, row });
+    const def = UNIT_DEFS.get(unit.typeId);
+    const blocked = (reason: StrikeBlockReason): StrikeCandidate => ({ unit, dist, available: false, reason });
+
+    if (!def || def.atk <= 0 || def.rng <= 0 || STRIKE_FORBIDDEN.has(def.category)) {
+      out.push(blocked('cannot-strike'));
+      continue;
+    }
+    if (tasked.has(unit.uid)) {
+      out.push(blocked('tasked'));
+      continue;
+    }
+    if (unit.cooldown > 0) {
+      out.push(blocked('rearming'));
+      continue;
+    }
+    if (unit.magazine <= 0) {
+      out.push(blocked('no-munitions'));
+      continue;
+    }
+    if (snap.faction === 'iran') {
+      const cls = deliveryClassFor(unit.typeId);
+      if (cls) {
+        if (snap.iran.rounds[cls] <= 0) {
+          out.push(blocked('no-munitions'));
+          continue;
+        }
+        if (launcherSortiesLeft(snap.iran, cls === 'drone' ? 'drone' : 'ballistic') <= 0) {
+          out.push(blocked('no-launchers'));
+          continue;
+        }
+      }
+    }
+    if (dist > strikeRange(snap, unit)) {
+      out.push(blocked('out-of-range'));
+      continue;
+    }
+    const hits = strikeTargetsFor(snap, map, unit, labelFor, hexLabel, unitLabel).some(
+      (target) => target.col === col && target.row === row && (nodeId ? target.nodeId === nodeId : !target.nodeId),
+    );
+    out.push(hits ? { unit, dist, available: true } : blocked('not-a-target'));
+  }
+
+  return out.sort((a, b) => Number(b.available) - Number(a.available) || a.dist - b.dist);
+}
+
 /**
  * Reverse lookup for the location sheet: every one of the player's units that
  * can legally strike this hex/facility this turn. This is what lets a player
@@ -105,27 +195,9 @@ export function attackersForHex(
   hexLabel: (col: number, row: number) => string = (c, r) => `${c},${r}`,
   unitLabel?: (unit: UnitInstance) => string,
 ): Array<{ unit: UnitInstance; dist: number }> {
-  const tasked = new Set(
-    snap.orders.filter((o) => 'unitUid' in o).map((o) => (o as { unitUid: string }).unitUid),
-  );
-  return snap.units
-    .filter((unit) => unit.faction === snap.faction && !tasked.has(unit.uid))
-    .filter((unit) => {
-      if (unit.magazine <= 0 || unit.cooldown > 0) return false;
-      if (snap.faction === 'iran') {
-        const cls = deliveryClassFor(unit.typeId);
-        if (cls && (snap.iran.rounds[cls] <= 0 || launcherSortiesLeft(snap.iran, cls === 'drone' ? 'drone' : 'ballistic') <= 0)) {
-          return false;
-        }
-      }
-      return strikeTargetsFor(snap, map, unit, labelFor, hexLabel, unitLabel).some(
-        (target) => target.col === col && target.row === row && (nodeId ? target.nodeId === nodeId : !target.nodeId),
-      );
-    })
-    .map((unit) => ({
-      unit,
-      dist: hexDistance({ col: unit.col, row: unit.row }, { col, row }),
-    }))
+  return strikeCandidates(snap, map, col, row, nodeId, labelFor, hexLabel, unitLabel)
+    .filter((candidate) => candidate.available)
+    .map((candidate) => ({ unit: candidate.unit, dist: candidate.dist }))
     .sort((a, b) => a.dist - b.dist);
 }
 

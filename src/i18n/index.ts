@@ -355,6 +355,15 @@ const DICT = {
     'امتیاز نفوذ قدرت‌های بزرگ؛ هر نوبت به دست می‌آید و برای موشک، تولید یا اطلاعات خرج می‌شود.',
   ],
   'sheet.attackers': ['Tools that can strike this location', 'ابزارهای قابل استفاده علیه این مکان'],
+  'sheet.unavailable': ['Not available this turn', 'امکان استفاده در این نوبت نیست'],
+  'sheet.noForces': ['You have no forces in this theatre.', 'شما در این صحنه نیرویی ندارید.'],
+  'attack.reason.cannot-strike': ['Cannot strike targets', 'توان حمله به اهداف را ندارد'],
+  'attack.reason.tasked': ['Already tasked this turn', 'در این نوبت فرمان گرفته است'],
+  'attack.reason.rearming': ['Rearming', 'در حال بارگیری مجدد'],
+  'attack.reason.no-munitions': ['No munitions remaining', 'مهمات باقی نمانده است'],
+  'attack.reason.no-launchers': ['No launcher sorties left', 'ظرفیت پرتابگر تمام شده است'],
+  'attack.reason.out-of-range': ['Out of range', 'خارج از برد'],
+  'attack.reason.not-a-target': ['Cannot attack this location', 'امکان حمله به این مکان نیست'],
   'sheet.noAttackers': [
     'No available unit can strike this location this turn. Move a launcher or aircraft closer.',
     'هیچ یگان آماده‌ای اکنون نمی‌تواند به این مکان حمله کند. پرتابگر یا هواپیما را نزدیک‌تر کنید.',
@@ -481,6 +490,37 @@ const DICT = {
   'grade.critical': ['critical', 'بحرانی'],
 
   'aria.objectives': ['Campaign objectives', 'اهداف کارزار'],
+  'aria.layers': ['Map layers', 'لایه‌های نقشه'],
+  'layer.political': ['POLITICAL', 'سیاسی'],
+  'layer.military': ['MILITARY', 'نظامی'],
+  'layer.intelligence': ['INTEL', 'اطلاعات'],
+  'layer.airDefence': ['AIR DEFENCE', 'پدافند هوایی'],
+  'layer.logistics': ['LOGISTICS', 'لجستیک'],
+  'layer.infrastructure': ['INFRASTRUCTURE', 'زیرساخت'],
+  'layer.political.hint': [
+    'Borders, sovereignty and who holds each region.',
+    'مرزها، حاکمیت و اینکه هر منطقه در دست کیست.',
+  ],
+  'layer.military.hint': [
+    'Force posture: units, deployment and strike reach.',
+    'وضعیت نیروها: یگان‌ها، استقرار و برد حمله.',
+  ],
+  'layer.intelligence.hint': [
+    'What is confirmed versus estimated; facilities stay named.',
+    'آنچه تأیید شده در برابر آنچه برآورد است؛ نام تأسیسات همیشه دیده می‌شود.',
+  ],
+  'layer.airDefence.hint': [
+    'Defence coverage rings from live air-defence units.',
+    'حلقه‌های پوشش پدافندی از یگان‌های فعال پدافند هوایی.',
+  ],
+  'layer.logistics.hint': [
+    'Supply geography: bases, ports and the facilities that sustain them.',
+    'جغرافیای تدارکات: پایگاه‌ها، بندرها و تأسیسات پشتیبان آن‌ها.',
+  ],
+  'layer.infrastructure.hint': [
+    'Cities, airbases, ports and strategic infrastructure.',
+    'شهرها، پایگاه‌های هوایی، بندرها و زیرساخت راهبردی.',
+  ],
   'aria.coach': ['Quick-start coach', 'راهنمای شروع سریع'],
   'tip.grade': ['Live campaign grade estimate', 'برآورد زنده نمره کارزار'],
 

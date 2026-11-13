@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { attackersForHex, strikeTargetsFor } from './targets';
+import { attackersForHex, strikeCandidates, strikeTargetsFor } from './targets';
 import { applyOrder, validateOrder } from '../core/engine';
 import { Game } from '../core/Game';
 import { defenderOfNode, unitType } from '../core/world';
@@ -200,5 +200,88 @@ describe('great-power favours', () => {
     favorsOf(game.snap).china = 5;
     applyAid(game.snap, 'china', 'production', []);
     expect(game.snap.iranProductionBoost).toBeGreaterThan(0);
+  });
+});
+
+describe('target-first force list', () => {
+  function hostileTarget(game: Game) {
+    for (const node of game.map.nodes) {
+      const defender = defenderOfNode(node);
+      const hex = game.map.nodeHexOf(node.id);
+      if (!defender || !hex || !hostileTo(game.snap.faction, defender)) continue;
+      return { node, hex };
+    }
+    throw new Error('no hostile node');
+  }
+
+  it('lists available forces first and gives every other force a reason', () => {
+    const game = start('usa');
+    const { node, hex } = hostileTarget(game);
+    const candidates = strikeCandidates(game.snap, game.map, hex.col, hex.row, node.id);
+    expect(candidates.length).toBeGreaterThan(0);
+
+    const available = candidates.filter((c) => c.available);
+    expect(available.length).toBeGreaterThan(0);
+    expect(candidates[0]!.available).toBe(true);
+
+    for (const candidate of candidates) {
+      if (candidate.available) {
+        expect(candidate.reason).toBeUndefined();
+        expect(candidate.unit.faction).toBe('usa');
+      } else {
+        expect(candidate.reason).toBeTruthy();
+      }
+    }
+    // The list explains unavailable forces instead of hiding them.
+    expect(candidates.some((c) => !c.available)).toBe(true);
+  });
+
+  it('agrees with attackersForHex on which forces are available', () => {
+    const game = start('usa');
+    const { node, hex } = hostileTarget(game);
+    const candidates = strikeCandidates(game.snap, game.map, hex.col, hex.row, node.id);
+    const attackers = attackersForHex(game.snap, game.map, hex.col, hex.row, node.id);
+    expect(attackers.map((a) => a.unit.uid)).toEqual(
+      candidates.filter((c) => c.available).map((c) => c.unit.uid),
+    );
+  });
+
+  it('reports a tasked force as tasked rather than silently dropping it', () => {
+    const game = start('usa');
+    const { node, hex } = hostileTarget(game);
+    const available = strikeCandidates(game.snap, game.map, hex.col, hex.row, node.id).find((c) => c.available)!;
+    expect(game.queueOrder({ kind: 'move', unitUid: available.unit.uid, col: available.unit.col, row: available.unit.row }).ok).toBe(true);
+    const after = strikeCandidates(game.snap, game.map, hex.col, hex.row, node.id);
+    const entry = after.find((c) => c.unit.uid === available.unit.uid)!;
+    expect(entry.available).toBe(false);
+    expect(entry.reason).toBe('tasked');
+  });
+
+  it('never offers a unit that cannot strike at all', () => {
+    const game = start('usa');
+    const { node, hex } = hostileTarget(game);
+    const defence = game.snap.units.find((u) => unitType(u.typeId).category === 'defense');
+    expect(defence).toBeTruthy();
+    const entry = strikeCandidates(game.snap, game.map, hex.col, hex.row, node.id).find(
+      (c) => c.unit.uid === defence!.uid,
+    )!;
+    expect(entry.available).toBe(false);
+    expect(entry.reason).toBe('cannot-strike');
+  });
+
+  it('distinguishes out-of-range forces from forces with no munitions', () => {
+    const game = start('usa');
+    const { node, hex } = hostileTarget(game);
+    const aircraft = game.snap.units.find(
+      (u) => u.faction === 'usa' && unitType(u.typeId).category === 'air' && u.magazine > 0,
+    )!;
+    aircraft.magazine = 0;
+    const entry = strikeCandidates(game.snap, game.map, hex.col, hex.row, node.id).find(
+      (c) => c.unit.uid === aircraft.uid,
+    )!;
+    // Either it is out of reach or it is the empty magazine that stops it; both
+    // are legitimate and both are named.
+    expect(['no-munitions', 'out-of-range']).toContain(entry.reason);
+    expect(entry.available).toBe(false);
   });
 });

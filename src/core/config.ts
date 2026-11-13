@@ -8,13 +8,15 @@ export const COLORS = {
   text: '#F5F5F5',
   textDim: '#9AA7B4',
 
-  water: '#2C5F8A',
-  coast: '#3A749E',
-  desert: '#D4B896',
-  plains: '#A9A276',
-  mountain: '#6B6B6B',
-  urban: '#9E9E9E',
-  hardened: '#4B4B55',
+  // Muted, geographic terrain. Deliberately desaturated: the map should read as
+  // a real region, not a board of coloured tiles.
+  water: '#2E4C5E',
+  coast: '#3B6478',
+  desert: '#C9B08A',
+  plains: '#8E9468',
+  mountain: '#6E6455',
+  urban: '#8A8578',
+  hardened: '#4A4740',
 
   alert: '#D32F2F',
   warn: '#FFA000',

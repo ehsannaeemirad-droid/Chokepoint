@@ -1401,3 +1401,44 @@ documentation-only commit made after this note follow the same two workflows and
 are listed at
 https://github.com/ehsannaeemirad-droid/Chokepoint/actions — they were not
 inspected individually, and this note makes no claim about them.
+
+## 39. Visual foundation (Phase 1) and target-first force list (Phase 3)
+
+Two phases of the improvement brief are implemented here; the others are not,
+and are listed at the end of this section.
+
+**Phase 1 — map.** `COLORS` moved to a muted geographic palette (sand, olive,
+brown, desaturated blue). `ChunkRenderer` now bakes terrain with per-kind
+detail (ridges, dunes, plain tufts, urban blocks, hardened pads, water waves),
+a hairline grid and per-hex coastline/country strokes drawn only where a
+neighbour's owner or land/water status differs, so borders follow the real
+frontier instead of every hex edge. A "layer" is a pure rendering treatment
+(`src/map/layers.ts`: owner tint, grid alpha, detail, desaturation, coverage)
+and never touches simulation state; only the air-defence layer reads live data.
+The overlay draws coverage rings from real `defense`-category units' `rng` and
+names every facility on analytical layers. The switcher sits on the map's left
+edge (a scrollable pill row on narrow screens) and goes through the existing
+`bus` event channel.
+
+**Phase 3 — target-first.** `strikeCandidates()` in `src/combat/targets.ts`
+judges every own unit against a target and returns it with a reason
+(`cannot-strike`, `tasked`, `rearming`, `no-munitions`, `no-launchers`,
+`out-of-range`, `not-a-target`). `attackersForHex` is now the available-only
+projection of that list, so the sheet and the engine cannot disagree. The
+location sheet shows available tools first, then "Not available this turn" with
+each force disabled and its reason, replacing the bare "no attackers" message.
+On Bandar Abbas (USA campaign) the live sheet lists 9 available tools and 5
+unavailable ones with reasons.
+
+Also fixed: the quick-start coach card had no CSS at all and rendered as loose
+text over the objectives strip; it is now a proper card above the location
+sheet.
+
+Verification: typecheck 0, `pnpm test` 44 files / 330 tests, build 0. Visually
+checked in the local dev server (political layer, air-defence layer with
+coverage rings, target sheet with the unavailable group); no browser pass was
+made on a phone, in Persian/RTL, or against the deployed site.
+
+Not done: Phase 2 (full interface redesign), Phase 4 (defensive-network
+attributes, detection vs interception), Phase 5 (missile data sourcing and
+provenance), Phase 6 (end-of-turn report, notifications, animation pass).

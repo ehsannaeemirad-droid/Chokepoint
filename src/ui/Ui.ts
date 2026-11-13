@@ -5,7 +5,7 @@
  * The interface is bilingual (English / Persian). All chrome goes through
  * `t()`; map nodes and units use their localised data fields.
  */
-import { attackersForHex, strikeTargetsFor, type StrikeTarget } from '../combat/targets';
+import { strikeCandidates, strikeTargetsFor, type StrikeTarget } from '../combat/targets';
 import { FACTION_COLORS } from '../core/config';
 import { ISRAEL_AIRLIFT, REINFORCEMENTS, effectiveArrival } from '../core/engine';
 import { ARSENAL_UNCERTAINTY_PCT, arsenalRows, deliveryClassFor } from '../core/inventory';
@@ -44,7 +44,8 @@ import { factionBriefing, scenarioBriefing, type Bi } from './briefing';
 import { deleteSave, downloadText, listSaves, SLOTS, type SlotId } from '../services/save';
 import { parseReplay, playReplay, serializeReplay, type PlaybackResult, type ReplayFile } from '../services/replay';
 import { Minimap } from './Minimap';
-import { bus, focusHex, zoomBy } from './bus';
+import { bus, focusHex, layerChanged, zoomBy } from './bus';
+import { DEFAULT_LAYER, isMapLayerId, layerDef, MAP_LAYERS, type MapLayerId } from '../map/layers';
 import { filterNodes, NAV_KINDS, nextOwnUid, nextThreatUid, nodeCatalog, type NavEntry, type NavKind } from './nav';
 import { modeOf, sheetActions, SHEET_ACTION_LABEL } from './actions';
 
@@ -132,6 +133,7 @@ function template(): string {
 <div id="impact-preview" class="impact-preview" hidden></div>
 <div id="coach" class="coach" hidden></div>
 <div id="tutorial-banner" class="tutorial-banner"></div>
+<div id="layer-bar" class="layer-bar" role="group" aria-label="${t('aria.layers')}"></div>
 
 <div class="map-controls">
   <button data-action="zoom-in" aria-label="${t('btn.zoomIn')}" data-tip="${t('btn.zoomIn')}">+</button>
@@ -197,6 +199,8 @@ export class Ui {
   private root: HTMLElement;
   private game: Game;
   private openPanel: 'forces' | 'strategic' | 'log' | null = null;
+  /** Active strategic map layer; the scene mirrors it via the bus. */
+  private layer: MapLayerId = DEFAULT_LAYER;
   private menuScenario = 'campaign';
   private menuFaction: PlayableFactionId = 'usa';
   private toastTimer = 0;
@@ -327,6 +331,14 @@ export class Ui {
     }
     if (verb === 'lang') {
       setLang((a === 'fa' ? 'fa' : 'en') as Lang);
+      return;
+    }
+    if (verb === 'layer' && a) {
+      if (!isMapLayerId(a)) return;
+      this.layer = a;
+      layerChanged(a);
+      this.renderLayers();
+      this.showToast(t(layerDef(a).hint), 'info');
       return;
     }
     if (verb === 'zoom-in') return zoomBy(1.25);
@@ -645,6 +657,7 @@ export class Ui {
     this.renderObjectives();
     this.renderImpactPreview();
     this.renderCoach();
+    this.renderLayers();
 
     const hormuz = Math.round(s.meters.hormuz);
     const bar = $('#hormuz-bar');
@@ -998,7 +1011,11 @@ export class Ui {
     `;
   }
 
-  /** Target-first view: all of the player's tools that can hit this location. */
+  /**
+   * Target-first view: every force that could act on this location, available
+   * ones first and every unavailable one with the exact reason. A player must
+   * never be told only that "no attackers are available".
+   */
   private attackersHtml(col: number, row: number, nodeId?: string): string {
     const snap = this.game.snap;
     const node = nodeId ? this.game.map.nodeById.get(nodeId) : undefined;
@@ -1007,7 +1024,7 @@ export class Ui {
       ? !!defender && hostileTo(snap.faction, defender)
       : this.game.unitsAt(col, row).some((u) => u.faction !== snap.faction && u.revealed && hostileTo(snap.faction, u.faction));
     if (!hostile) return '';
-    const attackers = attackersForHex(
+    const candidates = strikeCandidates(
       snap,
       this.game.map,
       col,
@@ -1020,10 +1037,13 @@ export class Ui {
       (c, r) => t('target.hex', { col: c, row: r }),
       (unit) => unitLabel(unit),
     );
-    if (attackers.length === 0) {
-      return `<section class="targets"><h4>${t('sheet.attackers')}</h4><p class="note">${t('sheet.noAttackers')}</p></section>`;
+    if (candidates.length === 0) {
+      return `<section class="targets"><h4>${t('sheet.attackers')}</h4><p class="note">${t('sheet.noForces')}</p></section>`;
     }
-    const rows = attackers
+    const available = candidates.filter((candidate) => candidate.available);
+    const blocked = candidates.filter((candidate) => !candidate.available);
+
+    const rows = available
       .map(
         ({ unit, dist }) => `<button class="target-row" data-action="attack:${unit.uid}:${col},${row}:${nodeId ?? ''}">
           <span class="t-main"><b>${unitLabel(unit)}</b></span>
@@ -1032,7 +1052,22 @@ export class Ui {
         </button>`,
       )
       .join('');
-    return `<section class="targets"><h4>${t('sheet.attackers')} <span>${attackers.length}</span></h4>${rows}</section>`;
+
+    const blockedRows = blocked
+      .map(
+        (candidate) => `<div class="target-row blocked">
+          <span class="t-main"><b>${unitLabel(candidate.unit)}</b></span>
+          <span class="t-meta">${t(`attack.reason.${candidate.reason}` as StringKey)}</span>
+        </div>`,
+      )
+      .join('');
+
+    const empty = available.length === 0 ? `<p class="note">${t('sheet.noAttackers')}</p>` : '';
+    const blockedBlock = blockedRows
+      ? `<h5 class="targets-sub">${t('sheet.unavailable')} <span>${blocked.length}</span></h5>${blockedRows}`
+      : '';
+
+    return `<section class="targets"><h4>${t('sheet.attackers')} <span>${available.length}</span></h4>${empty}${rows}${blockedBlock}</section>`;
   }
 
   // ------------------------------------------------------------------ panels
@@ -2002,6 +2037,16 @@ export class Ui {
     const risks = preview.risks.map((l) => `<li class="risk">${l}</li>`).join('');
     el.hidden = false;
     el.innerHTML = `<div class="impact-card"><b>${t('obj.impact')}</b><ul>${lines}${risks}</ul></div>`;
+  }
+
+  /** Strategic map layer switcher: always visible, one active layer at a time. */
+  private renderLayers(): void {
+    const el = document.getElementById('layer-bar');
+    if (!el) return;
+    el.innerHTML = MAP_LAYERS.map((layer) => {
+      const active = layer.id === this.layer;
+      return `<button class="layer-btn${active ? ' active' : ''}" data-action="layer:${layer.id}" aria-pressed="${active}" data-tip="${t(layer.hint)}">${t(layer.label)}</button>`;
+    }).join('');
   }
 
   private renderCoach(): void {
