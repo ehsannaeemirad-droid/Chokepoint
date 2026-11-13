@@ -46,6 +46,7 @@ import { parseReplay, playReplay, serializeReplay, type PlaybackResult, type Rep
 import { Minimap } from './Minimap';
 import { bus, focusHex, zoomBy } from './bus';
 import { filterNodes, NAV_KINDS, nextOwnUid, nextThreatUid, nodeCatalog, type NavEntry, type NavKind } from './nav';
+import { modeOf, sheetActions, SHEET_ACTION_LABEL } from './actions';
 
 const $ = <T extends HTMLElement>(selector: string): T => document.querySelector(selector) as T;
 
@@ -359,10 +360,7 @@ export class Ui {
       const mode = a as InteractionMode;
       if (!this.game.selectedUnit) return this.showToast(t('toast.selectUnitFirst'), 'warn');
       this.game.setMode(mode);
-      this.showToast(
-        mode === 'move' ? t('sheet.modeMove') : mode === 'strike' ? t('sheet.modeStrike') : t('sheet.modeSpecial'),
-        'info',
-      );
+      this.showToast(t(this.modeKey(mode)), 'info');
       return;
     }
     if (verb === 'attack') {
@@ -394,6 +392,13 @@ export class Ui {
       return;
     }
     if (verb === 'cancel-mode') return this.game.setMode('idle');
+    if (verb === 'escort-order') {
+      const unit = this.game.selectedUnit;
+      if (!unit) return;
+      const result = this.game.queueOrder({ kind: 'escort', unitUid: unit.uid });
+      this.showToast(result.ok ? t('toast.escortQueued') : rejectionText(result), result.ok ? 'good' : 'warn');
+      return;
+    }
     if (verb === 'cyber-order') {
       const unit = this.game.selectedUnit;
       if (!unit) return;
@@ -791,6 +796,12 @@ export class Ui {
       }
       case 'cyber':
         return fa ? 'عملیات واحد 8200' : 'Unit 8200 operation';
+      case 'mine':
+        return fa ? `${name} → مین‌گذاری ${order.col},${order.row}` : `${name} → lay mines ${order.col},${order.row}`;
+      case 'clear':
+        return fa ? `${name} → پاکسازی مین ${order.col},${order.row}` : `${name} → clear mines ${order.col},${order.row}`;
+      case 'escort':
+        return fa ? `${name} → اسکورت` : `${name} → escort shipping`;
       case 'hold':
         return fa ? `${name} در موضع` : `${name} holds`;
       case 'aid':
@@ -798,6 +809,15 @@ export class Ui {
       default:
         return fa ? 'فرمان' : 'Order';
     }
+  }
+
+  /** Mode hint key for the action sheet and the targeting toast. */
+  private modeKey(mode: InteractionMode): StringKey {
+    if (mode === 'move') return 'sheet.modeMove';
+    if (mode === 'strike') return 'sheet.modeStrike';
+    if (mode === 'mine') return 'sheet.modeMine';
+    if (mode === 'clear') return 'sheet.modeClear';
+    return 'sheet.modeSpecial';
   }
 
   // ------------------------------------------------------------------- sheets
@@ -824,18 +844,12 @@ export class Ui {
 
     const canStrike =
       def.atk > 0 && def.rng > 0 && def.category !== 'defense' && def.category !== 'production' && def.category !== 'cyber';
-    const canMove = def.mov > 0 && def.category !== 'cyber' && def.category !== 'production';
     const targets = canStrike ? this.strikeTargets(unit) : [];
 
-    const actions: string[] = [];
-    if (canMove) actions.push(`<button data-action="mode:move" class="${mode === 'move' ? 'active' : ''}">${t('btn.move')}</button>`);
-    if (canStrike) {
-      actions.push(`<button data-action="mode:strike" class="${mode === 'strike' ? 'active' : ''}">${t('btn.attack')}</button>`);
-    }
-    if (def.category === 'specops') actions.push(`<button data-action="mode:special">${t('btn.sabotage')}</button>`);
-    if (def.id === 'unit8200') actions.push(`<button data-action="cyber-order">${t('btn.cyber')}</button>`);
-    actions.push(`<button data-action="hold">${t('btn.hold')}</button>`);
-    actions.push(`<button data-action="clear-selection">${t('btn.deselect')}</button>`);
+    const actions = sheetActions(def).map((id) => {
+      const activeClass = modeOf(id) === mode ? ' class="active"' : '';
+      return `<button data-action="${id}"${activeClass}>${t(SHEET_ACTION_LABEL[id])}</button>`;
+    });
 
     const hostWarn =
       hostileHost && hostileHost.status !== 'open'
@@ -864,7 +878,7 @@ export class Ui {
       ${this.game.snap.faction === 'iran' && def.category === 'missile' ? `<div class="warn-line">${t('sheet.moveRisk')}</div>` : ''}
       ${hostWarn}
       ${active ? `<div class="warn-line">${t('sheet.tasked')}</div>` : ''}
-      ${mode !== 'idle' ? `<div class="mode-hint">${mode === 'move' ? t('sheet.modeMove') : mode === 'strike' ? t('sheet.modeStrike') : t('sheet.modeSpecial')} <button data-action="cancel-mode">${t('btn.cancel')}</button></div>` : ''}
+      ${mode !== 'idle' ? `<div class="mode-hint">${t(this.modeKey(mode))} <button data-action="cancel-mode">${t('btn.cancel')}</button></div>` : ''}
       <div class="actions">${actions.join('')}</div>
       <p class="note">${def.note}</p>
     `;

@@ -277,9 +277,15 @@ export class MapScene extends Phaser.Scene {
           ? { kind: 'move', unitUid: unit.uid, col: hex.col, row: hex.row }
           : mode === 'special'
             ? { kind: 'special', unitUid: unit.uid, col: hex.col, row: hex.row }
-            : { kind: 'strike', unitUid: unit.uid, col: hex.col, row: hex.row, nodeId };
+            : mode === 'mine'
+              ? { kind: 'mine', unitUid: unit.uid, col: hex.col, row: hex.row, count: 2 }
+              : mode === 'clear'
+                ? { kind: 'clear', unitUid: unit.uid, col: hex.col, row: hex.row }
+                : { kind: 'strike', unitUid: unit.uid, col: hex.col, row: hex.row, nodeId };
       const result = game.queueOrder(order);
       if (!result.ok) showToast(result.reason ?? 'Invalid order', 'warn');
+      else if (mode === 'mine') showToast('Minefield queued', 'good');
+      else if (mode === 'clear') showToast('Clearance queued', 'good');
       else showToast(mode === 'move' ? 'Move queued' : 'Strike queued', 'good');
       game.setMode('idle');
       return;

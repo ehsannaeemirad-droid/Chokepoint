@@ -71,13 +71,10 @@ export class MapMarkers {
     if (unit && center) {
       const def = this.game.snap.units.length ? this.typeOf(unit) : null;
       if (def && this.game.selection.mode !== 'idle') {
-        const range =
-          this.game.selection.mode === 'move'
-            ? def.mov
-            : this.game.selection.mode === 'strike'
-              ? def.rng
-              : def.rng;
-        const color = this.game.selection.mode === 'move' ? 0x4caf50 : 0xe05a5a;
+        const mode = this.game.selection.mode;
+        const range = mode === 'move' ? def.mov : def.rng;
+        const color =
+          mode === 'move' ? 0x4caf50 : mode === 'mine' ? 0xffc857 : mode === 'clear' ? 0x4fc3f7 : 0xe05a5a;
         for (const hex of hexesInRange(center, range)) {
           const tile = this.map.hexAt(hex.col, hex.row);
           if (!tile) continue;

@@ -1070,3 +1070,35 @@ Limitations:
   layout would be a UI polish item, not a gameplay defect.
 - The aid balance is a playable baseline; it has not been tuned by a dedicated
   win-rate pass.
+
+## 30. Phase 4 gap — mine, clear and escort in the unit action sheet
+
+Commit: `feat: expose mine/clear/escort in the unit action sheet`.
+
+`mine`, `clear` and `escort` were engine-authorised order kinds (`SCOPE` in
+`src/core/permissions.ts`) with no button anywhere in the interface, so a mine
+warfare group could not lay a field and a warship could not clear or escort from
+the sheet. The only way to issue them was the AI's own internal path.
+
+- **One source of truth.** `src/ui/actions.ts` now owns the sheet's action list
+  (`sheetActions`) and its labels; `Ui.unitCard` renders that list instead of
+  hard-coding buttons. A mine warfare group gets LAY MINES, CLEAR MINES and
+  ESCORT; any naval unit gets CLEAR MINES and ESCORT; air, ground and launchers
+  get none of the three. Mine and clear are targeting modes
+  (`InteractionMode` gained `mine` and `clear`), so the map tap in
+  `src/scenes/MapScene.ts` builds the order, and the range overlay in
+  `src/map/MapMarkers.ts` colours those modes distinctly. Escort is queued
+  immediately from the button.
+- **Chrome.** Order strip labels, mode hints and the escort toast are keyed in
+  both languages; the order strip previously showed a bare `Order` for these
+  three kinds.
+- **Test.** `src/ui/actions.test.ts` asserts the sheet offers each order to the
+  right unit type and withholds it from the wrong ones, and then proves the
+  engine accepts the queued `mine`, `clear` and `escort` orders (and that a
+  second task on the same ship is refused).
+
+Verification: `tsc --noEmit` exit 0; `vitest run` 42 files / 314 tests passed.
+
+Limitations: the buttons were not exercised in a browser; the tap-to-target
+flow for the two new modes is covered by the order-construction path and the
+engine tests, not by a rendered UI.

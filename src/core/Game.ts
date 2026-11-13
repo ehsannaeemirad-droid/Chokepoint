@@ -76,7 +76,7 @@ export interface ScenarioDef {
 
 export const SCENARIOS = { ...scenarioData, ...LATE_SCENARIOS } as unknown as Record<string, ScenarioDef>;
 
-export type InteractionMode = 'idle' | 'move' | 'strike' | 'special';
+export type InteractionMode = 'idle' | 'move' | 'strike' | 'special' | 'mine' | 'clear';
 
 export interface Selection {
   hexId: string | null;
