@@ -17,6 +17,7 @@ import { clamp, unitType } from '../core/world';
 import { hexDistance } from '../map/hex';
 import type { TheaterMap } from '../map/TheaterMap';
 import { purchaseCostOfInterceptors, russiaTier } from '../politics/politics';
+import { abstractDefenceFactor, defenceNetwork } from './defenceNetwork';
 
 export type AdLayerName = 'long' | 'medium' | 'point';
 
@@ -68,8 +69,12 @@ function unitSuppressed(snap: GameSnapshot, unit: UnitInstance): boolean {
   return (unit.suppressedUntilTurn ?? 0) > snap.turn;
 }
 
-/** Detect one raid against a hex. Rolls once; the result gates all engagement. */
-export function detectRaid(
+/**
+ * The chance a defender detects a raid at this hex, without rolling. Split out
+ * of `detectRaid` so the interface can show the player the same number the
+ * engine will use instead of inventing its own estimate.
+ */
+export function detectionChance(
   snap: GameSnapshot,
   map: TheaterMap,
   col: number,
@@ -77,14 +82,18 @@ export function detectRaid(
   defender: FactionId,
   threat: ThreatClass,
   stealth: number,
-  rng: () => number,
 ): DetectionResult {
   const sources: string[] = [];
   let chance = 0.18;
 
   if (defender === 'iran' || defender === 'houthi') {
-    // Iran's national system is abstract: fewer named sensors, more depth.
-    chance = 0.55 + (russiaTier(snap) >= 2 ? 0.2 : 0);
+    // Iran's national system is abstract: fewer named sensors, more depth. The
+    // flat baseline is now scaled by the abstract network, so a degraded early
+    // warning and coordination picture genuinely sees less. A healthy network
+    // multiplies by 1, which is why the opening turn is unchanged.
+    let flat = 0.55 + (russiaTier(snap) >= 2 ? 0.2 : 0);
+    if (defender === 'iran') flat *= abstractDefenceFactor(defenceNetwork(snap, map, 'iran'));
+    chance = flat;
     if (russiaTier(snap) >= 2) sources.push('Russian-supplied radar');
   }
 
@@ -118,7 +127,22 @@ export function detectRaid(
   const terrain = map.hexAt(col, row)?.terrain;
   if (terrain === 'mountain') chance -= 0.15;
   chance = clamp(chance * SIGNATURE_VISIBILITY[threat] - stealth * 0.9, 0.03, 0.98);
-  return { detected: rng() < chance, chance, sources };
+  return { detected: false, chance, sources };
+}
+
+/** Detect one raid against a hex. Rolls once; the result gates all engagement. */
+export function detectRaid(
+  snap: GameSnapshot,
+  map: TheaterMap,
+  col: number,
+  row: number,
+  defender: FactionId,
+  threat: ThreatClass,
+  stealth: number,
+  rng: () => number,
+): DetectionResult {
+  const result = detectionChance(snap, map, col, row, defender, threat, stealth);
+  return { ...result, detected: rng() < result.chance };
 }
 
 /** The layers able to engage at this hex right now, strongest per layer. */
@@ -135,10 +159,12 @@ export function defenceLayers(
 
   if (defender === 'iran' || defender === 'houthi') {
     const shield = russiaTier(snap) >= 2 ? 0.06 : russiaTier(snap) >= 1 ? 0.03 : 0;
+    const factor =
+      defender === 'iran' ? abstractDefenceFactor(defenceNetwork(snap, map, 'iran')) : 1;
     return [
-      { layer: 'long', label: 'Iranian long-range SAM', probability: 0.18 + shield, cost: 0 },
-      { layer: 'medium', label: 'Iranian medium-range SAM', probability: 0.22 + shield, cost: 0 },
-      { layer: 'point', label: 'Iranian point defence', probability: 0.12, cost: 0 },
+      { layer: 'long', label: 'Iranian long-range SAM', probability: (0.18 + shield) * factor, cost: 0 },
+      { layer: 'medium', label: 'Iranian medium-range SAM', probability: (0.22 + shield) * factor, cost: 0 },
+      { layer: 'point', label: 'Iranian point defence', probability: 0.12 * factor, cost: 0 },
     ];
   }
 

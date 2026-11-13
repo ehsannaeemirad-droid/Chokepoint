@@ -65,11 +65,12 @@ describe('strategic panel tabs', () => {
     const html: Record<StrategicTab, string> = {
       situation: '<p>a</p>',
       military: '   ',
+      airDefence: '<p>d</p>',
       economy: '<p>b</p>',
       diplomacy: '',
       politics: '<p>c</p>',
     };
-    expect(visibleTabs(html)).toEqual(['situation', 'economy', 'politics']);
+    expect(visibleTabs(html)).toEqual(['situation', 'airDefence', 'economy', 'politics']);
   });
 
   it('keeps the chosen tab when it survives, otherwise falls back to the first', () => {

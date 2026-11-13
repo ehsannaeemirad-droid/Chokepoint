@@ -1494,3 +1494,56 @@ pixels.
 Still not done: Phase 4 (defensive-network attributes, detection vs
 interception), Phase 5 (missile data provenance), Phase 6 (end-of-turn report,
 notifications, animation pass).
+
+## 41. Air defence as a network (Phase 4)
+
+Air defence already had layers, detection, suppression and interceptor costs,
+but the *model* was invisible: Iran's entire national system was three
+hard-coded probabilities plus a Russian-tier bonus, and nothing told the player
+whether a raid was seen, engaged, or simply never detected.
+
+- **`src/combat/defenceNetwork.ts`** names five attributes — early warning,
+  sensor network, coordination, interceptor stocks, readiness — and derives each
+  from state the simulation already keeps (radar/airbase/naval node integrity,
+  node and unit suppression this turn, the interceptor pool, battery cooldown
+  and magazines). It returns one composite effectiveness. It is pure, never
+  mutates, and adds no randomness, so replays stay valid.
+- **Detection and interception are now separate in the UI.** `detectionChance()`
+  was split out of `detectRaid`, so the location sheet can show the engine's own
+  detection probability rather than an invented one, next to the layers able to
+  engage and the line "detection never guarantees interception".
+- **Consequences.** The abstract defender's detection chance and layer
+  probabilities are multiplied by `abstractDefenceFactor`, which is exactly 1 at
+  a documented reference effectiveness and falls to 0.6 as the network degrades.
+  The reference is what keeps the opening turn bit-identical to the old numbers:
+  this is a behaviour change only when a network is actually degraded, not a
+  silent rebalance.
+- **Uncertainty.** The opposing network is shown as a reconnaissance-derived
+  band, never a bare percentage, with a confidence chip (confirmed / assessed /
+  uncertain). Below the recon floor the sheet shows no numbers at all.
+- **Coverage layer.** Rings are now coloured by the defending network's health
+  (green/amber/red) instead of the faction colour, so degraded coverage looks
+  degraded.
+- **Layout fixes found while testing.** Panels sat at three different hard-coded
+  tops (108/76/58 px) and could be drawn over by the header on a phone; they now
+  anchor to the measured header. The map-layer bar and the coach card hid behind
+  nothing and painted over an open panel, so both now step aside; on phones a
+  panel uses the full width instead of floating.
+
+Verification: typecheck 0, `pnpm test` 46 files / 349 tests, build 0 (11 new
+tests: attribute ranges, radar loss lowering early warning, suppression lowering
+coordination and readiness, an empty pool reading as zero, Iran as an abstract
+system, the factor's reference and floor, and the confidence rules). In the dev
+server: the Air defence tab renders five attribute meters, the composite, the
+"detection is not interception" note and an assessed enemy band; selecting
+Bandar Abbas shows "Defence picture — assessed", detection 43% (cruise raid,
+stealth 0), and all three engagement layers; at 390x844 the panel sits below the
+header with no horizontal overflow while the layer bar and coach card hide.
+
+Known limitation, stated plainly: Iran's air-defence network is abstract and the
+map models no Iranian radar or SAM nodes, so its derived attributes sit at the
+documented baseline and its factor only moves if its tracked naval nodes are
+suppressed. Making its network degrade with SEAD properly needs Iranian IADS
+nodes in the map data — that is Phase 5 work, not something I invented here.
+Phase 5 (missile data provenance) and Phase 6 (turn report, notifications,
+animation) remain undone.

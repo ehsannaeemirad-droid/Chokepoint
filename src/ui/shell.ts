@@ -56,11 +56,18 @@ export function shellAlerts(snap: GameSnapshot): ShellAlert[] {
 }
 
 /** Which strategic-panel categories have something to say for this faction. */
-export type StrategicTab = 'situation' | 'military' | 'economy' | 'diplomacy' | 'politics';
+export type StrategicTab =
+  | 'situation'
+  | 'military'
+  | 'airDefence'
+  | 'economy'
+  | 'diplomacy'
+  | 'politics';
 
 export const STRATEGIC_TABS: StrategicTab[] = [
   'situation',
   'military',
+  'airDefence',
   'economy',
   'diplomacy',
   'politics',

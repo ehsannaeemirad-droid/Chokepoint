@@ -11,6 +11,7 @@ import { langRevision, localName } from '../i18n';
 import { HEX_W, hexCorners, hexDistance, hexesInRange, hexToWorld } from './hex';
 import { spreadLabels, type LabelBox } from './labelLayout';
 import { DEFAULT_LAYER, layerDef, type LayerDef, type MapLayerId } from './layers';
+import { defenceNetwork } from '../combat/defenceNetwork';
 import type { TheaterMap } from './TheaterMap';
 
 const NODE_COLORS: Record<NodeKind, string> = {
@@ -165,13 +166,24 @@ export class MapMarkers {
 
     // --- air-defence coverage (strategic layer) ------------------------------
     if (this.layer.coverage) {
+      // Ring colour is the network's own health, not just the flag: a degraded
+      // network looks degraded instead of showing confident coverage.
+      const health = new Map<string, number>();
+      const tone = (faction: string): number => {
+        let value = health.get(faction);
+        if (value === undefined) {
+          value = defenceNetwork(this.game.snap, this.game.map, faction as never).effectiveness;
+          health.set(faction, value);
+        }
+        return value >= 0.7 ? 0x4caf50 : value >= 0.4 ? 0xe0a800 : 0xd32f2f;
+      };
       for (const unit of this.game.visibleUnits()) {
         if (unitCategory(this.game, unit) !== 'defense') continue;
         const reach = unitRng(this.game, unit);
         if (reach <= 0) continue;
         const world = hexToWorld(unit.col, unit.row);
         const radius = reach * HEX_W * 0.92;
-        const color = hexToNumber(FACTION_COLORS[unit.faction] ?? COLORS.textDim);
+        const color = tone(unit.faction);
         this.g.fillStyle(color, 0.07);
         this.g.fillCircle(world.x, world.y, radius);
         this.g.lineStyle(1.5 / zoom, color, 0.4);

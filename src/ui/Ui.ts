@@ -25,7 +25,9 @@ import {
 } from '../i18n';
 import { faLog, faOutcome } from '../i18n/log';
 import { TERRAIN } from '../map/terrain';
-import { bandLabel, nodeIntegrityEstimate, unitStrengthEstimate } from './fog';
+import { bandLabel, estimate, nodeIntegrityEstimate, reconAt, unitStrengthEstimate } from './fog';
+import { defenceLayers, detectionChance } from '../combat/airdefence';
+import { defenceNetwork, networkConfidence, type NetworkAttribute } from '../combat/defenceNetwork';
 import { informationState } from '../core/intel';
 import { majorBaseState } from '../politics/politics';
 import { domesticCfg } from '../politics/domestic';
@@ -785,11 +787,17 @@ export class Ui {
    * hard-coded offset.
    */
   private syncChromeMetrics(): void {
-    const bar = this.root.querySelector('.topbar') as HTMLElement | null;
-    const strip = document.getElementById('objectives-strip');
-    const root = document.documentElement;
-    if (bar) root.style.setProperty('--topbar-h', `${Math.round(bar.getBoundingClientRect().height)}px`);
-    if (strip) root.style.setProperty('--obj-h', `${Math.round(strip.getBoundingClientRect().height)}px`);
+    const apply = () => {
+      const bar = this.root.querySelector('.topbar') as HTMLElement | null;
+      const strip = document.getElementById('objectives-strip');
+      const root = document.documentElement;
+      if (bar) root.style.setProperty('--topbar-h', `${Math.round(bar.getBoundingClientRect().height)}px`);
+      if (strip) root.style.setProperty('--obj-h', `${Math.round(strip.getBoundingClientRect().height)}px`);
+    };
+    apply();
+    // Wrapping and font loading can still change the height after this frame,
+    // and everything below the header is positioned from that number.
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(apply);
   }
 
   /** One line of the most urgent warnings; silence when nothing is wrong. */
@@ -1024,6 +1032,7 @@ export class Ui {
 
     if (node) {
       const state = this.game.snap.nodes[node.id];
+      const defenderFaction = defenderOfNode(node);
       const integrity = state ? Math.round(state.integrity) : 100;
       // Phase 4: enemy facility integrity shows as a recon-quality estimate.
       const fogEst = nodeIntegrityEstimate(this.game.snap, this.game.map, node.id);
@@ -1047,6 +1056,7 @@ export class Ui {
         </details>`}
         ${buriedWarn}
         ${unitChips}
+        ${this.defencePictureHtml(col, row, defenderFaction)}
         ${this.attackersHtml(col, row, node.id)}
         <div class="actions"><button data-action="focus-node:${node.id}">${t('btn.centre')}</button><button data-action="panel:strategic">${t('btn.intel')}</button></div>
       `;
@@ -1067,6 +1077,35 @@ export class Ui {
       ${unitChips}
       ${this.attackersHtml(col, row)}
     `;
+  }
+
+  /**
+   * What the target's defences look like from here: the engine's own detection
+   * chance, the layers that could engage, and how much of it the player is
+   * actually entitled to see. Below the confidence floor no numbers are shown.
+   */
+  private defencePictureHtml(col: number, row: number, defender: FactionId | null): string {
+    if (!defender) return '';
+    const snap = this.game.snap;
+    if (!hostileTo(snap.faction, defender)) return '';
+    const recon = reconAt(snap, snap.faction, col, row);
+    const confidence = networkConfidence(snap, defender, recon);
+    const head = `<h4>${t('sheet.defencePicture')} <span>${t(`confidence.${confidence}` as StringKey)}</span></h4>`;
+    if (confidence === 'uncertain') {
+      return `<section class="defence">${head}<p class="note">${t('defence.unknown')}</p></section>`;
+    }
+    const detection = detectionChance(snap, this.game.map, col, row, defender, 'cruise', 0);
+    const layers = defenceLayers(snap, this.game.map, col, row, defender, 'cruise');
+    const pct = Math.round(detection.chance * 100);
+    const tone = pct > 60 ? 'alert' : pct > 30 ? 'warn' : 'ok';
+    const layerText = layers.length
+      ? layers.map((layer) => t(`defence.layer.${layer.layer}` as StringKey)).join(' · ')
+      : t('defence.noLayers');
+    return `<section class="defence">${head}
+      <div class="meter-row"><span>${t('defence.detect')}</span><div class="bar"><i style="width:${pct}%;background:var(--${tone})"></i></div><b>${pct}%</b></div>
+      <div class="host-top"><b>${t('defence.layers')}</b><span class="status ${layers.length ? 'closed' : 'open'}">${layerText}</span></div>
+      <small>${t('defence.note')}</small>
+    </section>`;
   }
 
   /**
@@ -1457,6 +1496,47 @@ export class Ui {
 
     // Categories, not one long scroll: the panel shows one section at a time and
     // only offers the categories that actually have content for this faction.
+    const ownNet = defenceNetwork(s, this.game.map, s.faction);
+    const enemyFaction = s.faction === 'iran' ? 'usa' : 'iran';
+    const enemyNet = defenceNetwork(s, this.game.map, enemyFaction);
+    const enemyRecon = this.game.map.nodes
+      .filter((node) => node.operators.includes(enemyFaction))
+      .reduce<'none' | 'humint' | 'isr'>((best, node) => {
+        const hex = this.game.map.nodeHexOf(node.id);
+        if (!hex) return best;
+        const quality = reconAt(s, s.faction, hex.col, hex.row);
+        return quality === 'isr' ? 'isr' : quality === 'humint' && best !== 'isr' ? 'humint' : best;
+      }, 'none');
+    const enemyConfidence = networkConfidence(s, enemyFaction, enemyRecon);
+    // An assumed network is not a measured one: show the assessed band the fog
+    // system already produces instead of a confident percentage.
+    const rawBand = estimate(
+      Math.round(enemyNet.effectiveness * 100),
+      s,
+      `net:${enemyFaction}`,
+      enemyRecon,
+    );
+    const enemyBand = { ...rawBand, lo: Math.min(100, rawBand.lo), hi: Math.min(100, rawBand.hi) };
+    const attrRow = (key: NetworkAttribute, label: StringKey) => {
+      const value = Math.round(ownNet[key] * 100);
+      const tone = value >= 70 ? 'ok' : value >= 40 ? 'warn' : 'alert';
+      return `<div class="meter-row" data-tip="${t(`network.hint.${key}` as StringKey)}"><span>${t(label)}</span><div class="bar"><i style="width:${value}%;background:var(--${tone})"></i></div><b>${value}</b></div>`;
+    };
+    const ownTone =
+      ownNet.effectiveness >= 0.7 ? 'ok' : ownNet.effectiveness >= 0.4 ? 'warn' : 'alert';
+    const defenceSection = `<section class="panel-section"><h4>${t('network.title')}</h4>
+      <div class="host-top"><b>${t('network.effectiveness')}</b><span class="status ${ownTone}">${Math.round(ownNet.effectiveness * 100)}%</span></div>
+      ${attrRow('earlyWarning', 'network.earlyWarning')}
+      ${attrRow('sensors', 'network.sensors')}
+      ${attrRow('coordination', 'network.coordination')}
+      ${attrRow('interceptors', 'network.interceptors')}
+      ${attrRow('readiness', 'network.readiness')}
+      <small>${t('network.note')}</small>
+      <div class="host-top"><b>${t('network.enemy')}</b><span class="status ${enemyConfidence === 'confirmed' ? 'open' : 'restricted'}">${t(`confidence.${enemyConfidence}` as StringKey)}</span></div>
+      <div class="meter-row"><span>${t('network.effectiveness')}</span><div class="bar"><i style="width:${Math.round(enemyNet.effectiveness * 100)}%;background:var(--info)"></i></div><b>${bandLabel(enemyBand)}%</b></div>
+      <small>${t('network.enemyNote')}</small>
+    </section>`;
+
     const groups: Record<StrategicTab, string> = {
       situation: `${summary}
         <section class="panel-section"><h4>${t('panel.basing')}</h4>${baseRows}</section>
@@ -1464,6 +1544,7 @@ export class Ui {
         ${warCost}`,
       military: `<section class="panel-section"><h4>${t('panel.programme')}</h4>${facilities}</section>
         ${victorySection}`,
+      airDefence: defenceSection,
       economy: `<section class="panel-section"><h4>${t('panel.hormuz')}</h4>${hormuzCalc}</section>
         ${factionSection}`,
       diplomacy: `${phase3Section}`,
@@ -2100,6 +2181,8 @@ export class Ui {
   private renderLayers(): void {
     const el = document.getElementById('layer-bar');
     if (!el) return;
+    el.classList.toggle('panel-open', this.openPanel !== null);
+    document.getElementById('coach')?.classList.toggle('panel-open', this.openPanel !== null);
     el.innerHTML = MAP_LAYERS.map((layer) => {
       const active = layer.id === this.layer;
       return `<button class="layer-btn${active ? ' active' : ''}" data-action="layer:${layer.id}" aria-pressed="${active}" data-tip="${t(layer.hint)}">${t(layer.label)}</button>`;

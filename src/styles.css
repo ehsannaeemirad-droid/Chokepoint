@@ -830,7 +830,8 @@ button.primary:active {
 /* ------------------------------------------------------------------- panels */
 .slide-panel {
   position: absolute;
-  top: calc(var(--safe-top) + 60px);
+  /* Below the measured header, which is up to four rows on a phone. */
+  top: calc(var(--safe-top, 0px) + var(--topbar-h, 60px) + 8px);
   bottom: calc(var(--safe-bottom) + 76px);
   width: min(340px, 88vw);
   background: rgba(18, 22, 27, 0.985);
@@ -1719,11 +1720,15 @@ html[dir='rtl'] .map-controls {
   }
 
   .tutorial-banner {
-    top: calc(var(--safe-top) + 108px);
+    top: calc(var(--safe-top, 0px) + var(--topbar-h, 108px) + 10px);
   }
 
   .slide-panel {
-    top: calc(var(--safe-top) + 108px);
+    top: calc(var(--safe-top, 0px) + var(--topbar-h, 108px) + 8px);
+    /* A panel on a phone uses the width it has rather than floating. */
+    left: 6px;
+    right: 6px;
+    width: auto;
   }
 }
 
@@ -1751,7 +1756,7 @@ html[dir='rtl'] .map-controls {
     width: min(620px, 100%);
   }
   .slide-panel {
-    top: 76px;
+    top: calc(var(--safe-top, 0px) + var(--topbar-h, 76px) + 8px);
   }
   .node-label {
     font-size: 12px;
@@ -1763,7 +1768,7 @@ html[dir='rtl'] .map-controls {
     max-height: 34vh;
   }
   .slide-panel {
-    top: 58px;
+    top: calc(var(--safe-top, 0px) + var(--topbar-h, 58px) + 6px);
     bottom: 70px;
   }
 }
@@ -2055,6 +2060,11 @@ button:focus-visible, [role='button']:focus-visible, summary:focus-visible { out
 }
 
 /* ---- Strategic map layers (Phase 1) ------------------------------------- */
+/* A side panel owns the map edge while it is open; the switcher steps aside. */
+.layer-bar.panel-open {
+  display: none;
+}
+
 .layer-bar {
   position: absolute;
   left: 8px;
@@ -2156,6 +2166,10 @@ button:focus-visible, [role='button']:focus-visible, summary:focus-visible { out
 }
 
 /* ---- Quick-start coach card --------------------------------------------- */
+.coach.panel-open {
+  display: none;
+}
+
 .coach {
   position: absolute;
   left: 50%;
