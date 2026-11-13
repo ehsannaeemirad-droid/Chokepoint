@@ -106,6 +106,8 @@ const DICT = {
 
   'btn.victory': ['VICTORY', 'پیروزی'],
   'btn.defeat': ['DEFEAT', 'شکست'],
+  'btn.drawn': ['UNRESOLVED', 'بی‌نتیجه'],
+  'outcome.drawn': ['Unresolved campaign', 'کارزار بی‌نتیجه'],
   'btn.nextUnit': ['NEXT READY UNIT', 'یگان آماده بعدی'],
   'btn.deselect': ['DESELECT', 'لغو انتخاب'],
   'btn.hold': ['HOLD', 'حفظ موضع'],

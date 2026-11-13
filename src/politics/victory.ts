@@ -291,7 +291,7 @@ const PATH_OUTCOME_TEXT: Record<VictoryPathId, string> = {
 };
 
 export interface Outcome {
-  status: 'playing' | 'won' | 'lost';
+  status: 'playing' | 'won' | 'lost' | 'drawn';
   outcome: string;
 }
 
@@ -436,6 +436,16 @@ export function checkOutcome(snap: GameSnapshot, map: TheaterMap): Outcome {
   // Final-turn resolution: multidimensional scores, not a single path.
   if (snap.victory && snap.turn >= snap.maxTurns) {
     if (snap.faction === 'iran') {
+      // SPEC §27: surviving the clock is not a victory. If no shot was ever
+      // fired there is no campaign to award, so the war that never started ends
+      // without a strategic result rather than as an Iranian win.
+      if (!snap.warStarted) {
+        return {
+          status: 'drawn',
+          outcome:
+            'The campaign has ended without a war: no hostile order was ever given, so neither side achieved a strategic result.',
+        };
+      }
       const achieved = victoryPaths(snap, map).some((p) => p.satisfied);
       const won = achieved || iranScore >= IRAN_SCORE_THRESHOLD;
       return {

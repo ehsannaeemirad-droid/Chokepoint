@@ -1218,3 +1218,34 @@ player's); that is a design property, not a seed defect.
 
 Phase 6 is optional; per the plan for this pass it was not attempted. Nothing in
 this log is evidence for it.
+
+## 35. Passive-Iranian settlement — the outcome was a victory
+
+Commit: `fix: do not award victory for a campaign the war never started`.
+
+The §33 caveat said a passive Iranian player "coasts to a turn-30 settlement".
+Checked against `/src/politics/victory.ts`: the turn-limit branch scored Iran as
+`won` whenever `iranScore >= IRAN_SCORE_THRESHOLD` (55) or any path was
+satisfied, and a pre-war snapshot reaches that score on stabilised meters alone.
+`status` in that case was **`won`**, so SPEC §27 ("Surviving a predetermined
+number of turns should not automatically guarantee victory") was violated.
+
+Fix:
+
+- `GameStatus` gained `drawn`; `Outcome` carries it too. At the bell, if the
+  Iranian campaign's `warStarted` is false, `checkOutcome` returns `drawn` with
+  "The campaign has ended without a war: no hostile order was ever given, so
+  neither side achieved a strategic result." The scoring path is untouched for
+  every campaign in which the war did start.
+- UI: the END TURN/VICTORY/DEFEAT label and the outcome modal show the new
+  status as "Unresolved campaign" (FA: کارزار بی‌نتیجه) with neutral styling
+  rather than a defeat banner.
+- Test: `victory.test.ts` sets every survival input satisfied at the bell with
+  `warStarted = false` and asserts the status is `drawn`, not `won`; flipping
+  `warStarted` back to true on the same snapshot returns `won`, so the guard is
+  narrow. The existing bell-scoring cases now state `warStarted = true` in their
+  harness, since they describe a campaign that ran. Two status enumerations
+  (`campaign.test.ts`, `balance.test.ts`) accept the new terminal value.
+
+Verification: `tsc --noEmit` exit 0; `vitest run` 43 files / 319 tests passed;
+`pnpm run build` exit 0.

@@ -64,7 +64,9 @@ describe('full campaigns', () => {
     const snap = game.snap;
 
     expect(snap.turn).toBeGreaterThanOrEqual(5);
-    expect(['playing', 'won', 'lost']).toContain(snap.status);
+    // 'drawn' is a terminal status: SPEC §27 says surviving the clock is not a
+    // victory, so a passive Iranian run that never opens the war is drawn.
+    expect(['playing', 'won', 'lost', 'drawn']).toContain(snap.status);
     expect(snap.units.length).toBeGreaterThan(0);
 
     for (const unit of snap.units) {

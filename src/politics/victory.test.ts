@@ -168,6 +168,9 @@ describe('checkOutcome with the four paths', () => {
   beforeEach(() => {
     h = setup('iran', 20260101);
     h.snap.victory = structuredClone(DEFAULT_VICTORY);
+    // These cases score a campaign that actually ran; a campaign in which the
+    // war never starts is drawn instead (see the §27 test below).
+    h.snap.warStarted = true;
   });
 
   it('ends the campaign immediately when the oil-shock streak completes', () => {
@@ -199,6 +202,26 @@ describe('checkOutcome with the four paths', () => {
     // Deny the no-occupation path so the regime streak is the deciding path.
     snap.meters.maxOccupationStreak = 3;
     expect(checkOutcome(snap, map).status).toBe('lost');
+  });
+
+  it('does not award Iran a victory for a campaign the war never started', () => {
+    // SPEC §27: surviving a predetermined number of turns is not a win. A
+    // passive Iranian player never fires, so `maybeStartWar` never runs and the
+    // campaign resolves the pre-war snapshot at the bell.
+    const { snap, map } = h;
+    snap.turn = snap.maxTurns;
+    snap.warStarted = false;
+    snap.phase = 'prewar';
+    snap.meters.regimeIntactStreak = 10; // every survival input is satisfied
+    snap.meters.maxOccupationStreak = 0;
+    const result = checkOutcome(snap, map);
+    expect(result.status).not.toBe('won');
+    expect(result.status).toBe('drawn');
+    expect(result.outcome).toContain('without a war');
+
+    // The same snapshot with the war actually under way keeps the result.
+    snap.warStarted = true;
+    expect(checkOutcome(snap, map).status).toBe('won');
   });
 
   it('requires a nuclear facility strictly above the threshold', () => {

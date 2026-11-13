@@ -416,7 +416,7 @@ export interface DecisionRecord {
   roll?: number;
 }
 
-export type GameStatus = 'playing' | 'won' | 'lost';
+export type GameStatus = 'playing' | 'won' | 'lost' | 'drawn';
 
 export interface VictoryThresholds {
   regimeSurvival: { finalTurns: number; nuclearIntegrityThreshold: number };

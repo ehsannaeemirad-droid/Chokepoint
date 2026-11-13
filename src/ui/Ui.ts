@@ -655,7 +655,13 @@ export class Ui {
     const endTurn = $('#end-turn') as HTMLButtonElement;
     endTurn.disabled = s.status !== 'playing';
     endTurn.textContent =
-      s.status === 'playing' ? t('btn.endTurn') : s.status === 'won' ? t('btn.victory') : t('btn.defeat');
+      s.status === 'playing'
+        ? t('btn.endTurn')
+        : s.status === 'won'
+          ? t('btn.victory')
+          : s.status === 'drawn'
+            ? t('btn.drawn')
+            : t('btn.defeat');
 
     $('#order-strip').innerHTML = this.orderStripHtml();
     $('#sheet').innerHTML = this.sheetHtml();
@@ -1611,6 +1617,7 @@ export class Ui {
   private openOutcome(): void {
     const s = this.game.snap;
     const won = s.status === 'won';
+    const drawn = s.status === 'drawn';
     // Improvement 7: the graded multi-axis settlement, when the campaign
     // ended under the victory-path system.
     const scorecard = s.scorecard
@@ -1634,8 +1641,8 @@ export class Ui {
       : '';
     this.modalKind = 'outcome';
     this.openModal(`
-      <div class="modal-card outcome ${won ? 'won' : 'lost'}">
-        <header><h2>${won ? t('outcome.victory') : t('outcome.defeat')}</h2><button data-action="close-modal" aria-label="${t('btn.close')}">✕</button></header>
+      <div class="modal-card outcome ${won ? 'won' : drawn ? '' : 'lost'}">
+        <header><h2>${won ? t('outcome.victory') : drawn ? t('outcome.drawn') : t('outcome.defeat')}</h2><button data-action="close-modal" aria-label="${t('btn.close')}">✕</button></header>
         <div class="modal-body">
           <p class="outcome-text">${getLang() === 'fa' ? faOutcome(s.outcome) ?? s.outcome : s.outcome}</p>
           <div class="stat-row">

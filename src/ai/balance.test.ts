@@ -164,7 +164,7 @@ describe('multi-seed AI balance', () => {
     console.log('AI balance rows:', JSON.stringify(rows, null, 1));
 
     for (const row of rows) {
-      expect(['won', 'lost', 'playing']).toContain(row.status);
+      expect(['won', 'lost', 'playing', 'drawn']).toContain(row.status);
       expect(row.turn).toBeGreaterThan(0);
       expect(row.turn).toBeLessThanOrEqual(31);
       expect(row.outcome.length).toBeGreaterThan(10);
@@ -188,7 +188,7 @@ describe('multi-seed AI balance', () => {
     console.log('Defensive-policy rows:', JSON.stringify(rows, null, 1));
 
     for (const row of rows) {
-      expect(['won', 'lost', 'playing']).toContain(row.status);
+      expect(['won', 'lost', 'playing', 'drawn']).toContain(row.status);
       expect(row.turn).toBeLessThanOrEqual(31);
       expect(row.posture).toBe('constrained');
       expect(row.interceptors).toBeGreaterThanOrEqual(0);
