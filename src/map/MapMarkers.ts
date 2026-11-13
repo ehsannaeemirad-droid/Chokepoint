@@ -9,6 +9,7 @@ import type { MapNodeDef, NodeKind, UnitInstance } from '../core/types';
 import { strikeTargetsFor } from '../combat/targets';
 import { langRevision, localName } from '../i18n';
 import { hexCorners, hexDistance, hexesInRange } from './hex';
+import { spreadLabels, type LabelBox } from './labelLayout';
 import type { TheaterMap } from './TheaterMap';
 
 const NODE_COLORS: Record<NodeKind, string> = {
@@ -248,6 +249,7 @@ export class MapMarkers {
     const view = cam.worldView;
     const zoom = cam.zoom;
     const shown = new Set<string>();
+    const pending: Array<{ el: HTMLElement; box: LabelBox }> = [];
 
     for (const node of this.map.nodes) {
       const hex = this.map.nodeHexOf(node.id);
@@ -273,8 +275,24 @@ export class MapMarkers {
       el.onclick = () => this.game.selectHex(hex.col, hex.row);
       const sx = ((tile.x - view.x) / view.width) * cam.width;
       const sy = ((tile.y - view.y) / view.height) * cam.height;
-      el.style.transform = `translate3d(${Math.round(sx + 12 / zoom)}px, ${Math.round(sy - 10 / zoom)}px, 0)`;
+      pending.push({
+        el,
+        box: {
+          x: Math.round(sx + 12 / zoom),
+          y: Math.round(sy - 10 / zoom),
+          w: el.offsetWidth || 96,
+          h: el.offsetHeight || 20,
+        },
+      });
     }
+
+    // Neighbouring facilities land within a few pixels of each other at the
+    // initial zoom; resolve the collisions before the labels are positioned.
+    const placed = spreadLabels(pending.map((entry) => entry.box));
+    pending.forEach((entry, index) => {
+      const point = placed[index]!;
+      entry.el.style.transform = `translate3d(${point.x}px, ${point.y}px, 0)`;
+    });
 
     for (const [id, el] of this.labels) {
       if (!shown.has(id)) {

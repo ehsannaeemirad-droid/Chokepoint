@@ -1122,3 +1122,30 @@ stub became player-visible, and it is content, not a translation.
 
 Verification: `tsc --noEmit` exit 0; `vitest run src/ui/objectives.test.ts`
 6 tests passed.
+
+## 32. Phase 4 gap — label collision at the initial zoom
+
+Commit: `fix: resolve label collision at initial zoom`.
+
+§29's known limitation: at the initial camera zoom neighbouring facilities
+overlap (Bandar Abbas coastal storage over Bandar Abbas, Kharg Island over
+Bushehr), so the lower label is unreadable and its button unreachable.
+
+- **Layout, not camera.** `src/map/labelLayout.ts` places labels in a stable
+  order: each stays at its anchor unless it would overlap an already-placed
+  label, in which case it slides down by its own height until it clears. The
+  first label in a cluster never moves, so strategic sites keep their position.
+  `MapMarkers.updateLabels` now measures each label, resolves all positions at
+  once, then applies the transforms; the work still only runs when the map
+  signature changes.
+- **Test.** `src/map/labelLayout.test.ts` covers a lone label, non-overlapping
+  labels, a three-label stack at initial-zoom spacing (asserting no pair
+  intersects and that each displacement is at least one label height), and
+  determinism for repeated input.
+
+Verification: `tsc --noEmit` exit 0; `vitest run src/map/labelLayout.test.ts`
+4 tests passed.
+
+Limitations: the rendered positions were not inspected in a browser; only the
+pure layout is asserted. Collision handling shifts a label down, so a dense
+coastal cluster now extends further south rather than hiding labels.
