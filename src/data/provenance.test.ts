@@ -17,6 +17,9 @@ import {
   referencesFor,
 } from '../core/provenance';
 import { REFERENCES } from './references';
+import unitData from './units.json';
+
+const IRAN_UNITS = (unitData as Record<string, Array<{ id: string }>>).iran ?? [];
 
 const EVIDENCE_TYPES: EvidenceType[] = ['verified', 'reported-estimate', 'disputed', 'game-abstraction'];
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -81,6 +84,21 @@ describe('coverage walk', () => {
       const ref = requireRef(id, 'facility');
       expect(ref.evidenceType).toBe('reported-estimate');
       expect(ref.notes.toLowerCase()).toContain('approximate');
+    }
+  });
+
+  it('covers every Iranian weapon system with a weapon record', () => {
+    expect(IRAN_UNITS.length).toBeGreaterThan(5);
+    for (const unit of IRAN_UNITS) requireRef(unit.id, 'weapon');
+  });
+
+  it('records ranges as published bands, never an invented single figure', () => {
+    for (const ref of REFERENCES.filter((r) => r.category === 'weapon')) {
+      expect(ref.gameMapping.length, `${ref.id} mapping too thin`).toBeGreaterThan(30);
+      if (ref.evidenceType === 'game-abstraction') continue;
+      expect(ref.min, `${ref.id} has no lower bound`).toBeDefined();
+      expect(ref.max, `${ref.id} has no upper bound`).toBeDefined();
+      expect(ref.sourcePublishedAt, `${ref.id} has no publication date`).toMatch(ISO_DATE);
     }
   });
 

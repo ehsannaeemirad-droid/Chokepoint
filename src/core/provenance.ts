@@ -22,7 +22,9 @@ export type ReferenceCategory =
   | 'launcher'
   | 'nuclear-material'
   | 'scenario'
-  | 'politics';
+  | 'politics'
+  /** A specific weapon system: range, accuracy class and role. */
+  | 'weapon';
 
 export interface HistoricalReference {
   /** Stable id, unique across the set. */

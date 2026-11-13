@@ -532,6 +532,132 @@ export const REFERENCES: HistoricalReference[] = [
   }),
 ];
 
+// ---- weapon systems (Phase 5) ----------------------------------------------
+// Model-specific records: what public sources say about the family's range and
+// accuracy class, and how this build turned that into hexes and a penetration
+// value. No precise CEP is asserted as a hit probability.
+REFERENCES.push(
+  ref({
+    id: 'ref-weapon-shahed136',
+    subjectId: 'shahed136',
+    category: 'weapon',
+    validAt: PREWAR,
+    min: 1000,
+    max: 2500,
+    unit: 'km_range',
+    evidenceType: 'reported-estimate',
+    confidence: 'medium',
+    sourceName: 'CSIS Missile Threat',
+    sourceUrl: 'https://missilethreat.csis.org/missile/shahed-131-and-136/',
+    sourcePublishedAt: '2026-05-22',
+    notes:
+      'Published estimates put the Shahed-136 between 1,000 and 2,000 km, with DIA assessing 2,500 km; Iran Watch lists a 40-50 kg warhead. One-way attack, pre-programmed before launch.',
+    gameMapping:
+      'Range 20 hexes on the compressed theatre map, not a 1:1 km conversion. One round = one airframe plus one warhead; 5 resources to produce, 4 per turn, one launcher sortie per shot.',
+  }),
+  ref({
+    id: 'ref-weapon-fateh110',
+    subjectId: 'fateh110',
+    category: 'weapon',
+    validAt: PREWAR,
+    min: 300,
+    max: 700,
+    unit: 'km_range',
+    evidenceType: 'reported-estimate',
+    confidence: 'high',
+    sourceName: 'Iran Watch',
+    sourceUrl:
+      'https://www.iranwatch.org/our-publications/weapon-program-background-report/table-irans-ballistic-missile-arsenal',
+    sourcePublishedAt: '2026-01-26',
+    notes:
+      'Fateh-110 is listed at about 300 km with a roughly 100 m CEP; the Zolfaghar variant at 700 km with a 10-30 m CEP. The game models the family, so one accuracy band covers both.',
+    gameMapping:
+      'Range 9 hexes reaches the Gulf bases. Penetration 0.5 stands for the family mix: the older variants are less accurate than the Zolfaghar, and a single CEP is deliberately not converted into a hit probability.',
+  }),
+  ref({
+    id: 'ref-weapon-khorramshahr',
+    subjectId: 'khorramshahr',
+    category: 'weapon',
+    validAt: PREWAR,
+    min: 1700,
+    max: 2000,
+    unit: 'km_range',
+    evidenceType: 'reported-estimate',
+    confidence: 'medium',
+    sourceName: 'CSIS Missile Threat',
+    sourceUrl: 'https://missilethreat.csis.org/missile/khorramshahr/',
+    sourcePublishedAt: '2017-09-29',
+    notes:
+      'Emad is reported at about 1,700 km and Khorramshahr at a claimed 2,000 km, with a smaller-reentry-vehicle version displayed in 2019 at up to 3,000 km. Reported accuracy is far coarser than the solid-fuel Fateh family.',
+    gameMapping:
+      'Range 27 hexes covers Israel and every Gulf base. Penetration 1 reflects payload and reach, not precision: this family is modelled as easy to detect and hard to stop rather than accurate.',
+  }),
+  ref({
+    id: 'ref-weapon-fattah',
+    subjectId: 'fattah',
+    category: 'weapon',
+    validAt: PREWAR,
+    min: 1400,
+    max: 1400,
+    unit: 'km_range',
+    evidenceType: 'disputed',
+    confidence: 'low',
+    sourceName: 'CSIS Missile Threat',
+    sourceUrl: 'https://missilethreat.csis.org/country/iran/',
+    sourcePublishedAt: '2018-06-14',
+    notes:
+      'Fattah is an Iranian-claimed hypersonic glide vehicle. Range and manoeuvre performance are claims that open sources have not independently confirmed, so this build treats it as a threat class rather than a measured capability.',
+    gameMapping:
+      'Range 27 hexes, threat class hypersonic, and only the Arrow-3 layer has a non-zero hypersonic intercept. Six rounds at the campaign start keep an unverified capability scarce.',
+  }),
+  ref({
+    id: 'ref-weapon-asm-launcher',
+    subjectId: 'asm_launcher',
+    category: 'weapon',
+    validAt: PREWAR,
+    min: 120,
+    max: 300,
+    unit: 'km_range',
+    evidenceType: 'reported-estimate',
+    confidence: 'medium',
+    sourceName: 'CSIS Missile Threat',
+    sourceUrl: 'https://missilethreat.csis.org/country/iran/',
+    sourcePublishedAt: '2018-06-14',
+    notes:
+      'Noor, Ghadir and Khalij Fars are anti-ship derivatives reported in the low hundreds of kilometres, which covers the Strait from the Iranian coast.',
+    gameMapping:
+      'Range 8 hexes from the coast reaches the shipping lanes. Each battery in range adds 10% Hormuz disruption; the unit is a launcher, and its rounds are tracked by the ASM arsenal class.',
+  }),
+  ref({
+    id: 'ref-weapon-mine-layer',
+    subjectId: 'mine_layer',
+    category: 'weapon',
+    validAt: PREWAR,
+    value: 2,
+    unit: 'game_hex_range',
+    evidenceType: 'game-abstraction',
+    confidence: 'low',
+    notes:
+      'Iranian naval mining is publicly reported, but no open source gives a usable mine count for a specific week, so no number is asserted here.',
+    gameMapping:
+      'A mine-layer unit with range 2 that spends one turn to add 15% Hormuz disruption. The mine count is a scenario decision, not a published figure.',
+  }),
+  ref({
+    id: 'ref-weapon-fac',
+    subjectId: 'fac',
+    category: 'weapon',
+    validAt: PREWAR,
+    value: 3,
+    unit: 'game_hex_range',
+    evidenceType: 'game-abstraction',
+    confidence: 'low',
+    notes:
+      'IRGC-N small craft and fast attack craft are widely reported; their numbers and readiness are not published with any confidence.',
+    gameMapping:
+      'Range 3, adds 5% Hormuz disruption per surviving group. It stands for a harassing presence rather than a counted flotilla.',
+  }),
+);
+
 // ---- later-war scenarios (Phase 5) -----------------------------------------
 // Alternate starts are game abstractions: their dates and depletion are the
 // scenario design, not a published order of battle.

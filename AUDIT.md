@@ -1547,3 +1547,48 @@ suppressed. Making its network degrade with SEAD properly needs Iranian IADS
 nodes in the map data — that is Phase 5 work, not something I invented here.
 Phase 5 (missile data provenance) and Phase 6 (turn report, notifications,
 animation) remain undone.
+
+## 42. Weapon-level data provenance (Phase 5)
+
+Phase 1c built the provenance layer for facilities, arsenal classes, launchers,
+scenario seeds and political values, but the weapon systems themselves were
+documented only in free-text `note` fields: "300-700 km", "1,000-2,000 km",
+"1,500 km range" with no source, no date and no statement of which part is a
+game decision.
+
+- **`category: 'weapon'`** joins the reference categories, and seven Iranian
+  systems now carry records: Shahed-136, Fateh-110/Zolfaghar, Khorramshahr/Emad,
+  Fattah, the anti-ship launcher, the mine layer and the fast-attack-craft group.
+  Each records a published range **band** (never a single invented figure),
+  the source organisation and its publication date, a confidence level, and the
+  exact mapping to the game's hex range and penetration value.
+- **Estimates are separated from the model.** Fateh-110 and Zolfaghar are
+  reported at 300 km and 700 km with published CEPs of roughly 100 m and 10-30 m;
+  the record says plainly that one penetration value covers the family and that a
+  CEP is *not* converted into a hit probability. Fattah is recorded as
+  `disputed`, because its hypersonic performance is an Iranian claim that open
+  sources have not confirmed.
+- **Two systems are labelled abstractions, not estimates.** Naval mining and the
+  fast-attack-craft group are marked `game-abstraction` with the reasoning
+  stated, rather than dressed up in a citation they do not have.
+- **`docs/DATA.md` is generated** from the records by `renderDataDoc()` and
+  committed; `src/data/dataDoc.test.ts` fails if the document and the data
+  disagree, so the documentation cannot drift.
+- **The game shows it.** A unit card now carries a collapsed "Source and
+  confidence" disclosure with the published value, the confidence, the reasoning,
+  the game mapping and the source line; facility cards use the same block, which
+  closes a gap where facility provenance existed in data but was never surfaced.
+
+Verification: typecheck 0, `pnpm test` 47 files / 353 tests, build 0. New tests:
+every Iranian unit has a weapon record; reported estimates carry a published band
+and a publication date; the generated document matches the records; abstractions
+are labelled as such. In the dev server, selecting an Iranian Fateh-110 unit shows
+"Published value 300-700 km", "Confidence High", the CEP caveat, the game mapping
+and "Source: Iran Watch · 2026-01-26"; Bandar Abbas shows the facility record.
+Also fixed: the first-turn coach card is now hidden whenever a unit or hex is
+selected or a panel is open, instead of covering the sheet.
+
+Caveats: coalition weapons still rely on their `note` text and have no weapon
+records yet; ranges are theatre hexes on a compressed map, which the document
+states explicitly rather than implying a km-per-hex conversion. Phase 6 (turn
+report, notifications, animation) remains undone.

@@ -28,6 +28,9 @@ import { TERRAIN } from '../map/terrain';
 import { bandLabel, estimate, nodeIntegrityEstimate, reconAt, unitStrengthEstimate } from './fog';
 import { defenceLayers, detectionChance } from '../combat/airdefence';
 import { defenceNetwork, networkConfidence, type NetworkAttribute } from '../combat/defenceNetwork';
+import { REFERENCES } from '../data/references';
+import { prettyUnit } from '../data/dataDoc';
+import { referenceFor, type ReferenceCategory } from '../core/provenance';
 import { informationState } from '../core/intel';
 import { majorBaseState } from '../politics/politics';
 import { domesticCfg } from '../politics/domestic';
@@ -964,7 +967,35 @@ export class Ui {
       ${mode !== 'idle' ? `<div class="mode-hint">${t(this.modeKey(mode))} <button data-action="cancel-mode">${t('btn.cancel')}</button></div>` : ''}
       <div class="actions">${actions.join('')}</div>
       <p class="note">${def.note}</p>
+      ${this.sourceHtml(unit.typeId)}
     `;
+  }
+
+  /**
+   * Where a weapon system's numbers come from, and how much of the figure is a
+   * game decision. Shown only when a record exists, never invented on the fly.
+   */
+  private sourceHtml(subjectId: string, category: ReferenceCategory = 'weapon'): string {
+    const ref = referenceFor(REFERENCES, subjectId, category);
+    if (!ref) return '';
+    const unit = prettyUnit(ref.unit);
+    const abstract = ref.evidenceType === 'game-abstraction';
+    const value =
+      ref.min !== undefined && ref.max !== undefined
+        ? `${ref.min}–${ref.max} ${unit}`
+        : ref.value !== undefined
+          ? `${ref.value} ${unit}`
+          : t('data.abstraction');
+    const source = abstract
+      ? t('data.abstraction')
+      : t('data.source', { name: ref.sourceName ?? '', date: ref.sourcePublishedAt ?? ref.validAt });
+    return `<details class="sheet-more data-source"><summary>${t('data.title')}</summary>
+      <div class="host-top"><span>${t(abstract ? 'data.gameValue' : 'data.value')}</span><b>${value}</b></div>
+      <div class="host-top"><span>${t('data.confidence')}</span><b>${t(`confidence.${ref.confidence}` as StringKey)}</b></div>
+      <p class="detail">${ref.notes}</p>
+      <p class="detail"><b>${t('data.mapping')}</b> ${ref.gameMapping}</p>
+      <p class="detail">${source}</p>
+    </details>`;
   }
 
   private targetsHtml(unit: UnitInstance, targets: StrikeTarget[], active: boolean): string {
@@ -1056,6 +1087,7 @@ export class Ui {
         </details>`}
         ${buriedWarn}
         ${unitChips}
+        ${this.sourceHtml(node.id, 'facility')}
         ${this.defencePictureHtml(col, row, defenderFaction)}
         ${this.attackersHtml(col, row, node.id)}
         <div class="actions"><button data-action="focus-node:${node.id}">${t('btn.centre')}</button><button data-action="panel:strategic">${t('btn.intel')}</button></div>
@@ -2182,7 +2214,11 @@ export class Ui {
     const el = document.getElementById('layer-bar');
     if (!el) return;
     el.classList.toggle('panel-open', this.openPanel !== null);
-    document.getElementById('coach')?.classList.toggle('panel-open', this.openPanel !== null);
+    // The coach card is a first-turn hint, not a layer: it steps aside whenever
+    // the player has opened a panel or is looking at something.
+    document
+      .getElementById('coach')
+      ?.classList.toggle('panel-open', this.openPanel !== null || !!this.game.selectedUnit || !!this.game.selectedHex);
     el.innerHTML = MAP_LAYERS.map((layer) => {
       const active = layer.id === this.layer;
       return `<button class="layer-btn${active ? ' active' : ''}" data-action="layer:${layer.id}" aria-pressed="${active}" data-tip="${t(layer.hint)}">${t(layer.label)}</button>`;
