@@ -10,14 +10,22 @@ that was not run is stated as not run.
 
 | Item | Value |
 |---|---|
-| Path | `C:\Projects\Chokepoint-main` |
+| Path | `C:\Chokepoint` |
 | Remote | `https://github.com/ehsannaeemirad-droid/Chokepoint` (`main`) |
-| Baseline commit | `ec8b345` ("Add files via upload") |
+| Baseline commit | `1307c83` ("test: close live target-first and reservation audit gaps") |
 | Package manager | pnpm 10.15.0 via `corepack` |
 | Toolchain | TypeScript 5.9, Vite 8, Vitest 5, Phaser 4.2.1 |
 
-The `G:\My Drive\Projects\Chokepoints` copy and the earlier
-`C:\Projects\Chokepoints` checkout are obsolete. `mdf.md` is not tracked in the
+The `G:\My Drive\Projects\Chokepoints` copy, the earlier `C:\Projects\Chokepoints`
+checkout, and the `C:\Projects\Chokepoint-main` path are obsolete. The clone used
+for the baseline check was retired into `C:\Chokepoint`; that is the only path
+this log refers to from here on.
+
+Baseline re-confirmed on 2026-11-13 on `C:\Chokepoint` at `1307c83`, after a
+fresh `pnpm install --frozen-lockfile`: `pnpm run typecheck` exit 0, `pnpm test`
+41 files / 311 tests passed, `pnpm run build` exit 0. The `node_modules` carried
+over by the directory move was discarded and rebuilt, because a pnpm store
+copied across paths leaves broken links (vitest could not resolve `std-env`). `mdf.md` is not tracked in the
 repository; the brief is available only as the conversation attachment.
 
 ## 1. Baseline recovery (commit `092f429`)
