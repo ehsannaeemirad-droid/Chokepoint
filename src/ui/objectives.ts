@@ -351,6 +351,18 @@ export function previewOrderImpact(
       lines.push(t('impact.produce'));
       break;
     }
+    case 'mine': {
+      lines.push(t('impact.mine'));
+      break;
+    }
+    case 'clear': {
+      lines.push(t('impact.clear'));
+      break;
+    }
+    case 'escort': {
+      lines.push(t('impact.escort'));
+      break;
+    }
     case 'roe': {
       if (order.posture === 'constrained') {
         lines.push(t('impact.roe.constrained'));

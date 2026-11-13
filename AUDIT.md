@@ -1102,3 +1102,23 @@ Verification: `tsc --noEmit` exit 0; `vitest run` 42 files / 314 tests passed.
 Limitations: the buttons were not exercised in a browser; the tap-to-target
 flow for the two new modes is covered by the order-construction path and the
 engine tests, not by a rendered UI.
+
+## 31. Phase 4 gap — impact previews for the maritime orders
+
+Commit: `fix: localize remaining previewOrderImpact lines`.
+
+§23 keyed everything `previewOrderImpact` emitted, but the switch had no case for
+`mine`, `clear` or `escort`, so those three fell through to the `impact.default`
+stub ("No meter preview for this order"). With §30 exposing the buttons, the
+stub became player-visible, and it is content, not a translation.
+
+- **New keyed lines.** `impact.mine`, `impact.clear` and `impact.escort` state
+  the expected effect of each order in both languages: mine stock spent versus a
+  field created, mines removed versus shipping confidence, escort coverage
+  gained versus the sortie spent.
+- **Tests.** `src/ui/objectives.test.ts` asserts the English previews return
+  their own line rather than the stub, and the Persian regression test now walks
+  all three kinds and requires Persian text and the absence of the English stub.
+
+Verification: `tsc --noEmit` exit 0; `vitest run src/ui/objectives.test.ts`
+6 tests passed.

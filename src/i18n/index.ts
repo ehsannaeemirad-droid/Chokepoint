@@ -520,6 +520,18 @@ const DICT = {
     'Expected: −Iran resources, +stock of selected munition/drone type',
     'انتظار: کاهش منابع ایران، افزایش ذخیره مهمات/پهپاد انتخاب‌شده',
   ],
+  'impact.mine': [
+    'Expected: −Iran mine stock, +a minefield in the targeted water hex',
+    'انتظار: کاهش ذخیره مین ایران، ایجاد میدان مین در خانه آبی هدف',
+  ],
+  'impact.clear': [
+    'Expected: −mines in the targeted field, +shipping confidence',
+    'انتظار: کاهش مین‌های میدان هدف، افزایش اطمینان کشتیرانی',
+  ],
+  'impact.escort': [
+    'Expected: +escort coverage, −one sortie for the escorting warship',
+    'انتظار: افزایش پوشش اسکورت، کاهش یک گشت برای ناو اسکورت‌کننده',
+  ],
   'impact.roe.constrained': [
     'Expected: −escalation signature, +1 congress/turn, urban strikes blocked',
     'انتظار: کاهش نشانه تشدید تنش، +۱ کنگره در نوبت، حملات شهری مسدود',

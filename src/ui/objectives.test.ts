@@ -35,6 +35,12 @@ describe('objectives legibility', () => {
     expect(strike.lines.length).toBeGreaterThan(0);
     const comm = previewOrderImpact(game.snap, { kind: 'communicate' });
     expect(comm.lines.some((l) => l.includes('congressional'))).toBe(true);
+    // Maritime orders have their own keyed lines rather than the default stub.
+    for (const kind of ['mine', 'clear', 'escort']) {
+      const preview = previewOrderImpact(game.snap, { kind });
+      expect(preview.lines.length).toBe(1);
+      expect(preview.lines[0]).not.toBe('No meter preview for this order');
+    }
   });
 
   it('meterDeltas reports only changed meters', () => {
@@ -79,6 +85,13 @@ describe('Persian presentation', () => {
       for (const line of strike.lines) expect(persian.test(line)).toBe(true);
       const comm = previewOrderImpact(game.snap, { kind: 'communicate' });
       for (const line of comm.lines) expect(persian.test(line)).toBe(true);
+      // The maritime orders used to fall through to the untranslated default.
+      for (const kind of ['mine', 'clear', 'escort']) {
+        const preview = previewOrderImpact(game.snap, { kind });
+        expect(preview.lines.length).toBeGreaterThan(0);
+        for (const line of preview.lines) expect(persian.test(line)).toBe(true);
+        expect(preview.lines.join(' ')).not.toContain('No meter preview');
+      }
     } finally {
       setLang('en');
       if (original) Object.defineProperty(globalThis, 'document', original);
