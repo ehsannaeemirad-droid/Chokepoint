@@ -1,21 +1,173 @@
 {
   "meta": {
     "asOf": "2026-02-27",
-    "note": "Order-of-magnitude design values for the pre-war start. Not classified inventory. Game-scale magazines in BALANCE map from these."
+    "note": "Order-of-magnitude design values for the pre-war start. Not classified inventory. Game-scale magazines in BALANCE map from these. Site and unit rows added from the supplementary briefs carry per-row confidence and source.",
+    "integratedAt": "2026-11-14",
+    "confidenceLabels": [
+      "confirmed",
+      "single_source",
+      "belligerent_claim",
+      "estimate_range",
+      "data_gap"
+    ]
   },
   "iranMissiles": [
-    {"id": "fateh-110", "side": "iran", "type": "SRBM", "range_km": 300, "speed_mach": 4, "warhead_kg": 500, "guidance": "INS/optical", "cost_usd_est": 500000, "count_prewar": 800, "production_per_month": 40, "notes": "Solid fuel, high volume vs Gulf hosts"},
-    {"id": "zolfaghar", "side": "iran", "type": "SRBM", "range_km": 700, "speed_mach": 5.5, "warhead_kg": 500, "guidance": "INS/GPS", "cost_usd_est": 700000, "count_prewar": 400, "production_per_month": 20, "notes": "Solid, survivable TEL"},
-    {"id": "qiam-1", "side": "iran", "type": "SRBM", "range_km": 800, "speed_mach": 5, "warhead_kg": 650, "guidance": "INS", "cost_usd_est": 600000, "count_prewar": 250, "production_per_month": 10, "notes": "Liquid, older inventory"},
-    {"id": "shahab-3", "side": "iran", "type": "MRBM", "range_km": 1300, "speed_mach": 7.5, "warhead_kg": 1000, "guidance": "INS", "cost_usd_est": 1500000, "count_prewar": 300, "production_per_month": 8, "notes": "Israel-reach liquid"},
-    {"id": "ghadr-1", "side": "iran", "type": "MRBM", "range_km": 1800, "speed_mach": 8.5, "warhead_kg": 700, "guidance": "INS/terminal", "cost_usd_est": 1800000, "count_prewar": 200, "production_per_month": 6, "notes": "Improved Shahab family"},
-    {"id": "emad", "side": "iran", "type": "MRBM", "range_km": 1700, "speed_mach": 8.5, "warhead_kg": 750, "guidance": "maneuvering RV", "cost_usd_est": 2000000, "count_prewar": 150, "production_per_month": 5, "notes": "Maneuvering re-entry vehicle"},
-    {"id": "sejjil", "side": "iran", "type": "MRBM", "range_km": 2000, "speed_mach": 13, "warhead_kg": 1200, "guidance": "INS", "cost_usd_est": 2500000, "count_prewar": 120, "production_per_month": 4, "notes": "Solid two-stage primary long-range"},
-    {"id": "khorramshahr", "side": "iran", "type": "MRBM", "range_km": 2000, "speed_mach": 11, "warhead_kg": 1600, "guidance": "INS", "cost_usd_est": 3000000, "count_prewar": 80, "production_per_month": 3, "notes": "Heavy warhead; maps to in-game khorramshahr"},
-    {"id": "fattah-1", "side": "iran", "type": "hypersonic", "range_km": 1400, "speed_mach": 14, "warhead_kg": 400, "guidance": "maneuvering", "cost_usd_est": 5000000, "count_prewar": 20, "production_per_month": 1, "notes": "High priority; maps to in-game fattah"},
-    {"id": "soumar", "side": "iran", "type": "cruise", "range_km": 1350, "speed_mach": 0.8, "warhead_kg": 400, "guidance": "terrain following", "cost_usd_est": 1200000, "count_prewar": 150, "production_per_month": 5, "notes": "Low altitude cruise"},
-    {"id": "shahed-136", "side": "iran", "type": "OWA drone", "range_km": 2000, "speed_mach": 0.15, "warhead_kg": 45, "guidance": "GPS/INS", "cost_usd_est": 35000, "count_prewar": 5000, "production_per_month": 1000, "notes": "One-way attack; high volume"},
-    {"id": "shahed-131", "side": "iran", "type": "OWA drone", "range_km": 900, "speed_mach": 0.15, "warhead_kg": 25, "guidance": "GPS/INS", "cost_usd_est": 20000, "count_prewar": 3000, "production_per_month": 800, "notes": "Smaller OWA"}
+    {
+      "id": "fateh-110",
+      "side": "iran",
+      "type": "SRBM",
+      "range_km": 300,
+      "speed_mach": 4,
+      "warhead_kg": 500,
+      "guidance": "INS/optical",
+      "cost_usd_est": 500000,
+      "count_prewar": 800,
+      "production_per_month": 40,
+      "notes": "Solid fuel, high volume vs Gulf hosts"
+    },
+    {
+      "id": "zolfaghar",
+      "side": "iran",
+      "type": "SRBM",
+      "range_km": 700,
+      "speed_mach": 5.5,
+      "warhead_kg": 500,
+      "guidance": "INS/GPS",
+      "cost_usd_est": 700000,
+      "count_prewar": 400,
+      "production_per_month": 20,
+      "notes": "Solid, survivable TEL"
+    },
+    {
+      "id": "qiam-1",
+      "side": "iran",
+      "type": "SRBM",
+      "range_km": 800,
+      "speed_mach": 5,
+      "warhead_kg": 650,
+      "guidance": "INS",
+      "cost_usd_est": 600000,
+      "count_prewar": 250,
+      "production_per_month": 10,
+      "notes": "Liquid, older inventory"
+    },
+    {
+      "id": "shahab-3",
+      "side": "iran",
+      "type": "MRBM",
+      "range_km": 1300,
+      "speed_mach": 7.5,
+      "warhead_kg": 1000,
+      "guidance": "INS",
+      "cost_usd_est": 1500000,
+      "count_prewar": 300,
+      "production_per_month": 8,
+      "notes": "Israel-reach liquid"
+    },
+    {
+      "id": "ghadr-1",
+      "side": "iran",
+      "type": "MRBM",
+      "range_km": 1800,
+      "speed_mach": 8.5,
+      "warhead_kg": 700,
+      "guidance": "INS/terminal",
+      "cost_usd_est": 1800000,
+      "count_prewar": 200,
+      "production_per_month": 6,
+      "notes": "Improved Shahab family"
+    },
+    {
+      "id": "emad",
+      "side": "iran",
+      "type": "MRBM",
+      "range_km": 1700,
+      "speed_mach": 8.5,
+      "warhead_kg": 750,
+      "guidance": "maneuvering RV",
+      "cost_usd_est": 2000000,
+      "count_prewar": 150,
+      "production_per_month": 5,
+      "notes": "Maneuvering re-entry vehicle"
+    },
+    {
+      "id": "sejjil",
+      "side": "iran",
+      "type": "MRBM",
+      "range_km": 2000,
+      "speed_mach": 13,
+      "warhead_kg": 1200,
+      "guidance": "INS",
+      "cost_usd_est": 2500000,
+      "count_prewar": 120,
+      "production_per_month": 4,
+      "notes": "Solid two-stage primary long-range"
+    },
+    {
+      "id": "khorramshahr",
+      "side": "iran",
+      "type": "MRBM",
+      "range_km": 2000,
+      "speed_mach": 11,
+      "warhead_kg": 1600,
+      "guidance": "INS",
+      "cost_usd_est": 3000000,
+      "count_prewar": 80,
+      "production_per_month": 3,
+      "notes": "Heavy warhead; maps to in-game khorramshahr"
+    },
+    {
+      "id": "fattah-1",
+      "side": "iran",
+      "type": "hypersonic",
+      "range_km": 1400,
+      "speed_mach": 14,
+      "warhead_kg": 400,
+      "guidance": "maneuvering",
+      "cost_usd_est": 5000000,
+      "count_prewar": 20,
+      "production_per_month": 1,
+      "notes": "High priority; maps to in-game fattah"
+    },
+    {
+      "id": "soumar",
+      "side": "iran",
+      "type": "cruise",
+      "range_km": 1350,
+      "speed_mach": 0.8,
+      "warhead_kg": 400,
+      "guidance": "terrain following",
+      "cost_usd_est": 1200000,
+      "count_prewar": 150,
+      "production_per_month": 5,
+      "notes": "Low altitude cruise"
+    },
+    {
+      "id": "shahed-136",
+      "side": "iran",
+      "type": "OWA drone",
+      "range_km": 2000,
+      "speed_mach": 0.15,
+      "warhead_kg": 45,
+      "guidance": "GPS/INS",
+      "cost_usd_est": 35000,
+      "count_prewar": 5000,
+      "production_per_month": 1000,
+      "notes": "One-way attack; high volume"
+    },
+    {
+      "id": "shahed-131",
+      "side": "iran",
+      "type": "OWA drone",
+      "range_km": 900,
+      "speed_mach": 0.15,
+      "warhead_kg": 25,
+      "guidance": "GPS/INS",
+      "cost_usd_est": 20000,
+      "count_prewar": 3000,
+      "production_per_month": 800,
+      "notes": "Smaller OWA"
+    }
   ],
   "iranTotalsPrewar": {
     "ballisticTotal": 2750,
@@ -26,28 +178,163 @@
     "cruise": 200
   },
   "interceptorsPrewar": [
-    {"id": "patriot-pac3-mse", "side": "usa", "count_prewar": 2300, "range_km": 50, "notes": "Primary terminal BMD; rebuild measured in years"},
-    {"id": "thaad", "side": "usa", "count_prewar": 355, "range_km": 200, "notes": "High-end exo/endo; ~$12-15M/round"},
-    {"id": "sm-3", "side": "usa", "count_prewar": 120, "range_km": 1200, "notes": "Aegis ship-based; limited magazine"},
-    {"id": "sm-6", "side": "usa", "count_prewar": 200, "range_km": 370, "notes": "Multi-role naval"},
-    {"id": "arrow-2-3", "side": "israel", "count_prewar": 80, "range_km": 2400, "notes": "Primary long-range Israeli layer; strained"},
-    {"id": "davids-sling", "side": "israel", "count_prewar": 120, "range_km": 300, "notes": "Medium tier"},
-    {"id": "iron-dome-tamir", "side": "israel", "count_prewar": 1500, "range_km": 70, "notes": "Not designed for heavy ballistic"}
+    {
+      "id": "patriot-pac3-mse",
+      "side": "usa",
+      "count_prewar": 2300,
+      "range_km": 50,
+      "notes": "Primary terminal BMD; rebuild measured in years"
+    },
+    {
+      "id": "thaad",
+      "side": "usa",
+      "count_prewar": 355,
+      "range_km": 200,
+      "notes": "High-end exo/endo; ~$12-15M/round"
+    },
+    {
+      "id": "sm-3",
+      "side": "usa",
+      "count_prewar": 120,
+      "range_km": 1200,
+      "notes": "Aegis ship-based; limited magazine"
+    },
+    {
+      "id": "sm-6",
+      "side": "usa",
+      "count_prewar": 200,
+      "range_km": 370,
+      "notes": "Multi-role naval"
+    },
+    {
+      "id": "arrow-2-3",
+      "side": "israel",
+      "count_prewar": 80,
+      "range_km": 2400,
+      "notes": "Primary long-range Israeli layer; strained"
+    },
+    {
+      "id": "davids-sling",
+      "side": "israel",
+      "count_prewar": 120,
+      "range_km": 300,
+      "notes": "Medium tier"
+    },
+    {
+      "id": "iron-dome-tamir",
+      "side": "israel",
+      "count_prewar": 1500,
+      "range_km": 70,
+      "notes": "Not designed for heavy ballistic"
+    }
   ],
   "radars": [
-    {"id": "an-tpy-2-jordan", "owner": "usa", "type": "X-band TPY-2", "detection_range_km": 1000, "location": "Muwaffaq Salti AB, Jordan", "nodeId": "muwaffaq_salti", "effect_if_destroyed": "degrades regional BMD coverage in Levant sector"},
-    {"id": "an-fps-132-qatar", "owner": "usa", "type": "UEWR", "detection_range_km": 5000, "location": "Al Udeid, Qatar", "nodeId": "al_udeid", "effect_if_destroyed": "early warning degraded"},
-    {"id": "patriot-mpq-65", "owner": "usa", "type": "fire-control", "detection_range_km": 170, "location": "per Patriot battery", "nodeId": null, "effect_if_destroyed": "local intercept quality down"},
-    {"id": "aegis-spy", "owner": "usa", "type": "naval SPY-1D/6", "detection_range_km": 400, "location": "CSG", "nodeId": null, "effect_if_destroyed": "lose naval Aegis bubble"},
-    {"id": "elm-2084", "owner": "israel", "type": "MMR", "detection_range_km": 350, "location": "Israel", "nodeId": null, "effect_if_destroyed": "Iron Dome / David's Sling feed degraded"},
-    {"id": "green-pine", "owner": "israel", "type": "ELM-2080 early warning", "detection_range_km": 500, "location": "Israel", "nodeId": null, "effect_if_destroyed": "Arrow cueing degraded"}
+    {
+      "id": "an-tpy-2-jordan",
+      "owner": "usa",
+      "type": "X-band TPY-2",
+      "detection_range_km": 1000,
+      "location": "Muwaffaq Salti AB, Jordan",
+      "nodeId": "muwaffaq_salti",
+      "effect_if_destroyed": "degrades regional BMD coverage in Levant sector"
+    },
+    {
+      "id": "an-fps-132-qatar",
+      "owner": "usa",
+      "type": "UEWR",
+      "detection_range_km": 5000,
+      "location": "Al Udeid, Qatar",
+      "nodeId": "al_udeid",
+      "effect_if_destroyed": "early warning degraded"
+    },
+    {
+      "id": "patriot-mpq-65",
+      "owner": "usa",
+      "type": "fire-control",
+      "detection_range_km": 170,
+      "location": "per Patriot battery",
+      "nodeId": null,
+      "effect_if_destroyed": "local intercept quality down"
+    },
+    {
+      "id": "aegis-spy",
+      "owner": "usa",
+      "type": "naval SPY-1D/6",
+      "detection_range_km": 400,
+      "location": "CSG",
+      "nodeId": null,
+      "effect_if_destroyed": "lose naval Aegis bubble"
+    },
+    {
+      "id": "elm-2084",
+      "owner": "israel",
+      "type": "MMR",
+      "detection_range_km": 350,
+      "location": "Israel",
+      "nodeId": null,
+      "effect_if_destroyed": "Iron Dome / David's Sling feed degraded"
+    },
+    {
+      "id": "green-pine",
+      "owner": "israel",
+      "type": "ELM-2080 early warning",
+      "detection_range_km": 500,
+      "location": "Israel",
+      "nodeId": null,
+      "effect_if_destroyed": "Arrow cueing degraded"
+    }
   ],
   "undergroundNodes": [
-    {"id": "khojir", "name": "Khojir production complex", "name_fa": "مجتمع تولید خجیر", "lon": 51.73, "lat": 35.6, "production": "both", "regeneration_per_turn": 2, "notes": "Dispersed underground production"},
-    {"id": "parchin", "name": "Parchin complex", "name_fa": "مجتمع پارچین", "lon": 51.77, "lat": 35.52, "production": "missile", "regeneration_per_turn": 1, "notes": "Hardened research/production"},
-    {"id": "shahroud", "name": "Shahroud missile complex", "name_fa": "مجتمع موشکی شاهرود", "lon": 55.02, "lat": 36.42, "production": "missile", "regeneration_per_turn": 1, "notes": "Long-range storage and TELs"},
-    {"id": "bandar_abbas_underground", "name": "Bandar Abbas coastal storage", "name_fa": "انبار زیرزمینی بندرعباس", "lon": 56.27, "lat": 27.18, "production": "drone", "regeneration_per_turn": 3, "notes": "Coastal ASM and drone storage"},
-    {"id": "tabriz_complex", "name": "Tabriz industrial complex", "name_fa": "مجتمع صنعتی تبریز", "lon": 46.29, "lat": 38.08, "production": "both", "regeneration_per_turn": 1, "notes": "Northwest production depth"}
+    {
+      "id": "khojir",
+      "name": "Khojir production complex",
+      "name_fa": "مجتمع تولید خجیر",
+      "lon": 51.73,
+      "lat": 35.6,
+      "production": "both",
+      "regeneration_per_turn": 2,
+      "notes": "Dispersed underground production"
+    },
+    {
+      "id": "parchin",
+      "name": "Parchin complex",
+      "name_fa": "مجتمع پارچین",
+      "lon": 51.77,
+      "lat": 35.52,
+      "production": "missile",
+      "regeneration_per_turn": 1,
+      "notes": "Hardened research/production"
+    },
+    {
+      "id": "shahroud",
+      "name": "Shahroud missile complex",
+      "name_fa": "مجتمع موشکی شاهرود",
+      "lon": 55.02,
+      "lat": 36.42,
+      "production": "missile",
+      "regeneration_per_turn": 1,
+      "notes": "Long-range storage and TELs"
+    },
+    {
+      "id": "bandar_abbas_underground",
+      "name": "Bandar Abbas coastal storage",
+      "name_fa": "انبار زیرزمینی بندرعباس",
+      "lon": 56.27,
+      "lat": 27.18,
+      "production": "drone",
+      "regeneration_per_turn": 3,
+      "notes": "Coastal ASM and drone storage"
+    },
+    {
+      "id": "tabriz_complex",
+      "name": "Tabriz industrial complex",
+      "name_fa": "مجتمع صنعتی تبریز",
+      "lon": 46.29,
+      "lat": 38.08,
+      "production": "both",
+      "regeneration_per_turn": 1,
+      "notes": "Northwest production depth"
+    }
   ],
   "gameScaleMapping": {
     "note": "Abstract in-game magazines map from pre-war totals for playable scarcity without tracking thousands of individual rounds.",
@@ -58,5 +345,1554 @@
     "iranFatehStart": 28,
     "iranKhorramshahrStart": 12,
     "iranFattahStart": 5
-  }
+  },
+  "sites": [
+    {
+      "id": "al_udeid",
+      "name": "Al Udeid Air Base",
+      "side": "usa",
+      "host": "qatar",
+      "lat": 25.117,
+      "lon": 51.315,
+      "role": "CENTCOM forward HQ; 379th AEW; ~100 aircraft",
+      "node_id": "al_udeid",
+      "personnel": 10000,
+      "air_defence": [
+        "THAAD battery",
+        "Patriot",
+        "AN/FPS-132 \"Desert Eye\""
+      ],
+      "aircraft": [],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "note": "Radar status per IRGC claim: destroyed."
+    },
+    {
+      "id": "al_dhafra",
+      "name": "Al Dhafra Air Base",
+      "side": "usa",
+      "host": "uae",
+      "lat": 24.248,
+      "lon": 54.548,
+      "role": "380th AEW; F-22, F-15, MQ-9, AWACS, tankers",
+      "node_id": "al_dhafra",
+      "personnel": 4250,
+      "air_defence": [
+        "THAAD battery",
+        "Patriot"
+      ],
+      "aircraft": [
+        "F-22",
+        "F-15",
+        "MQ-9",
+        "E-3 AWACS",
+        "KC-135/KC-46"
+      ],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "note": "THAAD radar struck per IRGC claim (damage unconfirmed)."
+    },
+    {
+      "id": "nsa_bahrain",
+      "name": "NSA Bahrain (Fifth Fleet)",
+      "side": "usa",
+      "host": "bahrain",
+      "lat": 26.21,
+      "lon": 50.61,
+      "role": "US Fifth Fleet HQ; destroyers and cruisers",
+      "node_id": "nsa_bahrain",
+      "personnel": 8500,
+      "air_defence": [
+        "Patriot"
+      ],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "note": "SATCOM terminal struck per IRGC claim."
+    },
+    {
+      "id": "prince_sultan",
+      "name": "Prince Sultan Air Base",
+      "side": "usa",
+      "host": "saudi",
+      "lat": 24,
+      "lon": 47.5,
+      "role": "US transport and ISR hub",
+      "node_id": "prince_sultan",
+      "personnel": 2300,
+      "air_defence": [
+        "Patriot PAC-3",
+        "THAAD battery"
+      ],
+      "aircraft": [],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "note": "Coordinates approximate (Al Kharj). Saudi Arabia holds 108 Patriot launchers."
+    },
+    {
+      "id": "muwaffaq_salti",
+      "name": "Muwaffaq Salti Air Base",
+      "side": "usa",
+      "host": "jordan",
+      "lat": 32.3,
+      "lon": 36.8,
+      "role": "332nd Expeditionary Wing; largest US aircraft concentration in theatre",
+      "node_id": "muwaffaq_salti",
+      "personnel": null,
+      "air_defence": [
+        "THAAD radar",
+        "Patriot"
+      ],
+      "aircraft": [
+        "F-35A",
+        "F-15E",
+        "F-16",
+        "A-10"
+      ],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "note": "~60 aircraft; THAAD radar struck per IRGC claim."
+    },
+    {
+      "id": "camp_arifjan",
+      "name": "Camp Arifjan",
+      "side": "usa",
+      "host": "kuwait",
+      "lat": 28.9,
+      "lon": 48.1,
+      "role": "US Central Army forward HQ; logistics hub",
+      "node_id": "ali_al_salem",
+      "personnel": 13500,
+      "air_defence": [
+        "Patriot batteries"
+      ],
+      "aircraft": [],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "note": "Base struck by Iran during the campaign."
+    },
+    {
+      "id": "ayn_al_asad",
+      "name": "Ayn al-Asad Airbase",
+      "side": "usa",
+      "host": "iraq",
+      "lat": 33.8,
+      "lon": 42.4,
+      "role": "Iraqi control since January 2026; limited US presence",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "erbil",
+      "name": "Erbil Air Base",
+      "side": "usa",
+      "host": "iraq",
+      "lat": 36.2,
+      "lon": 44,
+      "role": "US training, ISR and logistics",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "incirlik",
+      "name": "Incirlik Air Base",
+      "side": "usa",
+      "host": "turkey",
+      "lat": 37,
+      "lon": 35.4,
+      "role": "NATO/US presence",
+      "node_id": "incirlik",
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "duqm",
+      "name": "Port of Duqm",
+      "side": "usa",
+      "host": "oman",
+      "lat": 19.6,
+      "lon": 57.7,
+      "role": "US logistics and air access under the 2019 agreement",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "thumrait",
+      "name": "Thumrait Air Base",
+      "side": "usa",
+      "host": "oman",
+      "lat": null,
+      "lon": null,
+      "role": "Oman air access",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "data_gap",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "note": "Listed in the brief without coordinates."
+    },
+    {
+      "id": "masirah",
+      "name": "Masirah Air Base",
+      "side": "usa",
+      "host": "oman",
+      "lat": null,
+      "lon": null,
+      "role": "Oman air access",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "data_gap",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "note": "Listed in the brief without coordinates."
+    },
+    {
+      "id": "cvn72",
+      "name": "USS Abraham Lincoln (CVN-72)",
+      "side": "usa",
+      "host": "gulf",
+      "lat": null,
+      "lon": null,
+      "role": "Carrier strike group, Arabian Sea near Oman",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [
+        "CVW: 3-4 F/A-18E/F squadrons",
+        "F-35C squadron",
+        "EA-18G",
+        "E-2D",
+        "MH-60R/S"
+      ],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "mobile": true,
+      "note": "Mobile carrier strike group: position changes, so no fixed coordinates."
+    },
+    {
+      "id": "cvn78",
+      "name": "USS Gerald R. Ford (CVN-78)",
+      "side": "usa",
+      "host": "mediterranean",
+      "lat": null,
+      "lon": null,
+      "role": "Carrier strike group, eastern Mediterranean / Red Sea",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "mobile": true,
+      "note": "Mobile carrier strike group: position changes, so no fixed coordinates."
+    },
+    {
+      "id": "nevatim",
+      "name": "Nevatim Air Base",
+      "side": "israel",
+      "host": "israel",
+      "lat": 31.21,
+      "lon": 35.01,
+      "role": "Primary F-35I base",
+      "node_id": "nevatim",
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [
+        "116th Lions of the South (F-35I)",
+        "117th First Jet (F-35I)",
+        "140th Golden Eagle (F-35I)",
+        "120th Desert Giants (tankers)"
+      ],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "note": "Runway and fuel infrastructure damaged during the war."
+    },
+    {
+      "id": "ramat_david",
+      "name": "Ramat David Air Base",
+      "side": "israel",
+      "host": "israel",
+      "lat": 32.66,
+      "lon": 35.18,
+      "role": "Northern fighter base",
+      "node_id": "ramat_david",
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [
+        "109th (F-16C/D)",
+        "110th (F-16C/D)",
+        "117th (F-16C/D)",
+        "101st First Fighter (F-16C/D)"
+      ],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "hatzerim",
+      "name": "Hatzerim Air Base",
+      "side": "israel",
+      "host": "israel",
+      "lat": 31.23,
+      "lon": 34.66,
+      "role": "F-15I strike base",
+      "node_id": "hatzerim",
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [
+        "107th (F-16I)",
+        "69th Hammers (F-15I)"
+      ],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "hatzor",
+      "name": "Hatzor Air Base",
+      "side": "israel",
+      "host": "israel",
+      "lat": 31.76,
+      "lon": 34.72,
+      "role": "Central fighter base; David's Sling HQ",
+      "node_id": "hatzor",
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [
+        "101st (F-16C/D)",
+        "105th (F-16C/D)"
+      ],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "ramon",
+      "name": "Ramon Air Base",
+      "side": "israel",
+      "host": "israel",
+      "lat": 30.78,
+      "lon": 34.66,
+      "role": "Southern F-16I base",
+      "node_id": "ramon",
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [
+        "119th",
+        "201st",
+        "253rd (F-16I)"
+      ],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "note": "Runway damaged during the war."
+    },
+    {
+      "id": "uvda",
+      "name": "Uvda Air Base",
+      "side": "israel",
+      "host": "israel",
+      "lat": 29.94,
+      "lon": 34.94,
+      "role": "Aggressor and training",
+      "node_id": "uvda",
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [
+        "115th (F-16A/B)"
+      ],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "idf_naval_haifa",
+      "name": "Haifa Naval Base",
+      "side": "israel",
+      "host": "israel",
+      "lat": null,
+      "lon": null,
+      "role": "Israeli naval base",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "data_gap",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "note": "Named in the brief; coordinates not supplied."
+    },
+    {
+      "id": "idf_naval_eilat",
+      "name": "Eilat Naval Base",
+      "side": "israel",
+      "host": "israel",
+      "lat": null,
+      "lon": null,
+      "role": "Israeli naval base",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "data_gap",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "note": "Named in the brief; coordinates not supplied."
+    },
+    {
+      "id": "iron_dome_battery",
+      "name": "Iron Dome battery (central Israel example)",
+      "side": "israel",
+      "host": "israel",
+      "lat": 32.3355,
+      "lon": 34.9503,
+      "role": "Iron Dome battery; 7 of 11 identified, 12-14 active",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [
+        "Iron Dome / Tamir"
+      ],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "davids_sling_battery",
+      "name": "David's Sling battery (example site)",
+      "side": "israel",
+      "host": "israel",
+      "lat": 32.8915,
+      "lon": 35.082,
+      "role": "David's Sling; 4 of 6 identified",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [
+        "David's Sling / Stunner"
+      ],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "arrow3_battery",
+      "name": "Arrow-3 battery area",
+      "side": "israel",
+      "host": "israel",
+      "lat": 32.4333,
+      "lon": 35,
+      "role": "Arrow-3; 4 of 6 identified",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [
+        "Arrow-2/3"
+      ],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "tabriz_north",
+      "name": "Tabriz North missile base",
+      "side": "iran",
+      "host": "iran",
+      "lat": 38.251,
+      "lon": 46.117,
+      "role": "MRBM base; Shahab-3 silos",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "tabriz_south",
+      "name": "Tabriz South missile base",
+      "side": "iran",
+      "host": "iran",
+      "lat": 38.08,
+      "lon": 46.28,
+      "role": "MRBM base",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "kermanshah",
+      "name": "Kermanshah (Shahid Montazeri) missile base",
+      "side": "iran",
+      "host": "iran",
+      "lat": 34.482,
+      "lon": 47.187,
+      "role": "MRBM base; bunkers",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "panj_pelleh",
+      "name": "Panj Pelleh launch site",
+      "side": "iran",
+      "host": "iran",
+      "lat": 34.358,
+      "lon": 47.3,
+      "role": "Launch site",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "kamijeh",
+      "name": "Kamijeh launch site",
+      "side": "iran",
+      "host": "iran",
+      "lat": 34.52,
+      "lon": 47.355,
+      "role": "Launch site",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "shiraz_north",
+      "name": "Shiraz North missile base",
+      "side": "iran",
+      "host": "iran",
+      "lat": 29.723,
+      "lon": 52.558,
+      "role": "Heavy MRBM base; southern launch hub",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "bandar_abbas_khorgu",
+      "name": "Bandar Abbas / Khorgu missile base",
+      "side": "iran",
+      "host": "iran",
+      "lat": 27.18,
+      "lon": 56.27,
+      "role": "Coastal missile base; naval strike",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "hajabad",
+      "name": "Hajabad underground launch facility",
+      "side": "iran",
+      "host": "iran",
+      "lat": null,
+      "lon": null,
+      "role": "Underground launch facility ~130 km north of Bandar Abbas",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "note": "Approximate location only; coordinates not supplied."
+    },
+    {
+      "id": "khorramabad",
+      "name": "Khorramabad underground missile base",
+      "side": "iran",
+      "host": "iran",
+      "lat": 33.5,
+      "lon": 48.3,
+      "role": "Underground missile base",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "bakhtaran",
+      "name": "Bakhtaran missile base",
+      "side": "iran",
+      "host": "iran",
+      "lat": 34.3,
+      "lon": 47.1,
+      "role": "Missile base",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "semnan",
+      "name": "Semnan Missile Complex",
+      "side": "iran",
+      "host": "iran",
+      "lat": 35.5,
+      "lon": 53.5,
+      "role": "Production and test facility",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "khojir",
+      "name": "Khojir missile production",
+      "side": "iran",
+      "host": "iran",
+      "lat": 35.6,
+      "lon": 51.5,
+      "role": "Missile production; heavily damaged",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "parchin",
+      "name": "Parchin / Shahid Boroujerdi",
+      "side": "iran",
+      "host": "iran",
+      "lat": 35.5,
+      "lon": 51.8,
+      "role": "Missile production; underground tunnels; MOP target",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "shahroud",
+      "name": "Shahroud missile production",
+      "side": "iran",
+      "host": "iran",
+      "lat": 36.4,
+      "lon": 55,
+      "role": "Liquid-propellant missile production; heavily damaged",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "oghab44",
+      "name": "Oghab 44 underground air base",
+      "side": "iran",
+      "host": "iran",
+      "lat": null,
+      "lon": null,
+      "role": "Underground air base north of the Strait of Hormuz",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "note": "Named, no coordinates supplied."
+    },
+    {
+      "id": "bandar_abbas_ab",
+      "name": "Bandar Abbas Air Base",
+      "side": "iran",
+      "host": "iran",
+      "lat": 27.22,
+      "lon": 56.37,
+      "role": "IRGC/Artesh; drones and maritime strike",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "khatam_ab",
+      "name": "Khatam Air Base",
+      "side": "iran",
+      "host": "iran",
+      "lat": 30.9,
+      "lon": 50.5,
+      "role": "IRIAF fighter base",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "dezful_ab",
+      "name": "Dezful / Vahdati Air Base",
+      "side": "iran",
+      "host": "iran",
+      "lat": 32.43,
+      "lon": 48.4,
+      "role": "Fighter and attack base",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "shiraz_ab",
+      "name": "Shiraz Air Base",
+      "side": "iran",
+      "host": "iran",
+      "lat": 29.54,
+      "lon": 52.59,
+      "role": "Fighter base; UAV launch sites nearby",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "tabriz_ab",
+      "name": "Tabriz Air Base",
+      "side": "iran",
+      "host": "iran",
+      "lat": 38.13,
+      "lon": 46.24,
+      "role": "Fighter base; IRGC missile complexes nearby",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "tehran_mehrabad",
+      "name": "Tehran (Mehrabad / Doshan Tappeh)",
+      "side": "iran",
+      "host": "iran",
+      "lat": 35.69,
+      "lon": 51.31,
+      "role": "Command and transport",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "bandar_abbas_naval",
+      "name": "Bandar Abbas naval base",
+      "side": "iran",
+      "host": "iran",
+      "lat": 27.14,
+      "lon": 56.21,
+      "role": "IRGCN/IRIN HQ; fast-attack craft; underground FAC base nearby",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "chabahar",
+      "name": "Chabahar naval base",
+      "side": "iran",
+      "host": "iran",
+      "lat": 25.29,
+      "lon": 60.64,
+      "role": "IRIN/IRGCN; naval facilities struck",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "jask",
+      "name": "Jask naval base",
+      "side": "iran",
+      "host": "iran",
+      "lat": 25.64,
+      "lon": 57.77,
+      "role": "IRGCN coastal missiles",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "kharg",
+      "name": "Kharg Island",
+      "side": "iran",
+      "host": "iran",
+      "lat": 29.23,
+      "lon": 50.32,
+      "role": "Oil terminal; naval/IRGC",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "s300_tehran",
+      "name": "S-300PMU-2 (Tehran)",
+      "side": "iran",
+      "host": "iran",
+      "lat": 35.7,
+      "lon": 51.4,
+      "role": "Long-range SAM; 30N6E2 fire-control radar",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [
+        "S-300PMU-2"
+      ],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
+      "note": "Engagement ~200 km. After 30N6E2 losses TELs were mated to Bavar-373."
+    },
+    {
+      "id": "bavar_fordow",
+      "name": "Bavar-373 (Fordow)",
+      "side": "iran",
+      "host": "iran",
+      "lat": 34.88,
+      "lon": 50.99,
+      "role": "Indigenous long-range SAM; Meraj-4 AESA",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [
+        "Bavar-373",
+        "Meraj-4"
+      ],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
+      "note": "Engagement ~200-300 km; Meraj-4 detection 320-450 km."
+    },
+    {
+      "id": "khordad15_isfahan",
+      "name": "Khordad-15 (Isfahan)",
+      "side": "iran",
+      "host": "iran",
+      "lat": 32.65,
+      "lon": 51.67,
+      "role": "Medium-range SAM; road-mobile",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [
+        "Khordad-15"
+      ],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
+      "note": "Engagement ~120 km; anti-stealth detection ~85 km."
+    },
+    {
+      "id": "talash_layered",
+      "name": "3rd Khordad / Talash (layered site)",
+      "side": "iran",
+      "host": "iran",
+      "lat": 33.5,
+      "lon": 51,
+      "role": "Medium-range SAM",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [
+        "3rd Khordad",
+        "Talash"
+      ],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
+      "note": "Engagement ~105 km; Ofogh radar track ~200 km."
+    },
+    {
+      "id": "s200_isfahan",
+      "name": "S-200 (Isfahan)",
+      "side": "iran",
+      "host": "iran",
+      "lat": 32.6,
+      "lon": 51.7,
+      "role": "Legacy long-range SAM",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [
+        "S-200"
+      ],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
+      "note": "Range ~250 km."
+    },
+    {
+      "id": "meraj4_network",
+      "name": "Meraj-4 surveillance network",
+      "side": "iran",
+      "host": "iran",
+      "lat": 34,
+      "lon": 51.5,
+      "role": "S-band AESA surveillance; detection 320-450 km",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
+      "note": "Deployed nationwide; count unknown."
+    },
+    {
+      "id": "kavosh_radar",
+      "name": "Kavosh (Kasta 2E2) gap-filler",
+      "side": "iran",
+      "host": "iran",
+      "lat": 35,
+      "lon": 51,
+      "role": "Legacy surveillance radar (~150 km)",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "ghadir_radar",
+      "name": "Ghadir over-the-horizon radar",
+      "side": "iran",
+      "host": "iran",
+      "lat": 29,
+      "lon": 53,
+      "role": "Strategic early warning (~1,100 km)",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "alim_radar",
+      "name": "Alim passive mobile radar",
+      "side": "iran",
+      "host": "iran",
+      "lat": null,
+      "lon": null,
+      "role": "Mobile air-defence cueing (~250-300 km)",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "data_gap",
+      "source": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
+      "note": "Mobile; no fixed coordinates supplied."
+    },
+    {
+      "id": "hezbollah",
+      "name": "Hezbollah (southern Lebanon, Bekaa, Beirut)",
+      "side": "hezbollah",
+      "host": "lebanon",
+      "lat": 33.4,
+      "lon": 35.5,
+      "role": "Rocket and ATGM force; ~1,000 precision-guided",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief",
+      "note": "15,000-20,000 rockets remaining (11k-13k in competing estimates)."
+    },
+    {
+      "id": "houthi",
+      "name": "Houthi forces (Bab al-Mandeb, Sanaa, Hodeidah)",
+      "side": "houthi",
+      "host": "yemen",
+      "lat": 15.35,
+      "lon": 44.2,
+      "role": "Missiles and drones; ~90% indigenous production",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "pmf_anbar",
+      "name": "PMF (Anbar: Al-Qaim, Habbaniyah, Taqqudum)",
+      "side": "pmf",
+      "host": "iraq",
+      "lat": 33.4,
+      "lon": 41.9,
+      "role": "Rocket, ATGM and drone harassment",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "pmf_jurf",
+      "name": "PMF (Jurf al-Sakhar, Camp Ashraf, Mosul outskirts, Jisr Diyala)",
+      "side": "pmf",
+      "host": "iraq",
+      "lat": 32.9,
+      "lon": 44.3,
+      "role": "Rocket and drone harassment",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief"
+    },
+    {
+      "id": "hamas",
+      "name": "Hamas (Gaza)",
+      "side": "hamas",
+      "host": "gaza",
+      "lat": 31.4,
+      "lon": 34.4,
+      "role": "Rocket force, largely paused",
+      "node_id": null,
+      "personnel": null,
+      "air_defence": [],
+      "aircraft": [],
+      "confidence": "single_source",
+      "source": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief"
+    }
+  ],
+  "weaponPerformance": [
+    {
+      "id": "emad",
+      "name": "Emad",
+      "type": "MRBM",
+      "propulsion": "liquid",
+      "range_km": [
+        1700,
+        1800
+      ],
+      "warhead_kg": [
+        500,
+        750
+      ],
+      "cep_m": [
+        500,
+        1000
+      ],
+      "reliability": "reported issues",
+      "base_pk": null,
+      "interception_pk": null,
+      "confidence": "estimate_range",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "kheibar_shekan",
+      "name": "Kheibar Shekan",
+      "type": "MRBM",
+      "propulsion": "solid",
+      "range_km": [
+        1450,
+        1450
+      ],
+      "warhead_kg": [
+        500,
+        500
+      ],
+      "cep_m": [
+        100,
+        500
+      ],
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "confidence": "estimate_range",
+      "note": "CEP claimed <100 m; stored band is the defensible calibration range.",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "fattah-1",
+      "name": "Fattah-1",
+      "type": "hypersonic glide",
+      "propulsion": "solid + glide vehicle",
+      "range_km": [
+        1400,
+        1400
+      ],
+      "warhead_kg": [
+        400,
+        500
+      ],
+      "cep_m": [
+        100,
+        500
+      ],
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "confidence": "belligerent_claim",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "fattah-2",
+      "name": "Fattah-2",
+      "type": "hypersonic glide",
+      "propulsion": "solid + glide vehicle",
+      "range_km": [
+        1400,
+        1500
+      ],
+      "warhead_kg": [
+        400,
+        500
+      ],
+      "cep_m": [
+        100,
+        500
+      ],
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "confidence": "belligerent_claim",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "ghadr",
+      "name": "Ghadr / Qadr",
+      "type": "MRBM",
+      "propulsion": "liquid",
+      "range_km": [
+        1600,
+        2000
+      ],
+      "warhead_kg": [
+        650,
+        750
+      ],
+      "cep_m": [
+        300,
+        500
+      ],
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "confidence": "estimate_range",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "fateh-110",
+      "name": "Fateh-110 family",
+      "type": "SRBM",
+      "propulsion": "solid",
+      "range_km": [
+        300,
+        300
+      ],
+      "warhead_kg": [
+        450,
+        500
+      ],
+      "cep_m": [
+        10,
+        30
+      ],
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "confidence": "confirmed",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "shahab-3",
+      "name": "Shahab-3",
+      "type": "MRBM",
+      "propulsion": "liquid",
+      "range_km": [
+        1000,
+        1500
+      ],
+      "warhead_kg": [
+        750,
+        1000
+      ],
+      "cep_m": [
+        500,
+        2500
+      ],
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "confidence": "estimate_range",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "shahed-136",
+      "name": "Shahed-136",
+      "type": "one-way attack drone",
+      "propulsion": "piston",
+      "range_km": [
+        1300,
+        2500
+      ],
+      "warhead_kg": [
+        40,
+        50
+      ],
+      "cep_m": null,
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "unit_cost_usd": [
+        20000,
+        50000
+      ],
+      "production_per_month": [
+        400,
+        500
+      ],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "shahed-238",
+      "name": "Shahed-238",
+      "type": "jet one-way attack drone",
+      "propulsion": "jet",
+      "range_km": [
+        1000,
+        1500
+      ],
+      "warhead_kg": [
+        40,
+        50
+      ],
+      "cep_m": null,
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "confidence": "single_source",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "samad-3",
+      "name": "Samad-3",
+      "type": "one-way attack drone (Houthi variant)",
+      "propulsion": "piston",
+      "range_km": [
+        2000,
+        2500
+      ],
+      "warhead_kg": [
+        30,
+        40
+      ],
+      "cep_m": null,
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "confidence": "single_source",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "samad-4",
+      "name": "Samad-4",
+      "type": "one-way attack drone (Houthi variant)",
+      "propulsion": "piston",
+      "range_km": [
+        2000,
+        2500
+      ],
+      "warhead_kg": [
+        30,
+        40
+      ],
+      "cep_m": null,
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "confidence": "single_source",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "thaad",
+      "name": "THAAD interceptor",
+      "type": "exo/endo interceptor",
+      "range_km": [
+        200,
+        200
+      ],
+      "warhead_kg": null,
+      "cep_m": null,
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "unit_cost_usd": [
+        12000000,
+        15000000
+      ],
+      "starting_inventory": [
+        534,
+        534
+      ],
+      "production_per_year": [
+        96,
+        400
+      ],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "patriot-pac3-mse",
+      "name": "Patriot PAC-3 MSE",
+      "type": "terminal interceptor",
+      "range_km": [
+        50,
+        50
+      ],
+      "warhead_kg": null,
+      "cep_m": null,
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "unit_cost_usd": [
+        4000000,
+        4000000
+      ],
+      "starting_inventory": [
+        2200,
+        2200
+      ],
+      "production_per_year": [
+        600,
+        2000
+      ],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "arrow-2-3",
+      "name": "Arrow-2 / Arrow-3",
+      "type": "exo-atmospheric interceptor",
+      "range_km": [
+        2400,
+        2400
+      ],
+      "warhead_kg": null,
+      "cep_m": null,
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "unit_cost_usd": [
+        1500000,
+        3000000
+      ],
+      "starting_inventory": null,
+      "production_per_year": null,
+      "confidence": "data_gap",
+      "note": "Inventory and rate classified; the game uses a depletion horizon instead.",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "davids-sling",
+      "name": "David's Sling (Stunner)",
+      "type": "medium-tier interceptor",
+      "range_km": [
+        300,
+        300
+      ],
+      "warhead_kg": null,
+      "cep_m": null,
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "unit_cost_usd": [
+        1000000,
+        2000000
+      ],
+      "starting_inventory": [
+        600,
+        600
+      ],
+      "confidence": "single_source",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "iron-dome-tamir",
+      "name": "Iron Dome (Tamir)",
+      "type": "short-range interceptor",
+      "range_km": [
+        70,
+        70
+      ],
+      "warhead_kg": null,
+      "cep_m": null,
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "unit_cost_usd": [
+        50000,
+        50000
+      ],
+      "starting_inventory": [
+        1500,
+        1500
+      ],
+      "production_per_year": [
+        1000,
+        1000
+      ],
+      "confidence": "confirmed",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "gbu-57-mop",
+      "name": "GBU-57 MOP",
+      "type": "penetrator",
+      "range_km": null,
+      "warhead_kg": [
+        13000,
+        13600
+      ],
+      "cep_m": [
+        3,
+        5
+      ],
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "penetration_m": [
+        60,
+        80
+      ],
+      "confidence": "confirmed",
+      "note": "Rated against ~80 m of rock at Fordow; the game treats penetration as a threshold, not a guarantee.",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "burkan",
+      "name": "Burkan",
+      "type": "Houthi SRBM",
+      "range_km": [
+        700,
+        800
+      ],
+      "warhead_kg": null,
+      "cep_m": null,
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "confidence": "single_source",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "palestine-2",
+      "name": "Palestine-2",
+      "type": "Houthi hypersonic",
+      "range_km": [
+        2150,
+        2150
+      ],
+      "warhead_kg": null,
+      "cep_m": null,
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "confidence": "belligerent_claim",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "quds-1",
+      "name": "Quds-1",
+      "type": "Houthi cruise missile",
+      "range_km": [
+        700,
+        900
+      ],
+      "warhead_kg": null,
+      "cep_m": null,
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "confidence": "single_source",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "hezbollah-rocket-family",
+      "name": "Hezbollah rocket family (Katyusha, Grad, Fajr, Zelzal)",
+      "type": "rocket",
+      "range_km": [
+        20,
+        300
+      ],
+      "warhead_kg": null,
+      "cep_m": null,
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "confidence": "estimate_range",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    },
+    {
+      "id": "hezbollah-atgm",
+      "name": "Hezbollah ATGM",
+      "type": "anti-tank guided missile",
+      "range_km": [
+        2,
+        8
+      ],
+      "warhead_kg": null,
+      "cep_m": null,
+      "reliability": null,
+      "base_pk": null,
+      "interception_pk": null,
+      "confidence": "estimate_range",
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+    }
+  ]
 }

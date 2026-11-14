@@ -522,6 +522,231 @@
       "oilShockTurns": 5,
       "israeliCapacityThreshold": 30,
       "israeliCapacityByTurn": 25
+    },
+    "hostAccess": {
+      "note": "Opening-phase access posture. Thresholds are the existing host threat values plus a closure margin; closure margin is a game abstraction.",
+      "source": "Brief A module 1 and brief B module 4 (GCC refusal of territory and airspace)",
+      "confidence": "estimate_range",
+      "hosts": {
+        "qatar": {
+          "access_status_start": "restricted",
+          "threat_threshold_restrict": 22,
+          "threat_threshold_close": 42,
+          "closure_duration_turns": 4,
+          "confidence": "single_source",
+          "source": "Brief A module 1: Al Udeid hosted US forces and was struck; Qatar restricts offensive sorties"
+        },
+        "uae": {
+          "access_status_start": "restricted",
+          "threat_threshold_restrict": 15,
+          "threat_threshold_close": 35,
+          "closure_duration_turns": 4,
+          "confidence": "single_source",
+          "source": "Brief A module 1: Al Dhafra struck; UAE declined offensive basing"
+        },
+        "kuwait": {
+          "access_status_start": "restricted",
+          "threat_threshold_restrict": 30,
+          "threat_threshold_close": 48,
+          "closure_duration_turns": 3,
+          "confidence": "single_source",
+          "source": "Brief A module 1: Camp Arifjan struck"
+        },
+        "bahrain": {
+          "access_status_start": "restricted",
+          "threat_threshold_restrict": 18,
+          "threat_threshold_close": 38,
+          "closure_duration_turns": 4,
+          "confidence": "single_source",
+          "source": "Brief A module 1: NSA Bahrain SATCOM struck per IRGC claim"
+        },
+        "saudi": {
+          "access_status_start": "restricted",
+          "threat_threshold_restrict": 28,
+          "threat_threshold_close": 50,
+          "closure_duration_turns": 5,
+          "confidence": "single_source",
+          "source": "Brief A module 1: Prince Sultan access contingent on Saudi consent"
+        },
+        "turkey": {
+          "access_status_start": "denied",
+          "threat_threshold_restrict": 45,
+          "threat_threshold_close": 60,
+          "closure_duration_turns": 6,
+          "confidence": "single_source",
+          "source": "Brief A module 1: Incirlik access requires Turkish consent"
+        },
+        "jordan": {
+          "access_status_start": "full",
+          "threat_threshold_restrict": 20,
+          "threat_threshold_close": 40,
+          "closure_duration_turns": 3,
+          "confidence": "single_source",
+          "source": "Brief A module 1: Muwaffaq Salti hosted the largest US aircraft concentration"
+        },
+        "egypt": {
+          "access_status_start": "restricted",
+          "threat_threshold_restrict": 25,
+          "threat_threshold_close": 45,
+          "closure_duration_turns": 4,
+          "confidence": "data_gap",
+          "source": "No explicit access figure in the briefs; Suez closure condition only"
+        }
+      }
+    },
+    "history": [
+      {
+        "id": "opening_strike",
+        "date": "2026-02-28",
+        "scripted": true,
+        "trigger_condition": null,
+        "branch_effect": "War begins; pre-war posture ends and the interceptor clock starts",
+        "confidence": "confirmed",
+        "source": "Brief A module 1; brief B module 2 (war start 28 Feb)"
+      },
+      {
+        "id": "khamenei_killed",
+        "date": "2026-02-28",
+        "scripted": true,
+        "trigger_condition": null,
+        "branch_effect": "Leadership shock; regime cohesion penalty and succession uncertainty",
+        "confidence": "single_source",
+        "source": "Brief A operational chronology"
+      },
+      {
+        "id": "true_promise_4",
+        "date": "2026-03-01",
+        "scripted": true,
+        "trigger_condition": null,
+        "branch_effect": "First large Iranian ballistic wave; interceptor expenditure spike",
+        "confidence": "single_source",
+        "source": "Brief A module 5 (True Promise waves)"
+      },
+      {
+        "id": "irgc_radar_strikes",
+        "date": "2026-03-03",
+        "scripted": true,
+        "trigger_condition": null,
+        "branch_effect": "THAAD AN/TPY-2 and AN/FPS-132 claims; radar-damage multiplier rises",
+        "confidence": "belligerent_claim",
+        "source": "Brief A module 4: IRGC claims, partly corroborated by imagery"
+      },
+      {
+        "id": "assembly_of_experts_strike",
+        "date": "2026-03-10",
+        "scripted": true,
+        "trigger_condition": null,
+        "branch_effect": "Strike on Qom; legitimacy and succession pressure",
+        "confidence": "single_source",
+        "source": "Brief A operational chronology"
+      },
+      {
+        "id": "launcher_attrition",
+        "date": null,
+        "scripted": false,
+        "trigger_condition": "iran_operational_launchers < 120",
+        "branch_effect": "Iranian salvo size halves; production bottleneck becomes binding",
+        "confidence": "estimate_range",
+        "source": "Brief A module 5: post-strike launchers 80-120"
+      },
+      {
+        "id": "f15e_shootdown",
+        "date": "2026-04-03",
+        "scripted": true,
+        "trigger_condition": null,
+        "branch_effect": "Coalition aircraft loss and CSAR; permanent pilot loss applies",
+        "confidence": "single_source",
+        "source": "Brief A operational chronology"
+      },
+      {
+        "id": "islamabad_mou",
+        "date": "2026-06-17",
+        "scripted": true,
+        "trigger_condition": null,
+        "branch_effect": "Diplomatic pause; Pakistan defensive-intervention trigger armed",
+        "confidence": "single_source",
+        "source": "Brief A diplomacy timeline"
+      },
+      {
+        "id": "ceasefire_collapse",
+        "date": "2026-07-02",
+        "scripted": true,
+        "trigger_condition": null,
+        "branch_effect": "Talks fail; escalation ladder unlock",
+        "confidence": "single_source",
+        "source": "Brief A diplomacy timeline"
+      },
+      {
+        "id": "gulf_barrages",
+        "date": "2026-07-11",
+        "scripted": true,
+        "trigger_condition": null,
+        "branch_effect": "Massed Gulf missile barrages; host access restricted further",
+        "confidence": "single_source",
+        "source": "Brief A operational chronology"
+      },
+      {
+        "id": "bab_al_mandeb_blockade",
+        "date": "2026-07-20",
+        "scripted": true,
+        "trigger_condition": null,
+        "branch_effect": "Red Sea disruption; escort demand rises",
+        "confidence": "single_source",
+        "source": "Brief A proxies section"
+      },
+      {
+        "id": "hezbollah_drone",
+        "date": "2026-08-15",
+        "scripted": true,
+        "trigger_condition": null,
+        "branch_effect": "Hezbollah activation pressure; northern front opens if armed",
+        "confidence": "single_source",
+        "source": "Brief A proxies section"
+      },
+      {
+        "id": "saudi_pipeline_attack",
+        "date": "2026-09-14",
+        "scripted": true,
+        "trigger_condition": null,
+        "branch_effect": "East-West pipeline attack; oil price spike and Hormuz pressure",
+        "confidence": "single_source",
+        "source": "Brief A energy section"
+      }
+    ],
+    "interventions": {
+      "note": "Third-party triggers from brief A; thresholds are game abstractions over documented conditions.",
+      "source": "Brief A diplomacy and proxies sections",
+      "confidence": "estimate_range",
+      "pakistan": {
+        "trigger": "oil_price >= 130 and saudi_casualties >= 25",
+        "effect": "defensive intervention on the Saudi axis; no strikes on Iran proper",
+        "confidence": "single_source",
+        "source": "Brief A: Islamabad MoU context"
+      },
+      "egypt": {
+        "trigger": "hormuz < 25 for 3 turns",
+        "effect": "Suez closure; adds transit delay and oil price pressure",
+        "confidence": "single_source",
+        "source": "Brief A: Suez closure condition"
+      },
+      "hezbollah": {
+        "trigger": "israeli_leadership_strikes >= 2 or lebanese_casualties >= 100",
+        "effect": "full activation; rocket depletion begins",
+        "confidence": "single_source",
+        "source": "Brief A module 6"
+      },
+      "houthi": {
+        "trigger": "turn >= 12 or iran_request",
+        "effect": "Bab al-Mandeb blockade; escort demand persists",
+        "confidence": "single_source",
+        "source": "Brief A: July 2026 blockade"
+      },
+      "pmf": {
+        "trigger": "us_basing_use >= 4 or iraqi_casualties >= 50",
+        "effect": "periodic harassment of US logistics and base integrity",
+        "confidence": "single_source",
+        "source": "Brief A module 6"
+      }
     }
   },
   "tutorial": {
