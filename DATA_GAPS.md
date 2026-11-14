@@ -53,9 +53,10 @@ inferring rather than reporting. Labels used:
 
 ## How these are consumed
 
-Site and endurance blocks are data only at this stage: they do not alter
-existing scenarios or the balance baseline. The mechanics that read them
-(munitions depletion, interceptor depletion with the radar multiplier, sortie
-fatigue, carrier endurance, Iranian production decline, proxy supply, cyber,
-Israeli mobilization) are added behind scenario flags, and each flag is
-documented in `README.md` when it lands.
+Munitions depletion, interceptor depletion and the radar-damage multiplier are
+now implemented in `src/combat/endurance.ts` and read `logistics.json`. They are
+off by default (`scenarios.json` → `systems`, all `false`), so the balance
+baseline is unchanged; `README.md` documents the flags. The remaining endurance
+blocks (sortie fatigue, carrier endurance, Iranian production decline, proxy
+supply, cyber, Israeli mobilization) are still data only and will be added the
+same way.
