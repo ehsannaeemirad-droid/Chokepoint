@@ -10,7 +10,7 @@ import { hexDistance } from '../map/hex';
 import type { TheaterMap } from '../map/TheaterMap';
 import { BALANCE } from '../core/config';
 import { attackerLossChance, defenceLayers, detectRaid, engageOnce, suppressAfterImpact } from './airdefence';
-import { airDefenceEffectiveness, airSortieCap, radarDamageMultiplier } from './endurance';
+import { airDefenceEffectiveness, airSortieCap, consumeCoalitionMunitions, radarDamageMultiplier } from './endurance';
 import { addCasualties, restrictionBlocksStrike } from '../politics/domestic';
 import { reject, type OrderRejectCode, type RejectParams } from '../core/rejection';
 import { roeBlocksStrike, roeDamageMultiplier } from '../politics/roe';
@@ -357,6 +357,11 @@ export function resolveStrike(
   const events: ResolveEvent[] = [];
   if (unit.magazine <= 0) {
     return { events: [{ text: `${unit.name} has no munitions.`, tone: 'warn' }], attackerLost: false };
+  }
+  // Charged here rather than at the call sites so AI-issued coalition strikes
+  // (when the player commands Iran) draw on the same magazines as the player's.
+  if (unit.faction === 'usa' || unit.faction === 'israel') {
+    consumeCoalitionMunitions(snap, def.category);
   }
   unit.magazine -= 1;
   unit.revealed = true;

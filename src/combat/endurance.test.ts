@@ -111,7 +111,9 @@ describe('munitions depletion', () => {
     // One package spent; the turn also adds whatever production arrived, so the
     // assertion is on the ledger rather than on the raw stock number.
     const pool = game.snap.endurance!.munitions.jassm!;
-    expect(pool.spent).toBe(1);
+    // The player's strike is charged, and so are any coalition strikes the AI
+    // flies in the same turn, so the assertion is on the ledger.
+    expect(pool.spent).toBeGreaterThanOrEqual(1);
     expect(pool.stock).toBe(pool.starting + pool.produced - pool.spent);
   });
 });

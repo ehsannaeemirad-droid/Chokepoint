@@ -1895,3 +1895,8 @@ defaults, pool initialisation, per-strike spending and ledger balance, degraded
 rather than stopped tempo, radar multiplier, Arrow depletion with a single
 exhaustion event, reload-driven effectiveness, a 30-turn run with all systems
 on, and the flags-off baseline), build 0.
+
+Follow-up: munitions are charged inside `resolveStrike`, not at the order path,
+so AI-flown coalition sorties (when the player commands Iran) draw on the same
+magazine as the player's. A test asserts the ledger identity
+`stock = starting + produced - spent` after a turn with mixed player and AI sorties.
