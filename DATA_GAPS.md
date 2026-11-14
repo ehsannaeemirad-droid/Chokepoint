@@ -74,3 +74,11 @@ stated game-scale readings rather than published dates.
 - **The reservist-fatigue start turn (12) and the carrier clock (20) are
   game-scale conversions** of "four months" and "nine months" onto a 30-turn
   campaign, not published event dates.
+
+## Weapon Pk fields
+
+`base_pk` and `interception_pk` in `weaponPerformance` remain **null** after
+calibration. The briefs give range, warhead, CEP, propulsion and reliability, but
+no hit probability against a defended target; the game resolves damage from unit
+attack/defence statistics and the interceptor model instead. Filling these fields
+would be a fabricated number, so they are left empty and listed here.

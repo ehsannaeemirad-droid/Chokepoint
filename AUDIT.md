@@ -1955,3 +1955,27 @@ All three are gated by scenario flags that default to `false`; the baseline
 path and the earlier endurance tests are unchanged.
 
 Checks: typecheck 0, `pnpm test` 51 files / **403 tests** (3 new), build 0.
+
+## 52. Endurance calibration (task 3)
+
+Measured the endurance layer with the existing crude policy across eight seeds
+per faction, flags off versus all-on, and recorded the distribution in
+BALANCE.md. No side freezes: every run issues strikes, spends munitions and
+terminates, with or without the flags. The Iranian player's 2/8 to 0/8 shift is
+attributable to `munitionsDepletion` (dropping it restores 2/8); it is not
+separable from noise at this sample size, so no constant was fitted to it.
+
+Two calibration decisions:
+
+- **IRIAF effectiveness stayed at the sourced 0.2.** An experimental 0.5 changed
+  no outcome across eight seeds, so the documented figure was left alone and the
+  constant named instead of silently weakening it.
+- **`base_pk` and `interception_pk` stay null.** The briefs contain no published
+  hit probability against a defended target; inventing one to "complete" the
+  schema would violate the provenance rule. The gap is recorded in DATA_GAPS.md.
+
+`src/ai/calibration.test.ts` keeps this reproducible: 18 runs (3 seeds x 3
+factions x off/on) assert termination, at least one issued strike per run, finite
+meters, actual munitions expenditure with the flags on, and determinism.
+
+Checks: typecheck 0, `pnpm test` 52 files / **405 tests**, build 0.

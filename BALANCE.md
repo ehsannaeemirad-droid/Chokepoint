@@ -53,3 +53,55 @@ Status `playing` means the 30-turn limit was reached without a terminal outcome.
 ## Reading
 
 Across 24 runs the simple policy produced 9 wins, 15 losses and 0 time-limit games. Coalition outcomes vary across seeds (including one US ceasefire win at seed 66 and a turn-25 Israeli loss at seed 33); the strike-only Iranian run is identical on every seed, so this artifact does not by itself show Iranian seed sensitivity.
+
+## Endurance calibration (task 3)
+
+Measured with the same crude player policy as the baseline above (coalition
+aircraft strike the nearest hostile node; Iran fires its launchers), eight seeds
+per faction, 30-turn limit, endurance systems toggled on the started snapshot.
+Eight seeds is a small sample: these rows are directional evidence that the
+mechanics engage and do not freeze a side, **not** a win-rate claim.
+
+| Systems | Faction | Won | Lost | Playing | Avg end turn |
+| --- | --- | ---: | ---: | ---: | ---: |
+| off | usa | 2 | 6 | 0 | 30.0 (one loss at 24, wins at 10 and 11) |
+| off | israel | 0 | 8 | 0 | 30.0 |
+| off | iran | 2 | 6 | 0 | 30.0 |
+| on | usa | 1 | 7 | 0 | 27.4 |
+| on | israel | 0 | 8 | 0 | 30.0 |
+| on | iran | 0 | 8 | 0 | 30.0 |
+
+Reading:
+
+- **No side is frozen.** Every run issues strikes and terminates; munitions are
+  spent, carriers and crews age, and Iran's production curve runs.
+- **The Iranian player's 2/8 → 0/8 shift tracks `munitionsDepletion`.** Dropping
+  that one flag restores 2/8; dropping any other single flag leaves 0-1/8. The
+  mechanism is that a coalition that cannot generate sorties does not close the
+  war, and Iran's outcome at the 30-turn limit turns on the coalition's residual
+  capability, not on Iranian damage. With eight seeds this is not separable from
+  noise, so no constant was fitted to it.
+- **IRIAF effectiveness stayed at the sourced 0.2.** Raising it to 0.5 changed
+  no outcome across the eight seeds, so weakening a documented figure would have
+  been an unmeasured change. The constant is now named and commented instead.
+- **`base_pk` / `interception_pk` remain null.** The briefs carry range, warhead,
+  CEP, propulsion and reliability, but no published hit probability against a
+  defended target; the game resolves damage from unit attack/defence statistics.
+  Filling these fields would be invention, so they are recorded as a data gap.
+
+Parameters calibrated (all game-scale readings, each stated in code and README):
+
+| Constant | Value | Anchor |
+| --- | ---: | --- |
+| Munitions per package | 30 | JASSM inventory ÷ strike-package size |
+| Coalition air sorties/turn | 8 | pre-war sortie generation |
+| Arrow depletion turn | 5 | end-of-March expenditure |
+| THAAD drain/turn | 1 | ~50% over 30 turns |
+| Industry surge threshold/warm-up | 60% / 2 turns | post-depletion mobilisation |
+| High tempo / fatigue onset | 4 sorties / 4 turns | crew rest cycle |
+| Carrier endurance | 20 turns | nine months of a nine-month war |
+| Homeland diversion | 0.7 | sorties retained for defence |
+| Iran stockpile assembly | 350 | component stock before decline |
+| Tanker sortie base | 6 | tanker-supported strike rhythm |
+| Reservist fatigue start | turn 12 | four months of call-ups |
+| Cyber radar factor / duration | 0.7 / 2 turns | documented "temporary disruption only" |

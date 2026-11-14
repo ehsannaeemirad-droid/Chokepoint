@@ -63,6 +63,12 @@ export const ISRAEL_MOBILIZATION_FATIGUE_TURN = 12;
 export const CYBER_RADAR_FACTOR = 0.7;
 /** Turns a cyber effect holds. */
 export const CYBER_EFFECT_TURNS = 2;
+/**
+ * IRIAF's share of its paper strike strength. Kept at the sourced 0.2 after
+ * calibration: raising it to 0.5 changed no campaign outcome across eight
+ * seeds, so there was no measured reason to weaken a documented figure.
+ */
+export const IRIAF_EFFECTIVENESS = 0.2;
 
 interface MunitionSource {
   label: string;
@@ -290,7 +296,7 @@ export function recordPilotLoss(snap: GameSnapshot, faction: FactionId): void {
 export function strikeEffectiveness(snap: GameSnapshot, faction: FactionId, category: string): number {
   const state = snap.endurance;
   if (!state?.systems.sortieFatigue) return 1;
-  if (faction === 'iran' && category === 'air') return 0.2;
+  if (faction === 'iran' && category === 'air') return IRIAF_EFFECTIVENESS;
   return 1;
 }
 
