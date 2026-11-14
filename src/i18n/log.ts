@@ -496,6 +496,10 @@ const OUTCOME_FA: Record<string, string> = {
     'مجتمع هسته‌ای نابود شده، هرمز باز است و نهادهای ایران شکسته‌اند. رژیم نمی‌تواند ادامه دهد.',
   'The campaign has ended. Iran preserved its government, a credible deterrent and enough regional and economic leverage to claim a strategic result.':
     'کارزار به پایان رسید. ایران دولت خود، بازدارندگی معتبر و اهرم منطقه‌ای و اقتصادی کافی برای ادعای نتیجه‌ای راهبردی را حفظ کرد.',
+  'The campaign has ended without a war: no hostile order was ever given, so neither side achieved a strategic result.':
+    'کارزار بدون هیچ جنگی پایان یافت: هیچ دستور خصمانه‌ای صادر نشد، بنابراین هیچ‌کدام از دو طرف به نتیجه راهبردی نرسید.',
+  'The campaign ended with Iran largely passive: it survived, but never imposed a strategic result. Surviving by restraint is not a victory.':
+    'کارزار با انفعال نسبی ایران پایان یافت: رژیم دوام آورد اما هرگز نتیجه‌ای راهبردی تحمیل نکرد. زنده ماندن از راه خویشتن‌داری پیروزی نیست.',
   'The campaign has ended without a strategic result for Iran: its deterrent, cohesion or leverage fell short, whatever the map looked like.':
     'کارزار بدون نتیجه راهبردی برای ایران پایان یافت: بازدارندگی، انسجام یا اهرم آن کافی نبود، هر چه نقشه نشان می‌داد.',
   'The campaign has ended with a coalition strategic result: the nuclear programme is set back, Iran’s launch force is reduced, access holds and domestic support endured.':

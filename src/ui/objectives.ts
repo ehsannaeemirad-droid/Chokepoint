@@ -222,12 +222,24 @@ function iranRows(snap: GameSnapshot, map: TheaterMap): ObjectiveRow[] {
     mapPath(
       'israeliDegradation',
       t('obj.move.israeli'),
-      (p) =>
-        t('obj.cap.capacity', {
-          n: String(p.stats.capacity),
-          threshold: String(p.stats.threshold),
-          turn: String(p.stats.byTurn),
-        }),
+      (p) => {
+        const capacity = Number(p.stats.capacity);
+        const threshold = Number(p.stats.threshold);
+        const byTurn = Number(p.stats.byTurn);
+        // Once the deadline has passed the countdown is a lie: the player needs
+        // to read whether the goal was met or is gone, not "need <30 by T25" on
+        // turn 26.
+        if (snap.turn > byTurn) {
+          return capacity < threshold
+            ? t('obj.cap.capacityMet', { n: String(capacity), turn: String(byTurn) })
+            : t('obj.cap.capacityExpired', { n: String(capacity), turn: String(byTurn) });
+        }
+        return t('obj.cap.capacity', {
+          n: String(capacity),
+          threshold: String(threshold),
+          turn: String(byTurn),
+        });
+      },
     ),
   ];
 }

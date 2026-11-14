@@ -2737,3 +2737,37 @@ button:focus-visible, [role='button']:focus-visible, summary:focus-visible { out
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--line);
 }
+
+/* ---------------------------------------------------------- gauge fit at 360
+   Six gauges do not fit the header row on a 360px phone: the row scrolled and
+   the last two values sat off-screen with nothing to suggest a swipe. Tighter
+   pills fit all six without hiding any. */
+@media (max-width: 430px) {
+  /* Six gauges must fit one 280px row at 360px. Shrinking the chrome is the
+     only option that keeps the header from eating map height — a second row
+     cost 84px of topbar, which is exactly the map dominance this pass is for. */
+  #gauges {
+    gap: 2px;
+  }
+  #gauges .pill {
+    min-width: 0;
+    padding: 3px 6px;
+  }
+  #gauges .pill span {
+    font-size: 10px;
+    letter-spacing: 0;
+  }
+  #gauges .pill b {
+    font-size: 14px;
+  }
+}
+
+/* Ending a turn with nothing queued is a decision, so it reads as a caution
+   rather than as ordinary body copy. */
+.review-empty {
+  border-inline-start: 3px solid var(--warn);
+  background: rgba(217, 155, 31, 0.08);
+  padding: 7px 9px;
+  border-radius: var(--radius-sm);
+  color: #f0dcc0;
+}

@@ -263,6 +263,7 @@ const DICT = {
   'verdict.clear-iran': ['Clear Iranian political victory', 'پیروزی سیاسی روشن ایران'],
   'verdict.narrow-iran': ['Narrow Iranian political victory', 'پیروزی سیاسی کم‌رمق ایران'],
   'verdict.stalemate': ['Stalemate on points', 'بن‌بست در امتیازها'],
+  'verdict.none': ['No verdict — the campaign settled nothing', 'بدون حکم — کارزار چیزی را تعیین نکرد'],
   'verdict.narrow-coalition': ['Narrow coalition political victory', 'پیروزی سیاسی کم‌رمق ائتلاف'],
   'verdict.clear-coalition': ['Clear coalition political victory', 'پیروزی سیاسی روشن ائتلاف'],
   'verdict.decisive-coalition': ['Decisive coalition political victory', 'پیروزی سیاسی قاطع ائتلاف'],
@@ -491,6 +492,11 @@ const DICT = {
     'ظرفیت {n} (کمتر از {threshold} تا نوبت {turn})',
   ],
   'obj.cap.capacityShort': ['capacity {n}', 'ظرفیت {n}'],
+  'obj.cap.capacityMet': ['capacity {n} · target met by T{turn}', 'ظرفیت {n} · هدف تا نوبت {turn} محقق شد'],
+  'obj.cap.capacityExpired': [
+    'capacity {n} · deadline T{turn} passed',
+    'ظرفیت {n} · مهلت نوبت {turn} گذشت',
+  ],
   'obj.cap.complex': ['complex avg {n}%', 'میانگین مجتمع {n}٪'],
   'obj.cap.streak': ['streak {n}/{turns}', 'رشته {n}/{turns}'],
 

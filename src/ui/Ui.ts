@@ -1714,7 +1714,7 @@ export class Ui {
     const review = buildTurnReview(this.game.snap, this.game.map);
     const orderRows =
       review.orders.length === 0
-        ? `<p class="modal-note">${t('review.noOrders')}</p>`
+        ? `<p class="modal-note review-empty">${t('review.noOrders')}</p>`
         : review.orders
             .map((order) => {
               const status = order.errors.length
@@ -1938,7 +1938,7 @@ export class Ui {
           <div class="calc">
             <div><span>${t('scorecard.iran')}</span><b>${s.scorecard.iranTotal}</b></div>
             <div><span>${t('scorecard.coalition')}</span><b>${s.scorecard.coalitionTotal}</b></div>
-            <div class="total"><span>${t('scorecard.verdict')}</span><b>${t(`verdict.${s.scorecard.verdict}`)}</b></div>
+            <div class="total"><span>${t('scorecard.verdict')}</span><b>${drawn ? t('verdict.none') : t(`verdict.${s.scorecard.verdict}`)}</b></div>
           </div>
         </div>`
       : '';

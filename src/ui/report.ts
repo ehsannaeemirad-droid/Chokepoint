@@ -55,6 +55,21 @@ function rankOf(event: ResolveEvent): number {
   return event.tone === 'bad' ? 0 : event.tone === 'good' ? 1 : 2;
 }
 
+/**
+ * Consequences outrank bookkeeping when choosing the headline. Tone alone used
+ * to decide it, which meant a stockpile update that happened to resolve before
+ * combat led the report over a missile that had just hit a base.
+ */
+const CONSEQUENCE =
+  /struck|casualt|intercept|destroy|closed|collapse|escalat|victory|defeat|signed|agreed|breakthrough|ceasefire|retaliat|occup|strangl/i;
+
+export function impactOf(event: ResolveEvent): number {
+  const tone = event.tone === 'bad' ? 3 : event.tone === 'good' || event.tone === 'warn' ? 2 : 1;
+  // Tone decides first — a bad development always leads — and a consequence
+  // breaks the tie against bookkeeping of the same tone.
+  return tone * 10 + (CONSEQUENCE.test(event.text) ? 3 : 0);
+}
+
 export function buildReport(events: ResolveEvent[]): TurnReport {
   const totals = { good: 0, bad: 0, info: 0 };
   for (const event of events) {
@@ -87,7 +102,7 @@ export function buildReport(events: ResolveEvent[]): TurnReport {
     groups.push({ key, events: list });
   }
 
-  const ranked = [...majors].sort((a, b) => rankOf(a) - rankOf(b));
+  const ranked = [...majors].sort((a, b) => impactOf(b) - impactOf(a) || rankOf(a) - rankOf(b));
   const headline = ranked[0] ?? null;
 
   return { headline, groups, minor, totals, total: events.length, majorCount: majors.length };

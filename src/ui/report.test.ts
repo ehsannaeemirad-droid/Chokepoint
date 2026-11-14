@@ -20,6 +20,15 @@ describe('report importance', () => {
 });
 
 describe('turn report', () => {
+  it('leads with the strike, not with the stockpile update that resolved first', () => {
+    const events = [
+      ev('Iran’s production lines added 1 Shahed-136 to the stockpile.', 'good'),
+      ev('Khorramshahr / Emad struck Ali Al Salem / Camp Arifjan (integrity 78%).', 'good'),
+    ];
+    expect(buildReport(events).headline?.text).toContain('struck');
+  });
+
+
   it('leads with the worst development and keeps every event', () => {
     const events = [
       ev('Patriot rearmed 4 interceptors.'),

@@ -1825,3 +1825,43 @@ Checks: typecheck 0, `pnpm test` 49 files / 368 tests, build 0. Screenshots rema
 unavailable this session — the browser window is minimised, so the compositor
 never draws; all of the above was measured through computed geometry and DOM
 state rather than viewed.
+
+## 48. Six defects found by the 30-turn playthrough, fixed
+
+A full Iran campaign played through the UI (once actively, once passively)
+surfaced these; each is fixed and checked.
+
+- **A drawn campaign declared a winner.** The end card titled "Unresolved
+  campaign" still printed "Narrow Iranian political victory" from a scorecard
+  computed independently of the outcome, with Iran 47 vs Coalition 44. A draw
+  now reads "No verdict — the campaign settled nothing"; the axis scores remain
+  as measurements, and only the verdict line changes.
+- **A deadline objective kept its countdown after the deadline.** At turn 26 the
+  bar still said `capacity 100 (need <30 by T25)`. Past the deadline it now reads
+  `capacity 100 · deadline T25 passed` (or `target met`) instead of advertising a
+  countdown that no longer exists.
+- **The Persian end card was half-translated.** Both passivity outcomes were
+  missing from `OUTCOME_FA`, so `faOutcome()` fell through to English under a
+  Persian heading. Both are translated; a scan of every outcome literal in
+  `victory.ts` against the map now finds no gaps.
+- **"Most important" led with the least important event.** Ranking used tone
+  alone and then insertion order, so "production lines added 1 Shahed-136"
+  led reports in which a missile had just hit a base. Ranking is now
+  tone-first with a consequence tie-break (struck / casualty / intercept /
+  destroyed / closed / collapse / escalation), so a bad development still
+  always leads, and within a tone a strike outranks bookkeeping.
+- **The header gauges overflowed at 360px.** Six pills needed 348–382px in a
+  280px row, hiding the last two behind a scroll with no affordance. At ≤430px
+  the pills use tighter padding and 10px labels, so all six fit one row in both
+  languages (measured: no row scroll, no truncated labels, header 163px).
+- **Ending a turn with nothing queued looked like a normal action.** The review
+  already warned in body text; it now renders as a caution — amber leading edge
+  and tint — so "this turn will pass with nothing done" is visible before the
+  primary Resolve button.
+
+Checks: typecheck 0, `pnpm test` 49 files / **370 tests** (two new: report
+headline prefers a strike over a stockpile line; the deadline objective stops
+advertising its deadline), build 0. Re-verified in the app: draw card verdict,
+Persian body, turn-26 objective caption, gauges at 360 in EN and FA, and the
+empty-review caution. Screenshots remain unavailable — the browser window is
+minimised, so nothing was drawn for capture.

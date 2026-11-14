@@ -29,6 +29,15 @@ describe('objectives legibility', () => {
     );
   });
 
+  it('stops advertising a deadline once it has passed', () => {
+    game.start('campaign', 'iran', 42);
+    game.snap.turn = 26; // one turn past israeliDegradation.byTurn
+    const view = buildObjectives(game.snap, game.map);
+    const row = view.rows.find((r) => r.id === 'israeliDegradation');
+    expect(row?.caption).toContain('deadline T25 passed');
+    expect(row?.caption).not.toContain('need <');
+  });
+
   it('previewOrderImpact returns deterministic lines for strike and communicate', () => {
     game.start('campaign', 'usa', 7);
     const strike = previewOrderImpact(game.snap, { kind: 'strike' });
