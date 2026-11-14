@@ -132,6 +132,16 @@ const DICT = {
   'btn.zoomOut': ['Zoom out', 'کوچک‌نمایی'],
   'btn.recentre': ['Centre on selection', 'تمرکز روی انتخاب'],
   'btn.selectUnit': ['SELECT A UNIT', 'انتخاب یگان'],
+  'btn.endTurnCount': ['END TURN · {n}', 'پایان نوبت · {n}'],
+  'obj.cap.regimeSatisfied': [
+    'Regime intact {turns}+ turns · strongest nuclear site {best}%',
+    'رژیم پایدار بیش از {turns} نوبت · قوی‌ترین سایت هسته‌ای {best}٪',
+  ],
+  'obj.cap.oilStreakMax': ['oil shock held {turns}+ turns', 'شوک نفتی بیش از {turns} نوبت'],
+  'outcome.restraint': [
+    'The campaign ended with Iran largely passive: it survived, but never imposed a strategic result. Surviving by restraint is not a victory.',
+    'کارزار با انفعال نسبی ایران پایان یافت: رژیم ماند، اما نتیجه راهبردی تحمیل نکرد. بقا با خویشتن‌داری پیروزی نیست.',
+  ],
   'btn.strike': ['STRIKE', 'حمله'],
 
   'gauge.int': ['INT', 'پدافند'],
@@ -533,6 +543,10 @@ const DICT = {
   'defence.layer.medium': ['Medium range', 'برد متوسط'],
   'defence.layer.point': ['Point defence', 'پدافند نقطه‌ای'],
   'defence.note': ['Detection never guarantees interception.', 'تشخیص هرگز به معنای رهگیری نیست.'],
+  'alert.prewar': [
+    'Pre-war turn: the first hostile order opens the war.',
+    'نوبت پیش از جنگ: نخستین فرمان خصمانه جنگ را آغاز می‌کند.',
+  ],
   'alert.will': ['Political will is nearly spent', 'اراده سیاسی در آستانه اتمام است'],
   'alert.interceptors': ['Interceptor stocks running low', 'موجودی رهگیرها کم است'],
   'alert.hormuz': ['Hormuz disruption above 70%', 'اختلال هرمز از ۷۰٪ گذشته است'],

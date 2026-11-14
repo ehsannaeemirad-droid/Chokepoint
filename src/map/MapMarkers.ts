@@ -312,15 +312,21 @@ export class MapMarkers {
       const friendly = node.operators.includes(this.game.snap.faction);
       el.className = `node-label${friendly ? ' friendly' : ''}${node.strategic ? ' strategic' : ''}`;
       el.innerHTML = `<span class="dot" style="background:${FACTION_COLORS[node.operators[0] ?? node.host] ?? COLORS.textDim}"></span><span class="name">${localName(node)}</span>${state && state.integrity < 100 ? `<span class="int">${Math.round(state.integrity)}%</span>` : ''}`;
+      el.title = localName(node);
+      el.setAttribute('aria-label', localName(node));
       el.onclick = () => this.game.selectHex(hex.col, hex.row);
       const sx = ((tile.x - view.x) / view.width) * cam.width;
       const sy = ((tile.y - view.y) / view.height) * cam.height;
+      const width = el.offsetWidth || 96;
+      // The right-hand tool strip is 56px of chrome: a label that slides under
+      // it is unreadable, so clamp the whole box inside the playable area.
+      const maxX = cam.width - width - 64;
       pending.push({
         el,
         box: {
-          x: Math.round(sx + 12 / zoom),
+          x: Math.max(6, Math.min(Math.round(sx + 12 / zoom), maxX)),
           y: Math.round(sy - 10 / zoom),
-          w: el.offsetWidth || 96,
+          w: width,
           h: el.offsetHeight || 20,
         },
       });

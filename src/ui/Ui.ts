@@ -133,7 +133,7 @@ function template(): string {
     <div class="bar"><i id="hormuz-bar"></i></div>
     <b id="hormuz-val">0%</b>
   </div>
-  <button class="icon-btn lang-btn" data-action="lang:${fa ? 'en' : 'fa'}" data-tip="${t('tip.lang')}">${fa ? 'EN' : 'فا'}</button>
+  <button class="icon-btn lang-btn" data-action="lang:${fa ? 'en' : 'fa'}" data-tip="${t('tip.lang')}">${fa ? 'EN' : 'FA'}</button>
   <div id="alerts" class="alerts" role="status" aria-live="polite" hidden></div>
   <div id="objectives-strip" class="objectives-strip" role="region" aria-label="${t('aria.objectives')}"></div>
 </header>
@@ -525,6 +525,8 @@ export class Ui {
       const scenario = a ?? this.menuScenario;
       const faction = (b ?? this.menuFaction) as PlayableFactionId;
       this.closeModal();
+      this.openPanel = null;
+      this.navOpen = false;
       this.game.start(scenario, faction, Math.floor(Math.random() * 900000) + 1000);
       const hex = this.homeHex();
       if (hex) focusHex(hex);
@@ -692,14 +694,20 @@ export class Ui {
 
     const endTurn = $('#end-turn') as HTMLButtonElement;
     endTurn.disabled = s.status !== 'playing';
+    // Queued orders live on the button that resolves them, so a desync between
+    // the sheet and the queue is visible without opening the review.
+    const queued = this.game.snap.orders.length;
     endTurn.textContent =
-      s.status === 'playing'
-        ? t('btn.endTurn')
-        : s.status === 'won'
+      s.status !== 'playing'
+        ? s.status === 'won'
           ? t('btn.victory')
           : s.status === 'drawn'
             ? t('btn.drawn')
-            : t('btn.defeat');
+            : t('btn.defeat')
+        : queued > 0
+          ? t('btn.endTurnCount', { n: queued })
+          : t('btn.endTurn');
+    endTurn.classList.toggle('has-orders', s.status === 'playing' && queued > 0);
 
     $('#order-strip').innerHTML = this.orderStripHtml();
     $('#sheet').innerHTML = this.sheetHtml();
@@ -971,7 +979,7 @@ export class Ui {
       ${unit.cooldown > 0 ? `<div class="warn-line">${t('sheet.rearming', { n: unit.cooldown })}</div>` : ''}
       ${this.game.snap.faction === 'iran' && def.category === 'missile' ? `<div class="warn-line">${t('sheet.moveRisk')}</div>` : ''}
       ${hostWarn}
-      ${active ? `<div class="warn-line">${t('sheet.tasked')}</div>` : ''}
+      ${active ? `<div class="warn-line tasked">${t('sheet.tasked')}</div>` : ''}
       ${mode !== 'idle' ? `<div class="mode-hint">${t(this.modeKey(mode))} <button data-action="cancel-mode">${t('btn.cancel')}</button></div>` : ''}
       <div class="actions">${actions.join('')}</div>
       <p class="note">${def.note}</p>
@@ -1869,6 +1877,10 @@ export class Ui {
     const hadReport = this.cinEvents.length > 0 || this.cinMinor.length > 0;
     this.revealAll();
     $('#cinematic').classList.remove('active');
+    // The resolved turn is a new board: no sheet or drawer from the old one.
+    this.openPanel = null;
+    this.navOpen = false;
+    this.game.clearSelection();
     // One line to keep the player oriented once the report is dismissed; the
     // log keeps the detail.
     if (hadReport) {
@@ -2143,7 +2155,9 @@ export class Ui {
   private loadSlot(slot: SlotId): void {
     const ok = this.game.load(slot);
     this.showToast(ok ? t('toast.loaded', { slot }) : t('toast.nothingToLoad'), ok ? 'good' : 'warn');
-    if (ok) this.closeModal();
+    // A saved turn never inherits the panels of the session it was saved from.
+    if (ok) this.closeAllPanels();
+    else this.closeModal();
   }
 
   private openModal(html: string): void {
@@ -2157,6 +2171,20 @@ export class Ui {
     modal.classList.add('active');
     const target = modal.querySelector<HTMLElement>('button, [href], input, select, textarea');
     target?.focus();
+  }
+
+  /**
+   * A panel is a view of the current turn, so every state change that replaces
+   * the turn (resolve, load, new campaign, review) tears all of them down.
+   * Leaving a stale sheet or drawer open over a new turn was the single most
+   * confusing thing in the build.
+   */
+  private closeAllPanels(): void {
+    this.openPanel = null;
+    this.navOpen = false;
+    this.closeModal();
+    this.game.clearSelection();
+    this.render();
   }
 
   private closeModal(): void {
@@ -2293,7 +2321,14 @@ export class Ui {
   private renderCoach(): void {
     const el = document.getElementById('coach');
     if (!el) return;
-    if (this.coachDismissed || this.game.snap.turn > 1 || this.game.snap.scenarioId === 'tutorial') {
+    // The hint has done its job the moment the player queues an order, so it
+    // retreats on its own rather than sitting over the board.
+    if (
+      this.coachDismissed ||
+      this.game.snap.turn > 1 ||
+      this.game.snap.orders.length > 0 ||
+      this.game.snap.scenarioId === 'tutorial'
+    ) {
       el.hidden = true;
       el.innerHTML = '';
       return;
@@ -2307,6 +2342,7 @@ export class Ui {
         <li>${fa ? 'سه راه پیروزی شما در نوار اهداف بالاست.' : 'Your three win paths are in the objectives strip above.'}</li>
         <li>${fa ? 'دو متری که می‌توانند شما را شکست دهند: فشار داخلی و شوک نفتی.' : 'Two meters that can end you: domestic pressure and the oil shock.'}</li>
         <li>${fa ? 'یک واحد را انتخاب کنید → فهرست اهداف → پیش‌بینی اثر را ببینید.' : 'Select a unit → target list → read the impact preview.'}</li>
+        ${this.game.snap.warStarted === false ? `<li class="coach-note">${t('alert.prewar')}</li>` : ''}
       </ol>
       <button class="primary" data-action="coach-dismiss">${fa ? 'متوجه شدم' : 'Got it'}</button>
     </div>`;

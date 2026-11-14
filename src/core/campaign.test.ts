@@ -193,3 +193,83 @@ describe('buried targets', () => {
     expect(nodeState(game.snap, 'fordow').integrity).toBeLessThan(55);
   });
 });
+
+describe('a scripted Iranian campaign', () => {
+  beforeEach(() => {
+    const store = new Map<string, string>();
+    Object.defineProperty(globalThis, 'localStorage', {
+      value: {
+        getItem: (k: string) => store.get(k) ?? null,
+        setItem: (k: string, v: string) => store.set(k, v),
+        removeItem: (k: string) => store.delete(k),
+      },
+      configurable: true,
+      writable: true,
+    });
+  });
+
+  it('fires missiles and lays mines across a full campaign, and resolves what it queues', () => {
+    const game = new Game();
+    game.start('campaign', 'iran', 20260101);
+    const startHormuz = game.snap.meters.hormuz;
+    let strikes = 0;
+    let mines = 0;
+    let guard = 0;
+
+    while (game.snap.status === 'playing' && guard < 31) {
+      for (const unit of game.snap.units.filter(
+        (u) => u.faction === 'iran' && unitType(u.typeId).category === 'missile' && u.magazine > 0,
+      )) {
+        for (const node of game.map.nodes) {
+          const defender = defenderOfNode(node);
+          const hex = game.map.nodeHexOf(node.id);
+          if (!defender || !hex || !hostileTo('iran', defender)) continue;
+          if (hexDistance({ col: unit.col, row: unit.row }, hex) > strikeRange(game.snap, unit)) continue;
+          const result = game.queueOrder({
+            kind: 'strike',
+            unitUid: unit.uid,
+            col: hex.col,
+            row: hex.row,
+            nodeId: node.id,
+          });
+          if (result.ok) {
+            strikes++;
+            break;
+          }
+        }
+      }
+
+      const miner = game.snap.units.find((u) => u.typeId === 'mine_layer');
+      if (
+        miner &&
+        game.queueOrder({ kind: 'mine', unitUid: miner.uid, col: miner.col, row: miner.row, count: 3 }).ok
+      ) {
+        mines++;
+      }
+
+      const queued = game.snap.orders.length;
+      const { events } = game.endTurn();
+      // The review reads the same queue the resolve consumes: nothing may be
+      // dropped between the two without an explicit logged reason.
+      const recorded = game.snap.orderLog.at(-1)?.orders.length ?? 0;
+      expect(recorded).toBe(queued);
+      const dropped = events.filter((e) => e.text.startsWith('Order dropped')).length;
+      expect(dropped).toBe(0);
+      expect(game.snap.orders).toHaveLength(0);
+      guard++;
+    }
+
+    expect(strikes).toBeGreaterThan(10);
+    expect(mines).toBeGreaterThan(0);
+    expect(game.snap.turn).toBeGreaterThan(5);
+    // Every meter must stay a real number for the whole campaign: a NaN here
+    // silently blanks the header and the victory paths that read it.
+    for (const [key, value] of Object.entries(game.snap.meters)) {
+      expect(Number.isFinite(value), `${key} went non-finite`).toBe(true);
+    }
+    expect(game.snap.meters.hormuz).toBeGreaterThanOrEqual(0);
+    expect(game.snap.meters.hormuz).toBeLessThanOrEqual(100);
+    expect(Number.isFinite(startHormuz)).toBe(true);
+    expect(['won', 'lost', 'drawn']).toContain(game.snap.status);
+  });
+});

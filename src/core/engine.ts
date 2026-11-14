@@ -201,14 +201,14 @@ export function reserveOrder(snap: GameSnapshot, reserved: OrderReservations, or
       return;
     case 'mine':
       reserved.units.add(order.unitUid);
-      reserved.mines += order.count;
+      reserved.mines += sortieCount(order);
       return;
     case 'clear':
     case 'escort':
       reserved.units.add(order.unitUid);
       return;
     case 'produce':
-      reserved.iranResources += productionCost(order.unitTypeId) * order.count;
+      reserved.iranResources += productionCost(order.unitTypeId) * sortieCount(order);
       return;
     case 'reinforce': {
       const pkg = REINFORCEMENTS.find((r) => r.id === order.packageId);
@@ -235,6 +235,19 @@ export function reserveOrder(snap: GameSnapshot, reserved: OrderReservations, or
     default:
       return;
   }
+}
+
+/**
+ * How many sorties or production runs an order asks for.
+ *
+ * `count` is optional in the order type, and `Math.floor(undefined)` is NaN:
+ * a mine order queued without a count used to poison the whole Hormuz meter
+ * with NaN, silently, because the reservation arithmetic never complained.
+ */
+export function sortieCount(order: { count?: number }): number {
+  const n = Math.floor(Number(order.count));
+  if (!Number.isFinite(n) || n < 1) return 1;
+  return Math.min(MINE_SORTIE_MAX, n);
 }
 
 /** Reservations implied by everything already queued. */
@@ -320,7 +333,7 @@ export function validateOrder(
         return reject('unit-tasked', 'That group has already been tasked this turn');
       }
       if (!isSeaHex(map, order.col, order.row)) return reject('mines-in-water', 'Mines can only be laid in water');
-      const count = Math.max(1, Math.min(MINE_SORTIE_MAX, Math.floor(order.count)));
+      const count = sortieCount(order);
       const dist = hexDistance({ col: unit.col, row: unit.row }, { col: order.col, row: order.row });
       if (dist > unitType(unit.typeId).rng) {
         return reject('lay-out-of-range', 'Lay point out of range', { dist, range: unitType(unit.typeId).rng });
@@ -351,7 +364,7 @@ export function validateOrder(
       if (snap.faction !== 'iran') return reject('iran-production-only', 'Only Iran produces munitions');
       const cost = productionCost(order.unitTypeId);
       if (cost <= 0) return reject('unknown-production', 'Unknown production line');
-      if (snap.iran.resources - reserved.iranResources < cost * order.count) {
+      if (snap.iran.resources - reserved.iranResources < cost * sortieCount(order)) {
         return reject('not-enough-resources', 'Not enough war resources for that order');
       }
       const line = lineForMunition(order.unitTypeId);
@@ -602,7 +615,7 @@ export function applyOrder(
     case 'mine': {
       const unit = findUnit(snap, order.unitUid);
       if (!unit) return;
-      const laid = layMines(snap, map, order.col, order.row, order.count);
+      const laid = layMines(snap, map, order.col, order.row, sortieCount(order));
       events.push({
         text:
           laid > 0
@@ -652,12 +665,12 @@ export function applyOrder(
         });
         return;
       }
-      snap.iran.resources -= cost * order.count;
+      snap.iran.resources -= cost * sortieCount(order);
       // Output tracks the average condition of the surviving facilities.
       const boost = (snap.iranProductionBoost ?? 0) > 0 ? 1.5 : 1;
       const output = Math.max(
         1,
-        Math.round(order.count * productionCapacity(map.nodes, snap, line) * boost),
+        Math.round(sortieCount(order) * productionCapacity(map.nodes, snap, line) * boost),
       );
       // Production builds airframes and warheads separately, then mates them.
       const cls = deliveryClassFor(order.unitTypeId);

@@ -310,6 +310,19 @@ export function usDomesticLoss(snap: GameSnapshot): boolean {
   return d.pressure >= collapseAt && (snap.meters.domesticPressureStreak ?? 0) >= turns;
 }
 
+/**
+ * Did Iran actually do anything? A campaign where the regime merely sat still
+ * is not an Iranian strategic result, however much it survived: passivity is
+ * scored as a draw rather than promoted to a win.
+ */
+const HOSTILE_ORDER_KINDS = new Set(['strike', 'mine', 'cyber', 'special', 'nuclear']);
+
+export function iranTookAction(snap: GameSnapshot): boolean {
+  return (snap.orderLog ?? []).some((entry) =>
+    entry.orders.some((order) => HOSTILE_ORDER_KINDS.has(order.kind)),
+  );
+}
+
 /** Check every faction's victory/defeat conditions (player-relative result). */
 export function checkOutcome(snap: GameSnapshot, map: TheaterMap): Outcome {
   const bases = operationalGulfBases(snap, map);
@@ -447,7 +460,14 @@ export function checkOutcome(snap: GameSnapshot, map: TheaterMap): Outcome {
         };
       }
       const achieved = victoryPaths(snap, map).some((p) => p.satisfied);
-      const won = achieved || iranScore >= IRAN_SCORE_THRESHOLD;
+      const earned = achieved || iranScore >= IRAN_SCORE_THRESHOLD;
+      // War was declared but never waged: surviving the clock alone is not a
+      // strategic result, so an otherwise-winning campaign settles as a draw.
+      // A defeat stays a defeat: passivity cannot save the regime either.
+      if (earned && !iranTookAction(snap)) {
+        return { status: 'drawn', outcome: 'The campaign ended with Iran largely passive: it survived, but never imposed a strategic result. Surviving by restraint is not a victory.' };
+      }
+      const won = earned;
       return {
         status: won ? 'won' : 'lost',
         outcome: won

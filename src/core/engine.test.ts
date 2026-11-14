@@ -94,3 +94,31 @@ describe('campaign engine', () => {
     expect(game.snap.log.length).toBeGreaterThan(2);
   });
 });
+
+describe('order counts', () => {
+  it('treats a missing sortie count as one instead of producing NaN', async () => {
+    const { orderReservations, sortieCount } = await import('./engine');
+    expect(sortieCount({})).toBe(1);
+    expect(sortieCount({ count: undefined })).toBe(1);
+    expect(sortieCount({ count: Number.NaN })).toBe(1);
+    expect(sortieCount({ count: 0 })).toBe(1);
+    // Rounded down, then capped at the mine-sortie maximum (3).
+    expect(sortieCount({ count: 4.7 })).toBe(3);
+
+    const game = new Game();
+    game.start('campaign', 'iran', 4242);
+    const miner = game.snap.units.find((u) => u.typeId === 'mine_layer')!;
+    game.snap.orders = [
+      {
+        kind: 'mine',
+        unitUid: miner.uid,
+        col: miner.col,
+        row: miner.row,
+        count: undefined as unknown as number,
+      },
+    ];
+    const reserved = orderReservations(game.snap);
+    expect(Number.isFinite(reserved.mines)).toBe(true);
+    expect(reserved.mines).toBe(1);
+  });
+});

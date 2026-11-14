@@ -1686,3 +1686,72 @@ current Air Force fact sheet, which carries no date; aircraft ranges are theatre
 radii under tanker support, not the published radius converted to hexes, and each
 mapping says so. Interceptor engagement ranges for Patriot come from an advocacy
 organisation's summary of public figures, hence the medium confidence.
+
+## 45. Update brief: queuing, panels, mobile layout and end-game passivity
+
+The brief's first item was an order-queuing failure: a strike that toasted as
+queued and then reached the review as "0 orders". Reproducing it on the normal
+path (select a launcher, tap a target row, open END TURN) showed one valid order
+in the review, so the queue itself was not drifting. The real defect was hiding
+one layer down: **`count` is required on mine and production orders, and a
+missing value became `NaN`**. `reserved.mines += undefined` poisoned the
+reservation arithmetic, `Math.floor(undefined)` reached `layMines`, and the
+Hormuz and oil meters went `NaN` — silently, because nothing asserts finiteness.
+A 30-turn scripted Iranian campaign now proves this is fixed: every meter stays
+finite for the whole run, and every queued order is the one the turn resolves.
+
+- **`sortieCount(order)`** normalises the count in one place: non-finite, zero
+  and negative all mean one sortie, and the value is capped at the mine-sortie
+  maximum. Reservations, validation and application all use it.
+- **Queue feedback.** The END TURN button now carries the queued count
+  ("END TURN · 2") and a highlighted state, so the player can see the queue
+  without opening the review — the exact place a desync would show. The unit
+  card's "Order already queued" is a full-width amber bar instead of a grey note.
+- **Panel teardown.** `closeAllPanels()` clears the slide panels, the nav drawer,
+  the modal and the selection, and runs when the resolution overlay closes, when
+  a save loads, and when a new campaign starts. Verified in the browser: after
+  CONTINUE, no panel is open, nothing is selected, and the sheet shows its empty
+  state.
+- **Streak display.** A satisfied regime streak no longer prints "16/10": the
+  caption switches to "Regime intact 10+ turns · strongest nuclear site 100%",
+  and the oil and occupation streaks clamp the same way.
+- **Coach card.** It already had a close button; it now also retires by itself as
+  soon as the player queues an order, sits below the layer bar (z 12 instead of
+  22) and clears the command bar at the bottom.
+- **Passive Iran.** An Iranian campaign that survived the clock without ever
+  giving a hostile order now settles as a **draw** with a "surviving by restraint
+  is not a victory" outcome, instead of a narrow win. A defeat still stays a
+  defeat — passivity cannot rescue the regime either.
+- **Pre-war turn.** The coach explains that the first hostile order opens the
+  war, rather than a banner claiming strikes resolve later (they resolve the same
+  turn; the old wording would have been a lie).
+
+### Mobile layout
+
+- **Top status bar**: the gauge row scrolls instead of squeezing, labels ellipsis
+  rather than collide, and the objectives strip became one scrollable row of
+  compact cards. Total header height at 360px went from **268px to 163px**.
+- **Action buttons** no longer truncate: `flex: 1 1 auto; min-width: max-content`
+  means the row wraps rather than showing "ESCOR"/"DESELE".
+- **Touch targets**: 46px floor on coarse pointers, 52px strike rows, 50px force
+  rows, 54px CONTINUE.
+- **Map labels**: 32px instead of the 44px slab the touch-target floor had forced
+  onto nameplates, ellipsis with the full name in the tooltip and the accessible
+  label, and the label box is clamped left of the 56px tool strip.
+- **Empty state**: the large "SELECT A UNIT" bar only exists when nothing is
+  selected; a selected unit shows its card with DESELECT.
+
+### Verification
+
+Typecheck 0, `pnpm test` 49 files / 368 tests, build 0. New tests: the queue →
+review path (1 order, valid, counted), next turn starts empty, a 30-turn Iranian
+campaign with missile strikes and mine laying that asserts queue == resolved
+count, no dropped orders, finite meters and a terminal outcome, plus the
+passivity outcome and the sortie-count normalisation.
+
+Measured in the running app at 360px and 430px, English and Persian: no clipped
+chips, no overlaps between top-bar children, no horizontal page overflow, no
+truncated action buttons. Not verified: a real 30-turn campaign played by hand
+through the UI (the scripted equivalent is the test above), and the visual
+consistency pass on shadows and corner radii is partial — the sheet, modal and
+panels were not systematically unified.

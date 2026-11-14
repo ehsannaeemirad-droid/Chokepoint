@@ -184,11 +184,15 @@ function iranRows(snap: GameSnapshot, map: TheaterMap): ObjectiveRow[] {
       'regimeSurvival',
       t('obj.move.regime'),
       (p) =>
-        t('obj.cap.regimeStreak', {
-          streak: String(p.stats.streak),
-          turns: String(p.stats.turns),
-          best: String(p.stats.best),
-        }),
+        // Never print a numerator larger than the target: once the clock is met
+        // the streak is a fact, not a running score (16/10 read as a bug).
+        Number(p.stats.streak) >= Number(p.stats.turns)
+          ? t('obj.cap.regimeSatisfied', { turns: String(p.stats.turns), best: String(p.stats.best) })
+          : t('obj.cap.regimeStreak', {
+              streak: String(p.stats.streak),
+              turns: String(p.stats.turns),
+              best: String(p.stats.best),
+            }),
     ),
     mapPath(
       'noOccupation',
@@ -196,20 +200,24 @@ function iranRows(snap: GameSnapshot, map: TheaterMap): ObjectiveRow[] {
       (p) =>
         p.satisfied
           ? t('obj.cap.noOccupation')
-          : t('obj.cap.occupationStreak', {
-              streak: String(p.stats.streak),
-              turns: String(p.stats.turns),
-            }),
+          : Number(p.stats.streak) >= Number(p.stats.turns)
+            ? t('obj.cap.occupationStreak', { streak: `${p.stats.turns}+`, turns: String(p.stats.turns) })
+            : t('obj.cap.occupationStreak', {
+                streak: String(p.stats.streak),
+                turns: String(p.stats.turns),
+              }),
     ),
     mapPath(
       'oilShock',
       t('obj.move.oilShock'),
       (p) =>
-        t('obj.cap.oilPath', {
-          price: String(p.stats.price),
-          streak: String(p.stats.streak),
-          turns: String(p.stats.turns),
-        }),
+        Number(p.stats.streak) >= Number(p.stats.turns)
+          ? t('obj.cap.oilStreakMax', { turns: String(p.stats.turns) })
+          : t('obj.cap.oilPath', {
+              price: String(p.stats.price),
+              streak: String(p.stats.streak),
+              turns: String(p.stats.turns),
+            }),
     ),
     mapPath(
       'israeliDegradation',
@@ -258,7 +266,13 @@ function enemyThreatRow(snap: GameSnapshot, map: TheaterMap, faction: PlayableFa
     enemy: true,
     caption:
       worst.id === 'oilShock'
-        ? t('obj.cap.streak', { n: String(worst.stats.streak), turns: String(worst.stats.turns) })
+        ? t('obj.cap.streak', {
+            n:
+              Number(worst.stats.streak) >= Number(worst.stats.turns)
+                ? `${worst.stats.turns}+`
+                : String(worst.stats.streak),
+            turns: String(worst.stats.turns),
+          })
         : t('obj.cap.capacityShort', { n: String(worst.stats.capacity) }),
   };
 }

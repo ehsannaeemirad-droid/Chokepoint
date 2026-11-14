@@ -169,8 +169,12 @@ describe('checkOutcome with the four paths', () => {
     h = setup('iran', 20260101);
     h.snap.victory = structuredClone(DEFAULT_VICTORY);
     // These cases score a campaign that actually ran; a campaign in which the
-    // war never starts is drawn instead (see the §27 test below).
+    // war never starts, or is declared but never waged, is drawn instead (see
+    // the §27 tests below). One hostile order is what "waged" means.
     h.snap.warStarted = true;
+    h.snap.orderLog = [
+      { turn: 2, orders: [{ kind: 'strike', unitUid: 'fateh', col: 40, row: 30 }] } as never,
+    ];
   });
 
   it('ends the campaign immediately when the oil-shock streak completes', () => {
@@ -325,5 +329,48 @@ describe('save compatibility', () => {
     expect(restored.snap.victory).toEqual(DEFAULT_VICTORY);
     expect(restored.snap.meters.regimeIntactStreak).toBe(0);
     expect(restored.snap.meters.oilShockStreak).toBe(0);
+  });
+});
+
+describe('passivity is not an Iranian victory', () => {
+  it('settles a never-fought war as a draw', () => {
+    const { snap, map } = setup('iran');
+    snap.warStarted = false;
+    snap.turn = snap.maxTurns;
+    expect(checkOutcome(snap, map).status).toBe('drawn');
+  });
+
+  it('settles a declared but never-waged war as a draw even if the clock is met', () => {
+    const { snap, map } = setup('iran', 20260101);
+    snap.victory = structuredClone(DEFAULT_VICTORY);
+    snap.warStarted = true;
+    snap.phase = 'war';
+    snap.turn = snap.maxTurns;
+    // The regime path is satisfied, so this would have been a win before the
+    // passivity rule: no hostile order was ever given.
+    snap.meters.regimeIntactStreak = 10;
+    snap.orderLog = [];
+    expect(checkOutcome(snap, map).status).toBe('drawn');
+    expect(checkOutcome(snap, map).outcome).toMatch(/restraint/i);
+  });
+
+  it('does not treat a non-hostile order as having waged the war', () => {
+    const { snap, map } = setup('iran', 20260101);
+    snap.victory = structuredClone(DEFAULT_VICTORY);
+    snap.warStarted = true;
+    snap.turn = snap.maxTurns;
+    snap.meters.regimeIntactStreak = 10;
+    snap.orderLog = [{ turn: 3, orders: [{ kind: 'hold', unitUid: 'x' }] } as never];
+    expect(checkOutcome(snap, map).status).toBe('drawn');
+  });
+
+  it('lets a war that was actually fought reach the normal settlement', () => {
+    const { snap, map } = setup('iran', 20260101);
+    snap.victory = structuredClone(DEFAULT_VICTORY);
+    snap.warStarted = true;
+    snap.turn = snap.maxTurns;
+    snap.meters.regimeIntactStreak = 10;
+    snap.orderLog = [{ turn: 3, orders: [{ kind: 'strike', unitUid: 'x', col: 1, row: 1 }] } as never];
+    expect(checkOutcome(snap, map).status).toBe('won');
   });
 });

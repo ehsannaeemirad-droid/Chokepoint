@@ -204,8 +204,12 @@ button.primary:active {
 
 .pill span {
   font-size: 9px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   color: var(--dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .pill b {
@@ -576,6 +580,7 @@ button.primary:active {
   color: var(--dim);
   white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .stat b {
@@ -590,11 +595,39 @@ button.primary:active {
   margin-top: 9px;
 }
 
+/* "Order already queued" is a state, not a footnote: it gets a full-width bar
+   so a second tap cannot be misread as a new order. */
+.warn-line.tasked {
+  display: block;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(240, 180, 41, 0.45);
+  border-left: 3px solid rgb(240, 180, 41);
+  border-radius: 6px;
+  background: rgba(240, 180, 41, 0.1);
+  color: #ffd98a;
+  font-size: 12px;
+  line-height: 1.35;
+}
+html[dir='rtl'] .warn-line.tasked {
+  border-left-width: 1px;
+  border-right-width: 3px;
+}
+
+/* Queued orders are the thing the next tap resolves, so the button says so. */
+.command-bar button.has-orders {
+  box-shadow: inset 0 0 0 1px rgba(240, 180, 41, 0.85);
+}
+
 .actions button {
-  flex: 1 1 0;
-  min-width: 74px;
+  /* Never shrink below the label: a wrapped second row is better than
+     "ESCOR" or "DESELE". */
+  flex: 1 1 auto;
+  min-width: max-content;
   min-height: 48px;
+  padding-inline: 12px;
   font-size: 13px;
+  white-space: nowrap;
 }
 
 /* ------------------------------------------------------------- strike list */
@@ -638,9 +671,9 @@ button.primary:active {
   align-items: center;
   gap: 8px;
   width: 100%;
-  min-height: 46px;
+  min-height: 52px;
   margin-bottom: 4px;
-  padding: 5px 8px;
+  padding: 7px 8px;
   text-align: start;
   letter-spacing: 0;
   background: rgba(211, 47, 47, 0.08);
@@ -928,8 +961,8 @@ button.primary:active {
   align-items: center;
   gap: 7px;
   width: 100%;
-  min-height: 38px;
-  padding: 0 8px;
+  min-height: 50px;
+  padding: 4px 8px;
   margin-bottom: 4px;
   background: rgba(255, 255, 255, 0.03);
   border-color: var(--line);
@@ -1193,6 +1226,26 @@ button.primary:active {
 
 .node-label.strategic {
   border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* A long facility name ends in an ellipsis instead of being cut mid-word; the
+   full name stays in the tooltip and the accessible label. */
+.node-label .name {
+  max-width: 15ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .node-label {
+    font-size: 10px;
+    min-height: 20px;
+    padding: 1px 5px;
+  }
+  .node-label .name {
+    max-width: 12ch;
+  }
 }
 
 .node-label.friendly {
@@ -1556,7 +1609,10 @@ button.primary:active {
 
 .cin-card footer button {
   width: 100%;
-  min-height: 46px;
+  min-height: 54px;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
 }
 
 /* ------------------------------------------------------------------ tooltips */
@@ -1772,8 +1828,19 @@ html[dir='rtl'] .map-controls {
     padding-right: 0;
   }
 
+  /* Scroll the gauge row rather than cramming five labels into 360px: a
+     clipped label reads as a broken header, a scrolled one does not. */
   .pill {
-    flex: 1 1 0;
+    flex: 0 0 auto;
+    min-width: 58px;
+    scroll-snap-align: start;
+  }
+
+  .gauges {
+    gap: 6px;
+    padding-inline: 2px;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
   }
 
   .tutorial-banner {
@@ -2110,8 +2177,10 @@ button:focus-visible, [role='button']:focus-visible, summary:focus-visible { out
 
 /* Phase 4 closeout: touch-target floor on phone/coarse-pointer layouts. */
 @media (max-width: 560px), (pointer: coarse) {
-  button { min-height: 44px !important; min-width: 44px !important; }
-  .node-label { min-height: 44px !important; padding-block: 10px; }
+  button { min-height: 46px !important; min-width: 44px !important; }
+  /* Map labels are not buttons: a 44px floor turned every nameplate into a
+     slab that covered the terrain it described. */
+  .node-label { min-height: 32px !important; padding-block: 5px; }
   .modal-card header button, .panel-head button, .cin-card header button { min-width: 44px; min-height: 44px; }
   .order-chip button, .slot-actions button, .mode-hint button, .map-controls button { min-width: 44px; min-height: 44px; }
 }
@@ -2230,9 +2299,11 @@ button:focus-visible, [role='button']:focus-visible, summary:focus-visible { out
 .coach {
   position: absolute;
   left: 50%;
-  bottom: 208px;
+  /* Sits above the sheet, below the layer bar and the panels it must never
+     cover, and clear of the command bar at the bottom. */
+  bottom: calc(208px + var(--safe-bottom, 0px));
   transform: translateX(-50%);
-  z-index: 22;
+  z-index: 12;
   width: min(430px, calc(100vw - 20px));
 }
 
@@ -2418,3 +2489,64 @@ button:focus-visible, [role='button']:focus-visible, summary:focus-visible { out
   margin: 0 0 4px;
 }
 
+
+/* --------------------------------------------------------------- phone layout
+   These overrides live at the end of the sheet on purpose: the base rules for
+   .obj-row and .pill are declared after the first mobile block, so anything
+   written there loses on source order. */
+
+@media (max-width: 560px) {
+  /* One scrollable objectives row instead of a three-row wall. */
+  .objectives-strip .obj-inner {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 5px;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .objectives-strip .obj-inner::-webkit-scrollbar {
+    display: none;
+  }
+  .obj-row {
+    flex: 0 0 auto;
+    min-width: 128px;
+    max-width: 128px;
+    min-height: 46px;
+    max-height: 46px;
+    padding: 4px 7px;
+    grid-template-rows: auto 5px auto;
+    scroll-snap-align: start;
+  }
+  .obj-row .obj-name {
+    font-size: 10px;
+  }
+  .obj-row .obj-cap {
+    font-size: 9px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .obj-grade {
+    flex: 0 0 auto;
+    min-height: 46px;
+    padding: 4px 8px;
+  }
+
+  /* The gauges scroll rather than squeezing labels into each other. */
+  .gauges .pill {
+    flex: 0 0 auto;
+    min-width: 58px;
+  }
+}
+
+@media (max-width: 380px) {
+  .pill {
+    min-width: 52px;
+    padding: 3px 5px;
+  }
+  .obj-row {
+    min-width: 118px;
+    max-width: 118px;
+  }
+}
