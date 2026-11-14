@@ -32,6 +32,7 @@ const CATEGORY_ORDER: HistoricalReference['category'][] = [
   'nuclear-material',
   'scenario',
   'politics',
+  'endurance',
 ];
 
 const CATEGORY_TITLE: Record<HistoricalReference['category'], string> = {
@@ -42,6 +43,7 @@ const CATEGORY_TITLE: Record<HistoricalReference['category'], string> = {
   'nuclear-material': 'Nuclear material',
   scenario: 'Scenario starting values',
   politics: 'Political and economic context',
+  endurance: 'Endurance constants (game-scale conversions)',
 };
 
 /** Human-readable unit slug; the raw strings are storage keys, not display text. */

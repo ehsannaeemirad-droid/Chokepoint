@@ -25,7 +25,7 @@ import logisticsData from '../data/logistics.json';
  * packages": one air strike order is one package of roughly 30 precision
  * munitions. 4,400 JASSM therefore read as 147 packages, not 4,400 sorties.
  */
-const MUNITIONS_PER_PACKAGE = 30;
+export const MUNITIONS_PER_PACKAGE = 30;
 
 /** Game-scale sortie ceiling for coalition air before endurance bites. */
 export const COALITION_AIR_SORTIES_PER_TURN = 8;
@@ -37,13 +37,13 @@ export const COALITION_AIR_SORTIES_PER_TURN = 8;
 export const ARROW_DEPLETION_TURN = 5;
 
 /** THAAD was ~50% expended across a 30-turn campaign. */
-const THAAD_DRAIN_PER_TURN = 1;
+export const THAAD_DRAIN_PER_TURN = 1;
 
 /** Industry switches to surge after this share of the starting stock is spent. */
-const MOBILIZATION_DEPLETION = 0.6;
+export const MOBILIZATION_DEPLETION = 0.6;
 
 /** Surge production needs this many turns to arrive after the decision. */
-const MOBILIZATION_WARMUP_TURNS = 2;
+export const MOBILIZATION_WARMUP_TURNS = 2;
 
 /** Sorties per turn that count as high tempo for a coalition air arm. */
 export const HIGH_TEMPO_SORTIES = 4;

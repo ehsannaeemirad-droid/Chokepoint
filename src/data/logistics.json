@@ -308,7 +308,9 @@
         "war_reduction_pct": 55,
         "f35_sorties_per_day": {
           "prewar": 2.2,
-          "wartime": 1.3
+          "wartime": 1.3,
+          "confidence": "confirmed",
+          "source": "Brief B module 3: Israeli sortie reporting"
         },
         "homeland_defense_diversion": 0.7,
         "pilot_fatigue_threshold": "12-hour shifts, up to 3 missions/day",
@@ -326,7 +328,9 @@
         "pilot_replacement_years": 5,
         "tanker_sortie_cap": {
           "value": null,
-          "note": "tanker availability is the decisive constraint; exact ceiling not published"
+          "note": "tanker availability is the decisive constraint; exact ceiling not published",
+          "confidence": "data_gap",
+          "source": "Brief B modules 3-4: tanker ceiling not published"
         },
         "confidence": "data_gap",
         "source": "Brief B modules 3-4; sortie ceilings unquantified"
@@ -361,7 +365,9 @@
         "carriers": 2,
         "destroyers": 12,
         "total_ships": 20,
-        "personnel": 20000
+        "personnel": 20000,
+        "confidence": "confirmed",
+        "source": "Brief B module 4: US Navy deployment reporting"
       },
       "repair_hub": "Diego Garcia (~2,500 miles); Bahrain logistics damaged at war start",
       "tanker_fleet_below_100_from": "2026-03",
@@ -391,7 +397,9 @@
       "decline_curve": {
         "surge_turns": 4,
         "surge_multiplier": 1.5,
-        "steady_state_multiplier": 0.6
+        "steady_state_multiplier": 0.6,
+        "confidence": "estimate_range",
+        "source": "Brief B module 5: production estimates conflict across sources"
       },
       "confidence": "estimate_range",
       "source": "Brief B module 5; production rates conflict across Western estimates (50 vs 100-300 vs 3,000/month)"
@@ -451,7 +459,9 @@
       "reservists_mobilized": 450000,
       "gdp_growth_forecast": {
         "before": 5.2,
-        "after": 4.7
+        "after": 4.7,
+        "confidence": "confirmed",
+        "source": "Brief B module 8: Bank of Israel forecast"
       },
       "war_cost_usd": [
         11500000000,
@@ -459,7 +469,9 @@
       ],
       "budget_deficit_ceiling_pct": {
         "before": 3.9,
-        "after": 5.1
+        "after": 5.1,
+        "confidence": "confirmed",
+        "source": "Brief B module 8: Israeli Finance Ministry"
       },
       "output_gap_pct": 9,
       "confidence": "confirmed",

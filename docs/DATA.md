@@ -149,6 +149,27 @@ as a guaranteed hit probability. Hex ranges are theatre distances on a compresse
 | congressional-support | 60 index | game abstraction | game-abstraction / low | Congress 60 at start, falling with casualties and escalation, recovering on quiet turns. Restrictions at 35, suspension at 20. |
 | oil-price | 60 index | game abstraction | game-abstraction / low | Index 60 at start; rises with Hormuz disruption and sustained closure, clamped 40-220. The 130 threshold for the oil-shock path is a scenario constant. |
 
+## Endurance constants (game-scale conversions)
+
+| Item | Value | Source | Confidence | Game mapping |
+| --- | --- | --- | --- | --- |
+| endurance:MUNITIONS_PER_PACKAGE | 20–40 munitions_per_strike_order | game abstraction | game-abstraction / medium | Strike package accounting: stockpiles divided by this reach game-scale sorties rather than individual rounds. |
+| endurance:HOMELAND_DIVERSION | 0.6–0.8 share_of_sorties_retained | Brief B module 3 (Israeli sortie diversion) | game-abstraction / medium | Israeli sortie availability: the coalition cap is multiplied by this on the turn after a homeland hit. |
+| endurance:IRAN_STOCKPILE_ASSEMBLY | 200–500 missiles | Brief B module 5 (stockpile assembly ceiling) | game-abstraction / medium | Iranian production surge length: production runs at the surge rate until this many rounds are assembled. |
+| endurance:TANKER_SORTIE_BASE | 6 tanker_supported_sorties_per_turn | game abstraction | game-abstraction / low | Coalition sortie cap: the tanker fleet, not airframes, limits coalition strike orders per turn. |
+| endurance:ISRAEL_MOBILIZATION_FATIGUE_TURN | 10–14 turn | Brief B module 8 (reservist mobilization) | game-abstraction / medium | Israeli ground effectiveness: from this turn ground formations lose 2% a turn to a 75% floor. |
+| endurance:CYBER_RADAR_FACTOR | 0.6–0.8 detection_multiplier | Brief B module 7 (cyber effects) | game-abstraction / medium | Raid detection chance: multiplied by this for two turns after a successful cyber operation. |
+| endurance:CYBER_EFFECT_TURNS | 1–2 turns | Brief B module 7 (cyber effects) | game-abstraction / medium | Cyber effect duration: how long the radar blinding or launcher suppression lasts. |
+| endurance:IRIAF_EFFECTIVENESS | 0.1–0.3 share_of_paper_strength | Brief B module 3 (IRIAF serviceability) | game-abstraction / medium | Iranian air strike damage: IRIAF strikes resolve at this share of their paper strength. |
+| endurance:COALITION_AIR_SORTIES_PER_TURN | 4–12 air_strike_orders_per_turn | game abstraction | game-abstraction / low | Air strike cap and tempo: the ceiling endurance reduces, and the denominator of the sortie factor. |
+| endurance:ARROW_DEPLETION_TURN | 4–6 turn | Brief B module 3 (Arrow expenditure assessment) | game-abstraction / medium | Israeli interceptor pool drain: the pool is drawn down evenly to this turn rather than emptied on one day. |
+| endurance:THAAD_DRAIN_PER_TURN | 0.5–1.5 interceptors_per_turn | Brief B module 3 (THAAD expenditure assessment) | game-abstraction / medium | US interceptor pool drain: one interceptor a turn approximates the documented half-magazine expenditure. |
+| endurance:MOBILIZATION_DEPLETION | 0.5–0.7 share_of_starting_stock | game abstraction | game-abstraction / low | Defence-industrial mobilization: crossing this share of starting stock starts the surge clock. |
+| endurance:MOBILIZATION_WARMUP_TURNS | 1–3 turns | game abstraction | game-abstraction / low | Surge production lead time before any extra package reaches the theatre. |
+| endurance:HIGH_TEMPO_SORTIES | 3–6 sorties_per_turn | game abstraction | game-abstraction / low | Sortie-fatigue onset: a turn at or above this count accumulates high-tempo turns. |
+| endurance:FATIGUE_AFTER_TURNS | 3–6 consecutive_turns | game abstraction | game-abstraction / low | Sortie-fatigue onset: consecutive high-tempo turns before the tempo factor starts falling. |
+| endurance:CARRIER_ENDURANCE_TURNS | 18–22 turns | Brief B module 4 (carrier deployment endurance) | game-abstraction / medium | Carrier deployment clock: past this turn the deployment is extended and sortie generation falls. |
+
 ---
 
 Every record is last reviewed on the date in `lastReviewed` and is validated by

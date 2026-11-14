@@ -1430,7 +1430,11 @@
       "base_pk": null,
       "interception_pk": null,
       "confidence": "estimate_range",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": null,
+        "use": "data only: no Emad launcher unit in the order of battle"
+      }
     },
     {
       "id": "kheibar_shekan",
@@ -1454,7 +1458,11 @@
       "interception_pk": null,
       "confidence": "estimate_range",
       "note": "CEP claimed <100 m; stored band is the defensible calibration range.",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": null,
+        "use": "data only: no Kheibar Shekan launcher unit in the order of battle"
+      }
     },
     {
       "id": "fattah-1",
@@ -1477,7 +1485,11 @@
       "base_pk": null,
       "interception_pk": null,
       "confidence": "belligerent_claim",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": "fattah",
+        "use": "Iranian hypersonic strike unit"
+      }
     },
     {
       "id": "fattah-2",
@@ -1500,7 +1512,11 @@
       "base_pk": null,
       "interception_pk": null,
       "confidence": "belligerent_claim",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": "fattah",
+        "use": "Iranian hypersonic strike unit"
+      }
     },
     {
       "id": "ghadr",
@@ -1523,7 +1539,11 @@
       "base_pk": null,
       "interception_pk": null,
       "confidence": "estimate_range",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": null,
+        "use": "data only: no Ghadr launcher unit in the order of battle"
+      }
     },
     {
       "id": "fateh-110",
@@ -1546,7 +1566,11 @@
       "base_pk": null,
       "interception_pk": null,
       "confidence": "confirmed",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": "fateh110",
+        "use": "Iranian SRBM launcher and its rounds"
+      }
     },
     {
       "id": "shahab-3",
@@ -1569,7 +1593,11 @@
       "base_pk": null,
       "interception_pk": null,
       "confidence": "estimate_range",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": null,
+        "use": "data only: no Shahab-3 launcher unit in the order of battle"
+      }
     },
     {
       "id": "shahed-136",
@@ -1597,7 +1625,11 @@
         500
       ],
       "confidence": "confirmed",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": "shahed136",
+        "use": "Iranian one-way attack drone unit"
+      }
     },
     {
       "id": "shahed-238",
@@ -1617,7 +1649,11 @@
       "base_pk": null,
       "interception_pk": null,
       "confidence": "single_source",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": null,
+        "use": "data only: jet drone not fielded as a separate unit"
+      }
     },
     {
       "id": "samad-3",
@@ -1637,7 +1673,11 @@
       "base_pk": null,
       "interception_pk": null,
       "confidence": "single_source",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": "houthi_drone",
+        "use": "Houthi drone unit"
+      }
     },
     {
       "id": "samad-4",
@@ -1657,7 +1697,11 @@
       "base_pk": null,
       "interception_pk": null,
       "confidence": "single_source",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": "houthi_drone",
+        "use": "Houthi drone unit"
+      }
     },
     {
       "id": "thaad",
@@ -1685,7 +1729,11 @@
         400
       ],
       "confidence": "confirmed",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": "thaad",
+        "use": "US THAAD battery, interceptor magazine and long layer"
+      }
     },
     {
       "id": "patriot-pac3-mse",
@@ -1713,7 +1761,11 @@
         2000
       ],
       "confidence": "confirmed",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": "patriot",
+        "use": "US Patriot battery, interceptor magazine and medium layer"
+      }
     },
     {
       "id": "arrow-2-3",
@@ -1736,7 +1788,11 @@
       "production_per_year": null,
       "confidence": "data_gap",
       "note": "Inventory and rate classified; the game uses a depletion horizon instead.",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": "arrow2",
+        "use": "Israeli Arrow battery; Arrow 3 shares the long layer"
+      }
     },
     {
       "id": "davids-sling",
@@ -1760,7 +1816,11 @@
         600
       ],
       "confidence": "single_source",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": "davids_sling",
+        "use": "Israeli David's Sling battery, medium layer"
+      }
     },
     {
       "id": "iron-dome-tamir",
@@ -1788,7 +1848,11 @@
         1000
       ],
       "confidence": "confirmed",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": "iron_dome",
+        "use": "Israeli Iron Dome battery, point layer and Tamir magazine"
+      }
     },
     {
       "id": "gbu-57-mop",
@@ -1812,7 +1876,11 @@
       ],
       "confidence": "confirmed",
       "note": "Rated against ~80 m of rock at Fordow; the game treats penetration as a threshold, not a guarantee.",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": "b2",
+        "use": "B-2 penetration strike against hardened nodes"
+      }
     },
     {
       "id": "burkan",
@@ -1828,7 +1896,11 @@
       "base_pk": null,
       "interception_pk": null,
       "confidence": "single_source",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": "houthi_missile",
+        "use": "Houthi ballistic missile unit"
+      }
     },
     {
       "id": "palestine-2",
@@ -1844,7 +1916,11 @@
       "base_pk": null,
       "interception_pk": null,
       "confidence": "belligerent_claim",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": null,
+        "use": "data only: belligerent claim, not fielded as a separate unit"
+      }
     },
     {
       "id": "quds-1",
@@ -1860,7 +1936,11 @@
       "base_pk": null,
       "interception_pk": null,
       "confidence": "single_source",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": "houthi_asm",
+        "use": "Houthi anti-ship cruise missile unit"
+      }
     },
     {
       "id": "hezbollah-rocket-family",
@@ -1876,7 +1956,11 @@
       "base_pk": null,
       "interception_pk": null,
       "confidence": "estimate_range",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": null,
+        "use": "data only: no Hezbollah units in the order of battle"
+      }
     },
     {
       "id": "hezbollah-atgm",
@@ -1892,7 +1976,11 @@
       "base_pk": null,
       "interception_pk": null,
       "confidence": "estimate_range",
-      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)"
+      "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
+      "game_field": {
+        "unit_type_id": null,
+        "use": "data only: no Hezbollah units in the order of battle"
+      }
     }
   ]
 }

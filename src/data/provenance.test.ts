@@ -17,6 +17,24 @@ import {
   referencesFor,
 } from '../core/provenance';
 import { REFERENCES } from './references';
+import {
+  ARROW_DEPLETION_TURN,
+  CARRIER_ENDURANCE_TURNS,
+  COALITION_AIR_SORTIES_PER_TURN,
+  CYBER_EFFECT_TURNS,
+  CYBER_RADAR_FACTOR,
+  FATIGUE_AFTER_TURNS,
+  HIGH_TEMPO_SORTIES,
+  HOMELAND_DIVERSION,
+  IRAN_STOCKPILE_ASSEMBLY,
+  IRIAF_EFFECTIVENESS,
+  ISRAEL_MOBILIZATION_FATIGUE_TURN,
+  MOBILIZATION_DEPLETION,
+  MOBILIZATION_WARMUP_TURNS,
+  MUNITIONS_PER_PACKAGE,
+  TANKER_SORTIE_BASE,
+  THAAD_DRAIN_PER_TURN,
+} from '../combat/endurance';
 import unitData from './units.json';
 
 const ALL_UNITS = Object.values(unitData as Record<string, Array<{ id: string }>>).flat();
@@ -143,6 +161,45 @@ describe('coverage walk', () => {
       expect(requireRef(`${id}:nuclear-material`, 'nuclear-material').value).toBe(
         scenario.iran.nuclearMaterial,
       );
+    }
+  });
+});
+
+describe('endurance constant coverage', () => {
+  const constants: Record<string, number> = {
+    MUNITIONS_PER_PACKAGE,
+    COALITION_AIR_SORTIES_PER_TURN,
+    ARROW_DEPLETION_TURN,
+    THAAD_DRAIN_PER_TURN,
+    MOBILIZATION_DEPLETION,
+    MOBILIZATION_WARMUP_TURNS,
+    HIGH_TEMPO_SORTIES,
+    FATIGUE_AFTER_TURNS,
+    CARRIER_ENDURANCE_TURNS,
+    HOMELAND_DIVERSION,
+    IRAN_STOCKPILE_ASSEMBLY,
+    TANKER_SORTIE_BASE,
+    ISRAEL_MOBILIZATION_FATIGUE_TURN,
+    CYBER_RADAR_FACTOR,
+    CYBER_EFFECT_TURNS,
+    IRIAF_EFFECTIVENESS,
+  };
+
+  it('references every constant with its value, band and game field', () => {
+    for (const [id, value] of Object.entries(constants)) {
+      const ref = requireRef(`endurance:${id}`, 'endurance');
+      expect(ref.unit, `${id} has no unit`).toBeTruthy();
+      expect(ref.gameMapping.length, `${id} mapping too thin`).toBeGreaterThan(30);
+      const banded = ref.min !== undefined && ref.max !== undefined;
+      expect(banded || ref.value !== undefined, `${id} records no value`).toBe(true);
+      if (banded) {
+        expect(ref.min!, `${id} band excludes the code value`).toBeLessThanOrEqual(value);
+        expect(ref.max!, `${id} band excludes the code value`).toBeGreaterThanOrEqual(value);
+      } else {
+        expect(ref.value, `${id} value disagrees with the code`).toBeCloseTo(value, 6);
+      }
+      // A game-scale conversion must say so rather than claim a publication.
+      expect(ref.evidenceType, `${id} evidence type`).toBe('game-abstraction');
     }
   });
 });

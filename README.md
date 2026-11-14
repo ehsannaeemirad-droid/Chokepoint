@@ -160,6 +160,16 @@ close facilities, mediate, or intervene.
 | `campaign` | The Narrow Sea | 30 | Full theatre, all three factions playable |
 | `tutorial` | First Strike | 5 | Scripted Iranian response; win by holding three operational Gulf bases |
 
+## Data provenance
+
+Every modelled value carries a provenance record in `src/data/references.ts`:
+subject, validity date, value or band, unit, evidence type, confidence, source
+and a `gameMapping` that states how the real-world figure became a game number.
+`docs/DATA.md` is generated from those records and `src/data/provenance.test.ts`
+walks the data, so a new number without provenance fails CI. Endurance constants
+use the same mechanism under the `endurance` category, including the params that
+are game-scale conversions rather than published figures.
+
 ## Endurance systems
 
 Two optional mechanics model the war as a contest of "command of the reload"

@@ -24,7 +24,9 @@ export type ReferenceCategory =
   | 'scenario'
   | 'politics'
   /** A specific weapon system: range, accuracy class and role. */
-  | 'weapon';
+  | 'weapon'
+  /** A game constant in the endurance layer: value, band and the field it drives. */
+  | 'endurance';
 
 export interface HistoricalReference {
   /** Stable id, unique across the set. */

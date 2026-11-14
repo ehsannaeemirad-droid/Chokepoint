@@ -1979,3 +1979,29 @@ factions x off/on) assert termination, at least one issued strike per run, finit
 meters, actual munitions expenditure with the flags on, and determinism.
 
 Checks: typecheck 0, `pnpm test` 52 files / **405 tests**, build 0.
+
+## 53. Provenance pass (task 4)
+
+Every new parameter now carries the project's provenance record, not just a
+free-text source line:
+
+- **Endurance constants.** All sixteen exported constants in
+  `src/combat/endurance.ts` have a `HistoricalReference` under the new
+  `endurance` category, with the value, the band it was chosen from, a unit, a
+  confidence level and a `gameMapping` naming the game field it drives. The
+  records are labelled `game-abstraction` where they are game-scale conversions
+  (and say why no publication is asserted); `src/data/provenance.test.ts` now
+  fails if a constant has no reference, if the band excludes the code value, or
+  if a mapping is too thin to explain the conversion. `docs/DATA.md` is
+  regenerated from the records, so the document and the data cannot drift.
+- **Weapon rows.** All 22 `weaponPerformance` rows gained a `game_field` with
+  either the `unit_type_id` they drive or an explicit `data only` note where no
+  unit exists (Emad, Kheibar Shekan, Ghadr, Shahab-3, Shahed-238, Palestine-2 and
+  the two Hezbollah rows). A test verifies every referenced unit id exists in
+  `units.json`.
+- **Leaf metadata.** Six nested groups that inherited their block's label now
+  carry their own `source`/`confidence`: F-35 sorties per day, the US tanker
+  ceiling, late-war ship counts, Iran's decline curve, and Israel's GDP and
+  deficit forecasts.
+
+Checks: typecheck 0, `pnpm test` 52 files / **406 tests** (one new), build 0.
