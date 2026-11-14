@@ -10,6 +10,7 @@ import { hexDistance } from '../map/hex';
 import type { TheaterMap } from '../map/TheaterMap';
 import { BALANCE } from '../core/config';
 import { attackerLossChance, defenceLayers, detectRaid, engageOnce, suppressAfterImpact } from './airdefence';
+import { airDefenceEffectiveness, airSortieCap, radarDamageMultiplier } from './endurance';
 import { addCasualties, restrictionBlocksStrike } from '../politics/domestic';
 import { reject, type OrderRejectCode, type RejectParams } from '../core/rejection';
 import { roeBlocksStrike, roeDamageMultiplier } from '../politics/roe';
@@ -81,12 +82,13 @@ export function bestDefence(
     if (def.intercept === undefined) continue;
     if (!def.engages?.includes(threat)) continue;
     if (hexDistance({ col: unit.col, row: unit.row }, { col, row }) > (def.coverage ?? 0)) continue;
-    const cost = def.interceptCost ?? 0;
+    const baseCost = def.interceptCost ?? 0;
+    const cost = baseCost > 0 ? Math.ceil(baseCost * radarDamageMultiplier(snap, map, defender)) : 0;
     if (interceptorPool(snap, defender) < cost) continue;
     if (def.id === 'iron_beam' && unit.magazine <= 0) continue;
 
-    let p = def.intercept;
-    if (threat === 'hypersonic') p = def.hypersonicIntercept ?? 0;
+    let p = (def.intercept ?? 0) * airDefenceEffectiveness(snap, defender);
+    if (threat === 'hypersonic') p = (def.hypersonicIntercept ?? 0) * airDefenceEffectiveness(snap, defender);
     if (!best || p > best.probability) {
       best = { unit, probability: p, cost, label: def.name };
     }
@@ -255,6 +257,28 @@ export function validateStrike(
   nodeId?: string,
 ): StrikeValidation {
   const def = unitType(unit.typeId);
+
+  // Precision-munition endurance: below the critical stock the coalition can
+  // only generate so many strike sorties per turn. Degraded operations, never a
+  // hard stop for the whole force.
+  if ((unit.faction === 'usa' || unit.faction === 'israel') && def.category === 'air') {
+    const cap = airSortieCap(snap);
+    if (Number.isFinite(cap)) {
+      const queued = snap.orders.filter((order) => {
+        if (order.kind !== 'strike') return false;
+        const other = snap.units.find((u) => u.uid === order.unitUid);
+        return other && (other.faction === 'usa' || other.faction === 'israel') && unitType(other.typeId).category === 'air';
+      }).length;
+      if (queued > cap) {
+        return reject(
+          'no-munitions',
+          `Precision munitions are below establishment: ${cap} strike sorties this turn`,
+          { need: cap },
+        );
+      }
+    }
+  }
+
   if (unit.magazine <= 0) return reject('no-munitions-remaining', 'No munitions remaining');
   if (unit.cooldown > 0) {
     return reject('rearming', `Rearming (${unit.cooldown} turns)`, { turns: unit.cooldown });

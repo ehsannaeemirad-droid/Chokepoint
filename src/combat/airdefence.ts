@@ -18,6 +18,7 @@ import { hexDistance } from '../map/hex';
 import type { TheaterMap } from '../map/TheaterMap';
 import { purchaseCostOfInterceptors, russiaTier } from '../politics/politics';
 import { abstractDefenceFactor, defenceNetwork } from './defenceNetwork';
+import { airDefenceEffectiveness, radarDamageMultiplier } from './endurance';
 
 export type AdLayerName = 'long' | 'medium' | 'point';
 
@@ -177,9 +178,13 @@ export function defenceLayers(
     if (unitSuppressed(snap, unit)) continue;
     if (hexDistance({ col: unit.col, row: unit.row }, { col, row }) > (def.coverage ?? 0)) continue;
     if (def.id === 'iron_beam' && unit.magazine <= 0) continue;
-    const cost = def.interceptCost ?? 0;
+    // A blind battery still shoots; it just spends more rounds to buy the same
+    // chance. Destroyed cueing radars therefore drain the magazine faster.
+    const baseCost = def.interceptCost ?? 0;
+    const cost = baseCost > 0 ? Math.ceil(baseCost * radarDamageMultiplier(snap, map, defender)) : 0;
     if (poolFor(snap, defender) < cost) continue;
-    const probability = threat === 'hypersonic' ? (def.hypersonicIntercept ?? 0) : (def.intercept ?? 0);
+    const raw = threat === 'hypersonic' ? (def.hypersonicIntercept ?? 0) : (def.intercept ?? 0);
+    const probability = raw * airDefenceEffectiveness(snap, defender);
     if (probability <= 0) continue;
     const current = byLayer.get(def.adLayer);
     if (!current || probability > current.probability) {

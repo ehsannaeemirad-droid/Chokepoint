@@ -496,6 +496,36 @@ export interface TurnRecord {
   summary?: TurnSummary;
 }
 
+/** Optional endurance systems, switched on per scenario (integration brief 2a/2b). */
+export interface EnduranceSystems {
+  munitionsDepletion?: boolean;
+  interceptorDepletion?: boolean;
+  radarDamageMultiplier?: boolean;
+}
+
+export interface MunitionsPool {
+  label: string;
+  stock: number;
+  starting: number;
+  spent: number;
+  produced: number;
+  /** Sub-package production carried between turns. */
+  carry?: number;
+}
+
+export interface EnduranceState {
+  systems: EnduranceSystems;
+  munitions: Record<string, MunitionsPool>;
+  /** Cumulative production minus expenditure, per faction. */
+  reload: { usa: number; israel: number };
+  /** Turn the industrial-mobilization decision was taken, per faction. */
+  mobilizationTurn: { usa: number | null; israel: number | null };
+  /** Interceptors drawn down each turn by the documented expenditure rate. */
+  interceptorDrain: { usa: number; israel: number };
+  /** Sortie multiplier from munitions state, 0.5-1. */
+  sortieFactor: number;
+}
+
 export interface GameSnapshot {
   rulesVersion?: string;
   dataVersion?: string;
@@ -526,6 +556,10 @@ export interface GameSnapshot {
   roe?: RoeState;
   scorecardCfg?: ScorecardConfig;
   scorecard?: Scorecard;
+  /** Endurance systems enabled for this scenario (absent means all off). */
+  systems?: EnduranceSystems;
+  /** Endurance bookkeeping; present only when a system is enabled. */
+  endurance?: EnduranceState;
   orders: Order[];
   units: UnitInstance[];
   nodes: Record<string, NodeState>;

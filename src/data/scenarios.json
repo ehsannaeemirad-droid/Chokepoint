@@ -747,6 +747,11 @@
         "confidence": "single_source",
         "source": "Brief A module 6"
       }
+    },
+    "systems": {
+      "munitionsDepletion": false,
+      "interceptorDepletion": false,
+      "radarDamageMultiplier": false
     }
   },
   "tutorial": {
@@ -937,6 +942,11 @@
       "minesLaid": 0,
       "fac": 2
     },
-    "initialHormuz": 25
+    "initialHormuz": 25,
+    "systems": {
+      "munitionsDepletion": false,
+      "interceptorDepletion": false,
+      "radarDamageMultiplier": false
+    }
   }
 }

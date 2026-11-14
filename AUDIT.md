@@ -1865,3 +1865,33 @@ advertising its deadline), build 0. Re-verified in the app: draw card verdict,
 Persian body, turn-26 objective caption, gauges at 360 in EN and FA, and the
 empty-review caution. Screenshots remain unavailable — the browser window is
 minimised, so nothing was drawn for capture.
+
+## 49. Endurance layer, part 1: munitions and interceptors (2a, 2b)
+
+The integration brief's first two mechanics, implemented behind scenario flags
+that default to off.
+
+- **Munitions depletion (2a).** Coalition precision munitions are tracked as
+  strike packages derived from the sourced inventories (JASSM 4,400 and TLAM
+  3,100 at ~30 munitions per package). Each coalition air strike spends one
+  package; below 35% of opening stock the sortie ceiling degrades to half rather
+  than stopping; production is a deterministic per-turn trickle that switches to
+  surge rates after the defence-industrial-mobilization trigger plus a two-turn
+  warm-up. `command_of_reload` (production minus expenditure) scales
+  air-defence effectiveness between 0.85 and 1.1.
+- **Interceptor depletion (2b).** The Israeli magazine is drawn down at the
+  documented rate so it empties around turn 5 (end of March) and stays empty
+  without resupply; US stocks draw down more slowly. Exhaustion is reported once
+  as a bad event. The radar multiplier raises interceptors spent per engagement
+  by 35% per destroyed cueing radar, capped at 2.5x, in both the layered
+  resolver and the best-defence estimate.
+
+Gating: `snap.systems` comes from `scenarios.json` → `systems`, all `false` in
+`campaign` and `tutorial`. With every flag off `snap.endurance` is undefined and
+every helper returns its neutral value, so the engine follows its previous path.
+
+Checks: typecheck 0, `pnpm test` 51 files / **393 tests** (12 new: neutral
+defaults, pool initialisation, per-strike spending and ledger balance, degraded
+rather than stopped tempo, radar multiplier, Arrow depletion with a single
+exhaustion event, reload-driven effectiveness, a 30-turn run with all systems
+on, and the flags-off baseline), build 0.

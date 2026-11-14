@@ -9,8 +9,10 @@ import { hexId, hexDistance, type HexCoord } from '../map/hex';
 import { saveGame, loadGame, type SlotId } from '../services/save';
 import { BALANCE, FACTION_LABELS } from './config';
 import { DEFAULT_LOGISTICS_CFG, orderReservations, runTurn } from './engine';
+import { initEndurance } from '../combat/endurance';
 import type {
   DomesticConfig,
+  EnduranceSystems,
   EscalationConfig,
   FactionId,
   GameSnapshot,
@@ -72,6 +74,8 @@ export interface ScenarioDef {
   startDate?: string;
   warStarted?: boolean;
   phase?: 'prewar' | 'war';
+  /** Optional endurance systems (munitions, interceptors, radar damage). */
+  systems?: EnduranceSystems;
 }
 
 export const SCENARIOS = { ...scenarioData, ...LATE_SCENARIOS } as unknown as Record<string, ScenarioDef>;
@@ -106,6 +110,7 @@ export class Game {
     const scenario = SCENARIOS[scenarioId] ?? SCENARIOS.campaign!;
     this.uidCounter = 0;
     this.snap = this.buildSnapshot(structuredClone(scenario), faction, seed);
+    initEndurance(this.snap);
     this.selection = { hexId: null, unitUid: null, mode: 'idle' };
     this.lastEvents = [];
     this.emit();
@@ -246,6 +251,7 @@ export class Game {
           tone: 'info',
         },
       ],
+      systems: structuredClone(scenario.systems ?? {}),
       decisions: [],
       oilFacilitiesDown: [],
       nodeImpacts: {},

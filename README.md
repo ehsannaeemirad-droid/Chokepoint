@@ -160,6 +160,41 @@ close facilities, mediate, or intervene.
 | `campaign` | The Narrow Sea | 30 | Full theatre, all three factions playable |
 | `tutorial` | First Strike | 5 | Scripted Iranian response; win by holding three operational Gulf bases |
 
+## Endurance systems
+
+Two optional mechanics model the war as a contest of "command of the reload"
+rather than a force-on-force exchange. They are **off by default** and enabled
+per scenario through `scenarios.json` → `systems`:
+
+```json
+"systems": {
+  "munitionsDepletion": true,
+  "interceptorDepletion": true,
+  "radarDamageMultiplier": true
+}
+```
+
+- `munitionsDepletion` — coalition precision munitions are tracked as strike
+  packages (one per air strike; ~30 munitions per package at game scale, derived
+  from the JASSM/TLAM inventories in `logistics.json`). Below 35% of the opening
+  stock the coalition loses sortie tempo down to half, never to zero; production
+  is a per-turn trickle that switches to surge rates after the
+  defence-industrial-mobilization trigger and a two-turn warm-up. The faction's
+  `command_of_reload` score (production minus expenditure) scales air-defence
+  effectiveness between 0.85 and 1.1.
+- `interceptorDepletion` — the Israeli magazine is drawn down at the documented
+  rate so that it empties around turn 5 (end of March), with a three-year
+  replenishment horizon that no in-game airlift can shortcut; US stocks draw
+  down more slowly. Exhaustion is reported once, as a bad event, and the tier
+  simply stops engaging.
+- `radarDamageMultiplier` — destroying a cueing radar raises the interceptors
+  spent per engagement by 35% each (capped at 2.5x), because a blind battery
+  needs more rounds for the same chance. Iran's abstracted defence is unaffected.
+
+Turning every flag off leaves `snap.endurance` undefined and the engine on its
+pre-existing path; the balance baseline in `BALANCE.md` is unchanged, and a test
+asserts the documented Iran strike-only outcome still reproduces.
+
 ## Project layout
 
 ```

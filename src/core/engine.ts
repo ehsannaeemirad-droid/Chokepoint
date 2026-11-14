@@ -12,6 +12,7 @@ import type { DeliveryClass } from './types';
 import { runAiPhase, runHostPostures } from '../ai/ai';
 import { maybeStartWar, readyReserves, regenerateUnderground } from './prewar';
 import { resolveCyber, resolveSabotage, resolveStrike, validateStrike } from '../combat/combat';
+import { advanceEndurance, consumeCoalitionMunitions } from '../combat/endurance';
 import { canPlayerOrder } from './permissions';
 import { reject, type OrderRejectCode, type RejectParams } from './rejection';
 import { updateIntelligence } from './intel';
@@ -607,6 +608,7 @@ export function applyOrder(
           faction: 'usa',
         });
       }
+      if (snap.faction !== 'iran') consumeCoalitionMunitions(snap, def.category);
       const result = resolveStrike(snap, map, unit, order.col, order.row, order.nodeId, rng);
       events.push(...result.events);
       if (def.id === 'b2') unit.cooldown = 4;
@@ -981,6 +983,7 @@ export function runTurn(snap: GameSnapshot, map: TheaterMap): TurnResult {
     regenerateUnderground(snap, map, events);
   }
 
+  advanceEndurance(snap, events);
   updateVictoryClocks(snap, map);
   const result = checkOutcome(snap, map);
   snap.status = result.status;
