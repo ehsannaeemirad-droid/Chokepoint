@@ -45,6 +45,19 @@ const MOBILIZATION_DEPLETION = 0.6;
 /** Surge production needs this many turns to arrive after the decision. */
 const MOBILIZATION_WARMUP_TURNS = 2;
 
+/** Sorties per turn that count as high tempo for a coalition air arm. */
+export const HIGH_TEMPO_SORTIES = 4;
+/** Consecutive high-tempo turns before crew fatigue starts to bite. */
+export const FATIGUE_AFTER_TURNS = 4;
+/** Carrier deployment endurance: nine months on a 30-turn, nine-month campaign. */
+export const CARRIER_ENDURANCE_TURNS = 20;
+/** Homeland-defence diversion when Israeli soil is under missile attack. */
+export const HOMELAND_DIVERSION = 0.7;
+/** Missiles Iran can assemble from stockpiled components before the rate falls. */
+export const IRAN_STOCKPILE_ASSEMBLY = 350;
+/** Baseline tanker-supported coalition air sorties per turn. */
+export const TANKER_SORTIE_BASE = 6;
+
 interface MunitionSource {
   label: string;
   starting_inventory: [number, number] | null;
@@ -78,12 +91,15 @@ export function enduranceSystems(snap: GameSnapshot): Required<EnduranceSystems>
     munitionsDepletion: systems.munitionsDepletion ?? false,
     interceptorDepletion: systems.interceptorDepletion ?? false,
     radarDamageMultiplier: systems.radarDamageMultiplier ?? false,
+    sortieFatigue: systems.sortieFatigue ?? false,
+    carrierEndurance: systems.carrierEndurance ?? false,
+    iranProduction: systems.iranProduction ?? false,
   };
 }
 
 export function enduranceEnabled(snap: GameSnapshot): boolean {
   const systems = enduranceSystems(snap);
-  return systems.munitionsDepletion || systems.interceptorDepletion || systems.radarDamageMultiplier;
+  return Object.values(systems).some(Boolean);
 }
 
 /**
@@ -92,7 +108,7 @@ export function enduranceEnabled(snap: GameSnapshot): boolean {
  */
 export function initEndurance(snap: GameSnapshot): void {
   const systems = enduranceSystems(snap);
-  if (!systems.munitionsDepletion && !systems.interceptorDepletion && !systems.radarDamageMultiplier) {
+  if (!Object.values(systems).some(Boolean)) {
     snap.endurance = undefined;
     return;
   }
@@ -122,6 +138,13 @@ export function initEndurance(snap: GameSnapshot): void {
       usa: systems.interceptorDepletion ? THAAD_DRAIN_PER_TURN : 0,
     },
     sortieFactor: 1,
+    tempo: {
+      usa: { highTurns: 0, quietTurns: 0, factor: 1, pilotLosses: 0 },
+      israel: { highTurns: 0, quietTurns: 0, factor: 1, pilotLosses: 0 },
+    },
+    homelandHitsThisTurn: 0,
+    carriers: { deployedTurns: 0, factor: 1, extended: false },
+    iran: { stockpile: IRAN_STOCKPILE_ASSEMBLY, producedFromStockpile: 0, factor: 1 },
   };
   refreshSortieFactor(snap);
 }
@@ -152,15 +175,131 @@ function refreshSortieFactor(snap: GameSnapshot): void {
   state.sortieFactor = share >= 0.35 ? 1 : clamp(0.5 + (share / 0.35) * 0.5, 0.5, 1);
 }
 
-/** Sortie multiplier from munitions endurance. 1 when the system is off. */
+/**
+ * Sortie multiplier: munitions state, crew fatigue, permanent pilot losses and
+ * carrier crew endurance, whichever of those systems are enabled.
+ */
 export function sortieCapacityFactor(snap: GameSnapshot): number {
-  return snap.endurance?.sortieFactor ?? 1;
+  const state = snap.endurance;
+  if (!state) return 1;
+  let factor = state.systems.munitionsDepletion ? state.sortieFactor : 1;
+  if (state.systems.sortieFatigue) {
+    const tempo = state.tempo?.israel;
+    factor *= tempo?.factor ?? 1;
+    // Pilot losses are permanent, so they sit outside the rest-and-recover
+    // tempo factor and can never be trained back inside a campaign.
+    factor *= 1 - (tempo?.pilotPenalty ?? 0);
+  }
+  if (state.systems.carrierEndurance) {
+    factor *= state.carriers?.factor ?? 1;
+  }
+  if (state.systems.sortieFatigue && (state.homelandHitsLastTurn ?? 0) > 0) {
+    // About 70% of Israeli sorties go to homeland defence while missiles are
+    // inbound; the coalition total reflects that diversion.
+    factor *= HOMELAND_DIVERSION;
+  }
+  return clamp(factor, 0.4, 1);
 }
 
-/** Max coalition air strike orders per turn; Infinity when the system is off. */
+/**
+ * Tanker-supported coalition air sorties per turn. The tanker fleet, not the
+ * airframe count, is the binding constraint; carriers add a little capacity and
+ * lose it as crews tire.
+ */
+export function tankerSortieCap(snap: GameSnapshot): number {
+  const state = snap.endurance;
+  if (!state?.systems.carrierEndurance) return Number.POSITIVE_INFINITY;
+  const available = Number(snap.resources.tankerSorties ?? 0) + 2;
+  return Math.max(1, Math.floor(Math.min(TANKER_SORTIE_BASE, available) * (state.carriers?.factor ?? 1)));
+}
+
+/** Max coalition air strike orders per turn; Infinity when the systems are off. */
 export function airSortieCap(snap: GameSnapshot): number {
-  if (!snap.endurance?.systems.munitionsDepletion) return Number.POSITIVE_INFINITY;
-  return Math.max(1, Math.round(COALITION_AIR_SORTIES_PER_TURN * sortieCapacityFactor(snap)));
+  const state = snap.endurance;
+  if (!state) return Number.POSITIVE_INFINITY;
+  let cap = Number.POSITIVE_INFINITY;
+  if (state.systems.munitionsDepletion) {
+    cap = Math.max(1, Math.round(COALITION_AIR_SORTIES_PER_TURN * state.sortieFactor));
+  }
+  if (state.systems.sortieFatigue || state.systems.carrierEndurance) {
+    const enduranceCap = Math.max(1, Math.round(COALITION_AIR_SORTIES_PER_TURN * sortieCapacityFactor(snap)));
+    cap = Math.min(cap, enduranceCap);
+  }
+  const tankers = tankerSortieCap(snap);
+  if (Number.isFinite(tankers)) cap = Math.min(cap, tankers);
+  return cap;
+}
+
+/** Sortie weight of a coalition strike: a distant base costs two tanker slots. */
+export function strikeSortieWeight(distance: number): number {
+  return distance > 8 ? 2 : 1;
+}
+
+/** Israeli sorties diverted to homeland defence while missiles are inbound. */
+export function homelandDiversion(snap: GameSnapshot, faction: FactionId): number {
+  const state = snap.endurance;
+  if (!state?.systems.sortieFatigue) return 1;
+  if (faction !== 'israel') return 1;
+  return (state.homelandHitsLastTurn ?? 0) > 0 ? HOMELAND_DIVERSION : 1;
+}
+
+/** Record a missile impact on the homeland, for next turn's diversion. */
+export function noteHomelandHit(snap: GameSnapshot, host: string | undefined): void {
+  const state = snap.endurance;
+  if (!state?.systems.sortieFatigue) return;
+  if (host !== 'israel') return;
+  state.homelandHitsThisTurn = (state.homelandHitsThisTurn ?? 0) + 1;
+}
+
+/**
+ * A shot-down aircrew cannot be replaced inside a campaign: the pilot pipeline
+ * is five years. Every loss permanently reduces the faction's sortie factor.
+ */
+export function recordPilotLoss(snap: GameSnapshot, faction: FactionId): void {
+  const state = snap.endurance;
+  if (!state?.systems.sortieFatigue) return;
+  if (faction !== 'usa' && faction !== 'israel') return;
+  const tempo = state.tempo?.[faction];
+  if (!tempo) return;
+  tempo.pilotLosses += 1;
+  tempo.pilotPenalty = clamp((tempo.pilotPenalty ?? 0) + 0.03, 0, 0.3);
+}
+
+/**
+ * IRIAF is a nominal air force: with the system on, Iranian air strikes are a
+ * fraction as effective as their paper strength, because the fight is SAMs and
+ * missiles, not air combat.
+ */
+export function strikeEffectiveness(snap: GameSnapshot, faction: FactionId, category: string): number {
+  const state = snap.endurance;
+  if (!state?.systems.sortieFatigue) return 1;
+  if (faction === 'iran' && category === 'air') return 0.2;
+  return 1;
+}
+
+/**
+ * Iranian production bottleneck: a surge assembled from stockpiled components
+ * for the opening turns, then a lower steady state on a damaged industrial base.
+ * The naval blockade halves solid-fuel (missile) output, not drone assembly.
+ */
+export function iranProductionFactor(snap: GameSnapshot, line: string): number {
+  const state = snap.endurance;
+  if (!state?.systems.iranProduction) return 1;
+  const stockpileLeft = state.iran?.stockpile ?? 0;
+  const surge = stockpileLeft > 0 ? 1.5 : 0.6;
+  const blockade = line === 'missile' ? 0.5 : 1;
+  const factor = surge * blockade;
+  state.iran!.factor = factor;
+  return factor;
+}
+
+/** Draw down the finite stockpile of components as production is assembled. */
+export function consumeIranStockpile(snap: GameSnapshot, output: number): void {
+  const state = snap.endurance;
+  if (!state?.systems.iranProduction || !state.iran) return;
+  const used = Math.min(state.iran.stockpile, output);
+  state.iran.stockpile -= used;
+  state.iran.producedFromStockpile += used;
 }
 
 /**
@@ -254,6 +393,66 @@ export function advanceEndurance(snap: GameSnapshot, events: ResolveEvent[]): vo
     state.reload.usa += produced;
     state.reload.israel += produced;
     refreshSortieFactor(snap);
+  }
+
+  if (state.systems.sortieFatigue) {
+    const strikes = snap.orders.filter((order) => order.kind === 'strike');
+    for (const faction of ['usa', 'israel'] as const) {
+      const tempo = state.tempo?.[faction];
+      if (!tempo) continue;
+      const sorties = strikes.filter((order) => {
+        const unit = snap.units.find((u) => u.uid === order.unitUid);
+        return unit?.faction === faction;
+      }).length;
+      if (sorties >= HIGH_TEMPO_SORTIES) {
+        tempo.highTurns += 1;
+        tempo.quietTurns = 0;
+        if (tempo.highTurns > FATIGUE_AFTER_TURNS) {
+          tempo.factor = clamp(tempo.factor - 0.12, 0.6, 1);
+          events.push({
+            text:
+              faction === 'israel'
+                ? 'Israeli crews are past sustainable tempo: sortie generation is falling.'
+                : 'US aircrews are past sustainable tempo: sortie generation is falling.',
+            tone: 'warn',
+            faction,
+          });
+        }
+      } else {
+        tempo.quietTurns += 1;
+        if (tempo.quietTurns >= 2) {
+          tempo.highTurns = 0;
+          tempo.factor = clamp(tempo.factor + 0.06, 0.5, 1);
+        }
+      }
+    }
+    // Hits recorded during this turn are carried forward: the diversion they
+    // cause is felt when the next turn's sortie plan is drawn up.
+    state.homelandHitsLastTurn = state.homelandHitsThisTurn ?? 0;
+    state.homelandHitsThisTurn = 0;
+  }
+
+  if (state.systems.carrierEndurance) {
+    const carriers = state.carriers ?? { deployedTurns: 0, factor: 1, extended: false };
+    carriers.deployedTurns += 1;
+    if (carriers.deployedTurns > CARRIER_ENDURANCE_TURNS) {
+      if (!carriers.extended) {
+        carriers.extended = true;
+        events.push({
+          text: 'Carrier crews are past deployment endurance; no relief carrier is available, so the deployment is extended at rising cost.',
+          tone: 'warn',
+          faction: 'usa',
+        });
+      }
+      carriers.factor = clamp(carriers.factor - 0.04, 0.6, 1);
+    }
+    state.carriers = carriers;
+  }
+
+  if (state.systems.iranProduction && state.iran) {
+    // The surge is drawn from the component stockpile; once it is gone the rate
+    // settles at the damaged industrial base's steady state.
+    state.iran.factor = state.iran.stockpile > 0 ? 1.5 : 0.6;
   }
 
   if (state.systems.interceptorDepletion) {

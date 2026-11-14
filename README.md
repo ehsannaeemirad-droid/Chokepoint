@@ -170,7 +170,10 @@ per scenario through `scenarios.json` → `systems`:
 "systems": {
   "munitionsDepletion": true,
   "interceptorDepletion": true,
-  "radarDamageMultiplier": true
+  "radarDamageMultiplier": true,
+  "sortieFatigue": true,
+  "carrierEndurance": true,
+  "iranProduction": true
 }
 ```
 
@@ -190,6 +193,22 @@ per scenario through `scenarios.json` → `systems`:
 - `radarDamageMultiplier` — destroying a cueing radar raises the interceptors
   spent per engagement by 35% each (capped at 2.5x), because a blind battery
   needs more rounds for the same chance. Iran's abstracted defence is unaffected.
+- `sortieFatigue` — four or more coalition air sorties in a turn counts as high
+  tempo; after four such turns crews tire and sortie generation falls by 12% a
+  turn (floor 60%), recovering only after two quiet turns. Missile hits on
+  Israeli soil divert ~70% of sorties to homeland defence on the following turn,
+  and each shot-down aircrew applies a permanent 3% penalty (capped at 30%),
+  because the pilot pipeline is five years. With this on, Iranian air strikes
+  count as a fifth as effective: IRIAF is a nominal force.
+- `carrierEndurance` — carrier crews are past endurance after 20 turns (nine
+  months of a nine-month campaign) and, with no relief carrier available, the
+  deployment is extended at 4% sortie loss per turn. The tanker fleet caps
+  coalition air sorties per turn, and a sortie from more than eight hexes away
+  costs two tanker slots.
+- `iranProduction` — Iranian production surges at 150% while the component
+  stockpile lasts (350 missiles' worth), then settles at 60% of the damaged
+  base's rate; the naval blockade halves solid-fuel (missile) output but leaves
+  drone assembly alone.
 
 Turning every flag off leaves `snap.endurance` undefined and the engine on its
 pre-existing path; the balance baseline in `BALANCE.md` is unchanged, and a test

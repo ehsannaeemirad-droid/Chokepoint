@@ -53,10 +53,9 @@ inferring rather than reporting. Labels used:
 
 ## How these are consumed
 
-Munitions depletion, interceptor depletion and the radar-damage multiplier are
-now implemented in `src/combat/endurance.ts` and read `logistics.json`. They are
+Munitions depletion, interceptor depletion, the radar-damage multiplier, sortie
+fatigue, carrier endurance and Iranian production decline are now implemented in `src/combat/endurance.ts` and read `logistics.json`. They are
 off by default (`scenarios.json` → `systems`, all `false`), so the balance
 baseline is unchanged; `README.md` documents the flags. The remaining endurance
-blocks (sortie fatigue, carrier endurance, Iranian production decline, proxy
-supply, cyber, Israeli mobilization) are still data only and will be added the
-same way.
+blocks (proxy supply, cyber, Israeli mobilization) are still data only and will
+be added the same way.

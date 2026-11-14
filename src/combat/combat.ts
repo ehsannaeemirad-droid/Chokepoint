@@ -10,7 +10,16 @@ import { hexDistance } from '../map/hex';
 import type { TheaterMap } from '../map/TheaterMap';
 import { BALANCE } from '../core/config';
 import { attackerLossChance, defenceLayers, detectRaid, engageOnce, suppressAfterImpact } from './airdefence';
-import { airDefenceEffectiveness, airSortieCap, consumeCoalitionMunitions, radarDamageMultiplier } from './endurance';
+import {
+  airDefenceEffectiveness,
+  airSortieCap,
+  consumeCoalitionMunitions,
+  noteHomelandHit,
+  radarDamageMultiplier,
+  recordPilotLoss,
+  strikeEffectiveness,
+  strikeSortieWeight,
+} from './endurance';
 import { addCasualties, restrictionBlocksStrike } from '../politics/domestic';
 import { reject, type OrderRejectCode, type RejectParams } from '../core/rejection';
 import { roeBlocksStrike, roeDamageMultiplier } from '../politics/roe';
@@ -197,6 +206,7 @@ function applyImpact(
 ): void {
   if (nodeId) {
     const node = map.nodeById.get(nodeId)!;
+    noteHomelandHit(snap, node.host);
     const state = snap.nodes[nodeId]!;
     const factor = node.hardened ? 1.0 : 4.2;
     state.integrity = clamp(state.integrity - damage * factor, 0, state.maxIntegrity);
@@ -264,15 +274,20 @@ export function validateStrike(
   if ((unit.faction === 'usa' || unit.faction === 'israel') && def.category === 'air') {
     const cap = airSortieCap(snap);
     if (Number.isFinite(cap)) {
-      const queued = snap.orders.filter((order) => {
-        if (order.kind !== 'strike') return false;
+      // A sortie from a distant base burns two tanker slots, so long-range
+      // strikes cost more of the day's capacity than short ones.
+      let used = strikeSortieWeight(hexDistance({ col: unit.col, row: unit.row }, { col, row }));
+      for (const order of snap.orders) {
+        if (order.kind !== 'strike') continue;
         const other = snap.units.find((u) => u.uid === order.unitUid);
-        return other && (other.faction === 'usa' || other.faction === 'israel') && unitType(other.typeId).category === 'air';
-      }).length;
-      if (queued > cap) {
+        if (!other || (other.faction !== 'usa' && other.faction !== 'israel')) continue;
+        if (unitType(other.typeId).category !== 'air') continue;
+        used += strikeSortieWeight(hexDistance({ col: other.col, row: other.row }, { col: order.col, row: order.row }));
+      }
+      if (used > cap) {
         return reject(
           'no-munitions',
-          `Precision munitions are below establishment: ${cap} strike sorties this turn`,
+          `Precision munitions and tankers allow only ${cap} strike sortie slots this turn`,
           { need: cap },
         );
       }
@@ -373,7 +388,7 @@ export function resolveStrike(
   const rounds = def.bunkerBuster ? 2 : 1;
   // Improvement 6: the ROE posture colours coalition firepower. Iranian
   // strikes are untouched (multiplier 1 for non-coalition attackers).
-  const damage = def.atk * roeDamageMultiplier(snap, unit.faction);
+  const damage = def.atk * roeDamageMultiplier(snap, unit.faction) * strikeEffectiveness(snap, unit.faction, def.category);
   const stealth = def.stealth ?? 0;
   const dist = hexDistance({ col: unit.col, row: unit.row }, { col, row });
   const escort = snap.units.some(
@@ -478,6 +493,7 @@ export function resolveStrike(
     });
     if (rng() < risk) {
       attackerLost = true;
+      recordPilotLoss(snap, unit.faction);
       removeUnit(snap, unit.uid);
       // Losing a US aircrew over Iran is the heaviest domestic casualty event.
       if (unit.faction === 'usa') addCasualties(snap, 2);

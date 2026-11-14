@@ -1900,3 +1900,31 @@ Follow-up: munitions are charged inside `resolveStrike`, not at the order path,
 so AI-flown coalition sorties (when the player commands Iran) draw on the same
 magazine as the player's. A test asserts the ledger identity
 `stock = starting + produced - spent` after a turn with mixed player and AI sorties.
+
+## 50. Endurance layer, part 2: sorties, carriers and Iranian production (2c-2e)
+
+- **Sortie fatigue and homeland diversion (2c).** High tempo is four or more
+  coalition air sorties in a turn; after four consecutive such turns the tempo
+  factor falls 12% per turn to a 60% floor and recovers only after two quiet
+  turns. Missile hits on Israeli soil are recorded during resolution and divert
+  70% of sortie generation on the following turn. Pilot losses are permanent:
+  they live in a separate penalty (3% each, capped at 30%) that rest can never
+  recover, because the pipeline is five years. Iranian air strikes count as 20%
+  effective, so IRIAF never wins an exchange on paper.
+- **Carrier endurance and tanker cap (2d).** The deployment clock runs to 20
+  turns (nine months of a nine-month campaign); past it the deployment is
+  extended with a 4%-per-turn sortie loss and a single warning event, because no
+  relief carrier exists. The tanker fleet caps coalition strike sorties, and a
+  sortie from more than eight hexes away costs two slots, so distant basing is
+  more expensive than the map suggests.
+- **Iranian production bottleneck (2e).** Output is 150% while the 350-missile
+  component stockpile lasts, then 60%; the naval blockade halves solid-fuel
+  (missile) lines only, leaving drone assembly intact. The stockpile is drawn
+  down by what is actually assembled, so a long campaign ends at the steady
+  state rather than the surge rate.
+
+All three read the endurance state created by 2a/2b and remain gated by
+`snap.systems`; the flags default off, and the previous commit's flags-off
+baseline test still passes.
+
+Checks: typecheck 0, `pnpm test` 51 files / **400 tests** (7 new), build 0.

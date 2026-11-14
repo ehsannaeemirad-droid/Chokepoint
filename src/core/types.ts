@@ -501,6 +501,9 @@ export interface EnduranceSystems {
   munitionsDepletion?: boolean;
   interceptorDepletion?: boolean;
   radarDamageMultiplier?: boolean;
+  sortieFatigue?: boolean;
+  carrierEndurance?: boolean;
+  iranProduction?: boolean;
 }
 
 export interface MunitionsPool {
@@ -524,6 +527,19 @@ export interface EnduranceState {
   interceptorDrain: { usa: number; israel: number };
   /** Sortie multiplier from munitions state, 0.5-1. */
   sortieFactor: number;
+  /** Consecutive high-tempo and rest turns, plus permanent pilot attrition. */
+  tempo?: Record<
+    'usa' | 'israel',
+    { highTurns: number; quietTurns: number; factor: number; pilotLosses: number; pilotPenalty?: number }
+  >;
+  /** Homeland missile hits recorded this turn (drives the diversion). */
+  homelandHitsThisTurn?: number;
+  /** Hits carried into the next turn, which is when the diversion applies. */
+  homelandHitsLastTurn?: number;
+  /** Carrier deployment clock and the crew-fatigue multiplier it drives. */
+  carriers?: { deployedTurns: number; factor: number; extended: boolean };
+  /** Iranian stockpile-based surge and its steady-state decline. */
+  iran?: { stockpile: number; producedFromStockpile: number; factor: number };
 }
 
 export interface GameSnapshot {

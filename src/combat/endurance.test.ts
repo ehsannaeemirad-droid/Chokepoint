@@ -3,20 +3,34 @@ import { Game } from '../core/Game';
 import { defenderOfNode, nodeState, unitType } from '../core/world';
 import { hostileTo, strikeRange } from './combat';
 import {
+  CARRIER_ENDURANCE_TURNS,
   COALITION_AIR_SORTIES_PER_TURN,
+  HIGH_TEMPO_SORTIES,
   advanceEndurance,
   airDefenceEffectiveness,
   airSortieCap,
   consumeCoalitionMunitions,
   enduranceEnabled,
+  iranProductionFactor,
   radarDamageMultiplier,
+  recordPilotLoss,
   setEnduranceSystems,
+  consumeIranStockpile,
+  strikeEffectiveness,
   sortieCapacityFactor,
+  tankerSortieCap,
 } from './endurance';
 import { hexDistance } from '../map/hex';
 import type { ResolveEvent } from '../core/types';
 
-const ALL_ON = { munitionsDepletion: true, interceptorDepletion: true, radarDamageMultiplier: true };
+const ALL_ON = {
+  munitionsDepletion: true,
+  interceptorDepletion: true,
+  radarDamageMultiplier: true,
+  sortieFatigue: true,
+  carrierEndurance: true,
+  iranProduction: true,
+};
 
 function strikeTargetFor(game: Game, faction: 'usa' | 'israel') {
   const aircraft = game.snap.units.filter(
@@ -220,5 +234,119 @@ describe('endurance integration', () => {
       nodeId: target!.node.id,
     });
     expect(result.ok).toBe(true);
+  });
+});
+
+describe('sortie fatigue and homeland diversion (2c)', () => {
+  function fillHighTempo(game: Game): void {
+    const air = game.snap.units.find(
+      (u) => (u.faction === 'usa' || u.faction === 'israel') && unitType(u.typeId).category === 'air',
+    );
+    expect(air).toBeTruthy();
+    game.snap.orders = Array.from({ length: HIGH_TEMPO_SORTIES + 1 }, () => ({
+      kind: 'strike',
+      unitUid: air!.uid,
+      col: air!.col,
+      row: air!.row,
+    })) as never;
+  }
+
+  it('degrades capacity after sustained high tempo and recovers when rested', () => {
+    const game = new Game();
+    game.start('campaign', 'usa', 11);
+    setEnduranceSystems(game.snap, { sortieFatigue: true });
+    const events: ResolveEvent[] = [];
+    for (let turn = 1; turn <= 6; turn++) {
+      game.snap.turn = turn;
+      fillHighTempo(game);
+      advanceEndurance(game.snap, events);
+    }
+    const fatigue = game.snap.endurance!.tempo!.usa.factor;
+    expect(fatigue).toBeLessThan(1);
+    expect(events.some((event) => /past sustainable tempo/i.test(event.text))).toBe(true);
+
+    // Two quiet turns start the recovery.
+    game.snap.orders = [];
+    advanceEndurance(game.snap, events);
+    advanceEndurance(game.snap, events);
+    expect(game.snap.endurance!.tempo!.usa.factor).toBeGreaterThan(fatigue);
+  });
+
+  it('diverts Israeli sorties when the homeland was hit', () => {
+    const game = new Game();
+    game.start('campaign', 'usa', 11);
+    setEnduranceSystems(game.snap, { sortieFatigue: true });
+    game.snap.endurance!.homelandHitsThisTurn = 2;
+    advanceEndurance(game.snap, []);
+    expect(game.snap.endurance!.homelandHitsLastTurn).toBe(2);
+    expect(sortieCapacityFactor(game.snap)).toBeCloseTo(0.7, 5);
+  });
+
+  it('makes pilot losses permanent', () => {
+    const game = new Game();
+    game.start('campaign', 'usa', 11);
+    setEnduranceSystems(game.snap, { sortieFatigue: true });
+    for (let i = 0; i < 17; i++) recordPilotLoss(game.snap, 'israel');
+    const tempo = game.snap.endurance!.tempo!.israel;
+    expect(tempo.pilotLosses).toBe(17);
+    // Losses cannot be replaced inside a campaign: the penalty sits outside the
+    // rest-and-recover factor and caps at 30% of sortie generation.
+    expect(tempo.pilotPenalty).toBeCloseTo(0.3, 5);
+    game.snap.orders = [];
+    for (let i = 0; i < 6; i++) advanceEndurance(game.snap, []);
+    expect(game.snap.endurance!.tempo!.israel.pilotPenalty).toBeCloseTo(0.3, 5);
+    expect(sortieCapacityFactor(game.snap)).toBeCloseTo(0.7, 5);
+  });
+
+  it('treats IRIAF as nominal in the air', () => {
+    const game = new Game();
+    game.start('campaign', 'iraq' as never, 11);
+    expect(true).toBe(true);
+    game.start('campaign', 'usa', 11);
+    setEnduranceSystems(game.snap, { sortieFatigue: true });
+    expect(strikeEffectiveness(game.snap, 'iran', 'air')).toBeCloseTo(0.2, 5);
+    expect(strikeEffectiveness(game.snap, 'usa', 'air')).toBe(1);
+  });
+});
+
+describe('carrier endurance and the tanker cap (2d)', () => {
+  it('extends the deployment past endurance and loses sortie generation', () => {
+    const game = new Game();
+    game.start('campaign', 'usa', 11);
+    setEnduranceSystems(game.snap, { carrierEndurance: true });
+    const events: ResolveEvent[] = [];
+    for (let turn = 1; turn <= CARRIER_ENDURANCE_TURNS + 2; turn++) {
+      game.snap.turn = turn;
+      advanceEndurance(game.snap, events);
+    }
+    expect(game.snap.endurance!.carriers!.extended).toBe(true);
+    expect(game.snap.endurance!.carriers!.factor).toBeLessThan(1);
+    expect(events.some((event) => /no relief carrier/i.test(event.text))).toBe(true);
+    expect(airSortieCap(game.snap)).toBeLessThan(COALITION_AIR_SORTIES_PER_TURN);
+  });
+
+  it('caps coalition sorties by tanker availability', () => {
+    const game = new Game();
+    game.start('campaign', 'usa', 11);
+    setEnduranceSystems(game.snap, { carrierEndurance: true });
+    game.snap.resources.tankerSorties = 1;
+    expect(tankerSortieCap(game.snap)).toBe(3);
+    expect(airSortieCap(game.snap)).toBeLessThanOrEqual(tankerSortieCap(game.snap));
+  });
+});
+
+describe('Iranian production bottleneck (2e)', () => {
+  it('surges from the component stockpile and then declines, with solid fuel halved', () => {
+    const game = new Game();
+    game.start('campaign', 'iran', 11);
+    setEnduranceSystems(game.snap, { iranProduction: true });
+    // Surge × solid-fuel blockade.
+    expect(iranProductionFactor(game.snap, 'missile')).toBeCloseTo(0.75, 5);
+    expect(iranProductionFactor(game.snap, 'drone')).toBeCloseTo(1.5, 5);
+    const stockpile = game.snap.endurance!.iran!.stockpile;
+    consumeIranStockpile(game.snap, stockpile);
+    expect(game.snap.endurance!.iran!.stockpile).toBe(0);
+    expect(iranProductionFactor(game.snap, 'missile')).toBeCloseTo(0.3, 5);
+    expect(iranProductionFactor(game.snap, 'drone')).toBeCloseTo(0.6, 5);
   });
 });

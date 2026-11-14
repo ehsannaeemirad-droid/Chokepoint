@@ -12,7 +12,7 @@ import type { DeliveryClass } from './types';
 import { runAiPhase, runHostPostures } from '../ai/ai';
 import { maybeStartWar, readyReserves, regenerateUnderground } from './prewar';
 import { resolveCyber, resolveSabotage, resolveStrike, validateStrike } from '../combat/combat';
-import { advanceEndurance } from '../combat/endurance';
+import { advanceEndurance, consumeIranStockpile, iranProductionFactor } from '../combat/endurance';
 import { canPlayerOrder } from './permissions';
 import { reject, type OrderRejectCode, type RejectParams } from './rejection';
 import { updateIntelligence } from './intel';
@@ -669,10 +669,12 @@ export function applyOrder(
       snap.iran.resources -= cost * sortieCount(order);
       // Output tracks the average condition of the surviving facilities.
       const boost = (snap.iranProductionBoost ?? 0) > 0 ? 1.5 : 1;
+      const endurance = iranProductionFactor(snap, line);
       const output = Math.max(
         1,
-        Math.round(sortieCount(order) * productionCapacity(map.nodes, snap, line) * boost),
+        Math.round(sortieCount(order) * productionCapacity(map.nodes, snap, line) * boost * endurance),
       );
+      consumeIranStockpile(snap, output);
       // Production builds airframes and warheads separately, then mates them.
       const cls = deliveryClassFor(order.unitTypeId);
       if (cls) deliverMatedRounds(snap, cls, output);
