@@ -292,9 +292,13 @@ button.primary:active {
 }
 
 .tutorial-card {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'tag close'
+    'hint close';
+  align-items: start;
+  gap: 3px 8px;
   padding: 8px 10px;
   border: 1px solid rgba(255, 160, 0, 0.5);
   border-left: 3px solid var(--warn);
@@ -304,14 +308,28 @@ button.primary:active {
 }
 
 .tutorial-card b {
+  grid-area: tag;
   font-size: 10px;
   letter-spacing: 0.12em;
   color: var(--warn);
 }
 
 .tutorial-card span {
+  grid-area: hint;
   font-size: 13px;
   line-height: 1.35;
+  color: #efe6d6;
+}
+
+.tutorial-card button {
+  grid-area: close;
+  align-self: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  font-size: 13px;
+  background: transparent;
+  border-color: transparent;
   color: #efe6d6;
 }
 
@@ -709,12 +727,31 @@ html[dir='rtl'] .warn-line.tasked {
 
 .t-go {
   flex: none;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  padding: 5px 8px;
-  border-radius: 6px;
-  background: rgba(211, 47, 47, 0.22);
-  color: #ffb3b3;
+  display: grid;
+  place-items: center;
+  min-width: 78px;
+  min-height: 40px;
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(211, 47, 47, 0.65);
+  background: linear-gradient(180deg, rgba(211, 47, 47, 0.55), rgba(150, 30, 30, 0.55));
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.target-row:active .t-go {
+  background: rgba(211, 47, 47, 0.8);
+}
+
+/* An unavailable target is legible as unavailable before it is read. */
+.target-row.blocked .t-go {
+  background: transparent;
+  border-color: rgba(51, 59, 69, 0.9);
+  color: var(--dim);
+  font-weight: 600;
 }
 
 .badge {

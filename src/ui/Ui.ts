@@ -235,6 +235,7 @@ export class Ui {
   private forcesVisited: string[] = [];
   private minimap: Minimap | null = null;
   private coachDismissed = false;
+  private tutorialDismissed = false;
   /** Active strategic-panel category. */
   private strategicTab: StrategicTab = 'situation';
 
@@ -252,6 +253,18 @@ export class Ui {
     this.root.innerHTML = template();
     this.bind();
     this.game.subscribe(() => this.render());
+    // Long-pressing a map label asks for its full name; on touch there is no
+    // hover tooltip, and the label itself may be ellipsised.
+    bus.addEventListener('label-info', ((event: Event) => {
+      const detail = (event as CustomEvent<{ text: string; integrity?: number }>).detail;
+      if (!detail?.text) return;
+      const integrity =
+        detail.integrity !== undefined && detail.integrity < 100
+          ? ` · ${Math.round(detail.integrity)}%`
+          : '';
+      this.showToast(`${detail.text}${integrity}`, 'info');
+    }) as EventListener);
+
     bus.addEventListener('toast', ((event: Event) => {
       const detail = (event as CustomEvent<{ message: string; tone: string }>).detail;
       this.showToast(detail.message, detail.tone);
@@ -334,6 +347,10 @@ export class Ui {
       this.coachDismissed = true;
       this.renderCoach();
       return;
+    }
+    if (verb === 'tutorial-dismiss') {
+      this.tutorialDismissed = true;
+      return this.render();
     }
     if (verb === 'obj-detail' && a) {
       this.showObjectiveDetail(a);
@@ -843,9 +860,12 @@ export class Ui {
 
   private tutorialHtml(): string {
     if (this.game.snap.scenarioId !== 'tutorial') return '';
+    // The guidance banner steps aside once the player has actually done the
+    // thing it is describing — queuing an order — or when they close it.
+    if (this.tutorialDismissed || this.game.snap.orders.length > 0) return '';
     const key = TUTORIAL_HINTS[this.game.snap.turn];
     const hint = key ? t(key) : t('tutorial.complete');
-    return `<div class="tutorial-card"><b>${t('tutorial.tag', { n: this.game.snap.turn })}</b><span>${hint}</span></div>`;
+    return `<div class="tutorial-card"><b>${t('tutorial.tag', { n: this.game.snap.turn })}</b><span>${hint}</span><button data-action="tutorial-dismiss" aria-label="${t('btn.close')}">✕</button></div>`;
   }
 
   private orderStripHtml(): string {

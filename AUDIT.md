@@ -1791,3 +1791,37 @@ lines carrying their tone colour, headline and counts present, group headings
 produced. Not verified: a rendered screenshot of this pass — the browser window
 was minimized for the whole session, so nothing could be captured; the checks
 above read computed styles and geometry, which is weaker than looking at it.
+
+## 47. Brief re-audit: banner dismissal, long-press names, strike affordance
+
+Re-read the update brief against the running build and closed the four items that
+were still missing rather than assumed.
+
+- **Tutorial banner.** The tutorial scenario's guidance card had no way out and
+  never went away, so it sat over the map for the whole campaign. It now has a
+  44×46px close button and retires itself the first time the player queues an
+  order — the same trigger as the quick-start coach. Verified: after one strike
+  was queued the card was gone and the review modal read "1 orders · 1 passed
+  validation".
+- **Map label names.** Labels were ellipsised with only a desktop `title`
+  attribute, which is useless on touch. A 450ms long press now emits the full
+  name (and integrity, when known) to the toast layer. A press on the Al Udeid
+  label produced "Al Udeid Air Base".
+- **Strike affordance.** `STRIKE` was a 10px text pill; every row is now a card
+  ending in a 78×40 button-weight target with a red fill, and the unavailable
+  group renders the same slot as an outlined, dimmed control so "cannot strike
+  this" reads before the text does.
+- **Queued-order feedback on the unit.** The toast said "Strike queued"; the map
+  said nothing. Units that receive an order now get a green ring that expands and
+  fades over ~0.5s, driven off the same signature cache the selection pulse uses,
+  and suppressed under `prefers-reduced-motion`.
+
+Re-verified against the brief items that were already shipped: at 360px the
+mine-layer card's six actions (MOVE / LAY MINES / CLEAR MINES / ESCORT / HOLD /
+DESELECT) render 50px tall with zero clipping and wrap across three rows; the
+tutorial close button is 44×46; the strike pill measures 78×40.
+
+Checks: typecheck 0, `pnpm test` 49 files / 368 tests, build 0. Screenshots remain
+unavailable this session — the browser window is minimised, so the compositor
+never draws; all of the above was measured through computed geometry and DOM
+state rather than viewed.

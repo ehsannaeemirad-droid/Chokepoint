@@ -13,6 +13,7 @@ const REDUCED_MOTION =
 import type { Game } from '../core/Game';
 import type { MapNodeDef, NodeKind, UnitInstance } from '../core/types';
 import { strikeTargetsFor } from '../combat/targets';
+import { bus } from '../ui/bus';
 import { langRevision, localName } from '../i18n';
 import { HEX_W, hexCorners, hexDistance, hexesInRange, hexToWorld } from './hex';
 import { spreadLabels, type LabelBox } from './labelLayout';
@@ -38,6 +39,10 @@ export class MapMarkers {
   private signature = '';
   /** Step index of the selection pulse, 0..PULSE_STEPS-1. */
   private phase = 0;
+  private labelTimer = 0;
+  /** Units that just received an order, with the frame time their flash ends. */
+  private flashes = new Map<string, number>();
+  private lastOrdered = new Set<string>();
   private staticLayer: Phaser.GameObjects.Graphics;
   private layer: LayerDef = layerDef(DEFAULT_LAYER);
 
@@ -87,6 +92,19 @@ export class MapMarkers {
     // cheap. A pulsing selection is the one thing that has to change without
     // the state changing, so while something is selected the signature is
     // invalidated a few times a second instead of every frame.
+    // A newly queued order flashes its unit, which is the feedback that the
+    // tap landed where the player meant it to.
+    const ordered = new Set(
+      this.game.snap.orders.flatMap((o) => ('unitUid' in o && o.unitUid ? [o.unitUid] : [])),
+    );
+    const now = performance.now();
+    for (const uid of ordered) {
+      if (!this.lastOrdered.has(uid)) this.flashes.set(uid, now + (REDUCED_MOTION.matches ? 0 : 520));
+    }
+    this.lastOrdered = ordered;
+    for (const [uid, until] of this.flashes) if (until <= now) this.flashes.delete(uid);
+    if (this.flashes.size > 0 && !REDUCED_MOTION.matches) this.signature = '';
+
     const selection = this.game.selection;
     if (!REDUCED_MOTION.matches && (selection.hexId || selection.unitUid)) {
       const phase = Math.floor(performance.now() / 160) % PULSE_STEPS;
@@ -312,6 +330,12 @@ export class MapMarkers {
     } else {
       this.g.fillRect(x - r, y - r, r * 2, r * 2);
     }
+    const flashUntil = this.flashes.get(unit.uid);
+    if (flashUntil && flashUntil > performance.now()) {
+      const strength = (flashUntil - performance.now()) / 520;
+      this.g.lineStyle(3 / zoom, 0x6ee787, 0.2 + 0.8 * strength);
+      this.g.strokeCircle(x, y, r + (5 + 10 * (1 - strength)) / zoom);
+    }
     if (selected) {
       const pulse = this.pulseAmount();
       if (pulse > 0) {
@@ -356,6 +380,20 @@ export class MapMarkers {
       el.title = localName(node);
       el.setAttribute('aria-label', localName(node));
       el.onclick = () => this.game.selectHex(hex.col, hex.row);
+      // Touch has no hover, so a long press is how the full name is revealed
+      // when the label itself has been ellipsised.
+      el.onpointerdown = () => {
+        window.clearTimeout(this.labelTimer);
+        this.labelTimer = window.setTimeout(() => {
+          bus.dispatchEvent(
+            new CustomEvent('label-info', { detail: { text: localName(node), integrity: state?.integrity } }),
+          );
+        }, 450);
+      };
+      const cancel = () => window.clearTimeout(this.labelTimer);
+      el.onpointerup = cancel;
+      el.onpointerleave = cancel;
+      el.onpointercancel = cancel;
       const sx = ((tile.x - view.x) / view.width) * cam.width;
       const sy = ((tile.y - view.y) / view.height) * cam.height;
       const width = el.offsetWidth || 96;
