@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Game } from '../core/Game';
 import { defenderOfNode, nodeState, unitType } from '../core/world';
-import { hostileTo, strikeRange } from './combat';
+import { cyberTargets, hostileTo, resolveCyber, strikeRange } from './combat';
 import {
   CARRIER_ENDURANCE_TURNS,
   COALITION_AIR_SORTIES_PER_TURN,
@@ -11,8 +11,11 @@ import {
   airSortieCap,
   consumeCoalitionMunitions,
   enduranceEnabled,
+  cyberRadarFactor,
+  groundEffectiveness,
   iranProductionFactor,
   radarDamageMultiplier,
+  refillProxyMagazines,
   recordPilotLoss,
   setEnduranceSystems,
   consumeIranStockpile,
@@ -30,6 +33,9 @@ const ALL_ON = {
   sortieFatigue: true,
   carrierEndurance: true,
   iranProduction: true,
+  proxySupply: true,
+  cyberLimits: true,
+  israelMobilization: true,
 };
 
 function strikeTargetFor(game: Game, faction: 'usa' | 'israel') {
@@ -348,5 +354,98 @@ describe('Iranian production bottleneck (2e)', () => {
     expect(game.snap.endurance!.iran!.stockpile).toBe(0);
     expect(iranProductionFactor(game.snap, 'missile')).toBeCloseTo(0.3, 5);
     expect(iranProductionFactor(game.snap, 'drone')).toBeCloseTo(0.6, 5);
+  });
+});
+
+describe('proxy supply (2f)', () => {
+  it('refills only what the proxy can actually make, and only up to establishment', () => {
+    const game = new Game();
+    game.start('campaign', 'usa', 11);
+    setEnduranceSystems(game.snap, { proxySupply: true });
+    const drones = game.snap.units.filter((u) => u.faction === 'houthi' && u.typeId === 'houthi_drone');
+    expect(drones.length).toBeGreaterThan(0);
+    for (const unit of drones) unit.magazine = 0;
+    const missiles = game.snap.units.filter((u) => u.faction === 'houthi' && u.typeId === 'houthi_missile');
+    for (const unit of missiles) unit.magazine = 0;
+
+    game.snap.turn = 2;
+    refillProxyMagazines(game.snap, []);
+    expect(drones.every((u) => u.magazine === 1)).toBe(true);
+    expect(missiles.every((u) => u.magazine === 0)).toBe(true);
+
+    game.snap.turn = 3;
+    refillProxyMagazines(game.snap, []);
+    expect(missiles.every((u) => u.magazine === 1)).toBe(true);
+
+    game.snap.turn = 4;
+    refillProxyMagazines(game.snap, []);
+    expect(drones.every((u) => u.magazine === 2)).toBe(true);
+    // Establishment is the cap: no growth past it.
+    game.snap.turn = 6;
+    refillProxyMagazines(game.snap, []);
+    expect(drones.every((u) => u.magazine === 2)).toBe(true);
+    expect(game.snap.endurance!.proxies!.houthi.refilled).toBeGreaterThan(0);
+  });
+});
+
+describe('cyber limits (2g)', () => {
+  it('allows only temporary effects and destroys nothing', () => {
+    const game = new Game();
+    game.start('campaign', 'israel', 11);
+    setEnduranceSystems(game.snap, { cyberLimits: true });
+    const cyber = game.snap.units.find((u) => u.typeId === 'unit8200');
+    expect(cyber).toBeTruthy();
+    const launcher = game.snap.units.find(
+      (u) => u.faction === 'iran' && ['fateh110', 'khorramshahr', 'asm_launcher'].includes(u.typeId),
+    );
+    expect(launcher).toBeTruthy();
+    launcher!.revealed = true;
+    const target = cyberTargets(game.snap)[0];
+    expect(target).toBeTruthy();
+    const before = game.snap.units.length;
+
+    // Radar branch.
+    resolveCyber(game.snap, cyber!, () => 0.1);
+    expect(game.snap.units.length).toBe(before);
+    expect(game.snap.endurance!.cyber!.radarUntilTurn).toBeGreaterThan(game.snap.turn);
+    expect(cyberRadarFactor(game.snap, 'iran')).toBeCloseTo(0.7, 5);
+    expect(cyberRadarFactor(game.snap, 'usa')).toBe(1);
+
+    // Sortie-delay branch.
+    target!.revealed = true;
+    const events = resolveCyber(game.snap, cyber!, () => 0.9);
+    expect(game.snap.units.length).toBe(before);
+    expect(target!.suppressedUntilTurn).toBeGreaterThan(game.snap.turn);
+    expect(events[0]!.text).toMatch(/intact|delayed/i);
+    // The effect expires: nothing permanent happened.
+    game.snap.turn += 3;
+    expect(cyberRadarFactor(game.snap, 'iran')).toBe(1);
+  });
+});
+
+describe('Israeli mobilization fatigue (2h)', () => {
+  it('starts after four months, warns once, and floors at 75%', () => {
+    const game = new Game();
+    game.start('campaign', 'usa', 11);
+    setEnduranceSystems(game.snap, { israelMobilization: true });
+    const events: ResolveEvent[] = [];
+    for (let turn = 1; turn < 12; turn++) {
+      game.snap.turn = turn;
+      advanceEndurance(game.snap, events);
+    }
+    expect(game.snap.endurance!.israel!.factor).toBe(1);
+    game.snap.turn = 12;
+    advanceEndurance(game.snap, events);
+    expect(game.snap.endurance!.israel!.factor).toBeCloseTo(0.98, 5);
+    expect(events.filter((e) => /reservist call-ups/i.test(e.text))).toHaveLength(1);
+    for (let turn = 13; turn <= 25; turn++) {
+      game.snap.turn = turn;
+      advanceEndurance(game.snap, events);
+    }
+    expect(game.snap.endurance!.israel!.factor).toBeCloseTo(0.75, 5);
+    expect(events.filter((e) => /reservist call-ups/i.test(e.text))).toHaveLength(1);
+    expect(groundEffectiveness(game.snap, 'israel', 'ground')).toBeCloseTo(0.75, 5);
+    expect(groundEffectiveness(game.snap, 'israel', 'air')).toBe(1);
+    expect(groundEffectiveness(game.snap, 'usa', 'ground')).toBe(1);
   });
 });

@@ -173,7 +173,10 @@ per scenario through `scenarios.json` → `systems`:
   "radarDamageMultiplier": true,
   "sortieFatigue": true,
   "carrierEndurance": true,
-  "iranProduction": true
+  "iranProduction": true,
+  "proxySupply": true,
+  "cyberLimits": true,
+  "israelMobilization": true
 }
 ```
 
@@ -209,6 +212,20 @@ per scenario through `scenarios.json` → `systems`:
   stockpile lasts (350 missiles' worth), then settles at 60% of the damaged
   base's rate; the naval blockade halves solid-fuel (missile) output but leaves
   drone assembly alone.
+- `proxySupply` — proxy magazines refill only at what the proxy can actually
+  make: the Houthis add a drone every other turn and a missile every third turn
+  (about 90% indigenous production), while Hezbollah's Damascus route has been
+  closed since December 2024, so its rounds are one-way. Hamas and the PMF are
+  fixed at their opening inventories. Refills stop at establishment, never above.
+- `cyberLimits` — cyber operations are restricted to the two documented
+  effects: a two-turn partial blinding of the Iranian radar picture (detection
+  x0.7) or a two-turn sortie delay on one launcher. No unit is destroyed and no
+  strategic condition flips; with the flag off the older, stronger cyber result
+  is unchanged.
+- `israelMobilization` — four months of reservist call-ups (450,000 reservists,
+  a 9% output gap) erode Israeli ground formations by 2% a turn to a 75% floor,
+  with a single warning when it starts. Aircrew fatigue is the separate sortie
+  system; this is the land war.
 
 Turning every flag off leaves `snap.endurance` undefined and the engine on its
 pre-existing path; the balance baseline in `BALANCE.md` is unchanged, and a test

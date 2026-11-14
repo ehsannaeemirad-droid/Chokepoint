@@ -17,7 +17,7 @@
  */
 import type { EnduranceState, EnduranceSystems, FactionId, GameSnapshot, ResolveEvent } from '../core/types';
 import type { TheaterMap } from '../map/TheaterMap';
-import { clamp } from '../core/world';
+import { clamp, unitType } from '../core/world';
 import logisticsData from '../data/logistics.json';
 
 /**
@@ -57,6 +57,12 @@ export const HOMELAND_DIVERSION = 0.7;
 export const IRAN_STOCKPILE_ASSEMBLY = 350;
 /** Baseline tanker-supported coalition air sorties per turn. */
 export const TANKER_SORTIE_BASE = 6;
+/** Turn at which four months of reservist call-ups start to tell. */
+export const ISRAEL_MOBILIZATION_FATIGUE_TURN = 12;
+/** Detection loss while an Iranian radar network is under cyber attack. */
+export const CYBER_RADAR_FACTOR = 0.7;
+/** Turns a cyber effect holds. */
+export const CYBER_EFFECT_TURNS = 2;
 
 interface MunitionSource {
   label: string;
@@ -94,6 +100,9 @@ export function enduranceSystems(snap: GameSnapshot): Required<EnduranceSystems>
     sortieFatigue: systems.sortieFatigue ?? false,
     carrierEndurance: systems.carrierEndurance ?? false,
     iranProduction: systems.iranProduction ?? false,
+    proxySupply: systems.proxySupply ?? false,
+    cyberLimits: systems.cyberLimits ?? false,
+    israelMobilization: systems.israelMobilization ?? false,
   };
 }
 
@@ -145,6 +154,14 @@ export function initEndurance(snap: GameSnapshot): void {
     homelandHitsThisTurn: 0,
     carriers: { deployedTurns: 0, factor: 1, extended: false },
     iran: { stockpile: IRAN_STOCKPILE_ASSEMBLY, producedFromStockpile: 0, factor: 1 },
+    proxies: {
+      houthi: { refilled: 0, dryTurn: null },
+      hezbollah: { refilled: 0, dryTurn: null },
+      hamas: { refilled: 0, dryTurn: null },
+      pmf: { refilled: 0, dryTurn: null },
+    },
+    cyber: { radarUntilTurn: 0, effects: 0 },
+    israel: { fatigueTurn: null, factor: 1 },
   };
   refreshSortieFactor(snap);
 }
@@ -356,6 +373,76 @@ export function airDefenceEffectiveness(snap: GameSnapshot, defender: FactionId)
 }
 
 /** Per-turn endurance bookkeeping: production, mobilization, magazine drain. */
+/**
+ * Proxy resupply, from Brief B module 6. Hezbollah's Syrian route has been
+ * closed since December 2024, so its magazines only fall; the Houthis make
+ * about 90% of their own munitions and can trickle replacements in; the PMF is
+ * rated "low" and Hamas is fixed at its pre-war inventory. Only factions that
+ * actually field units are replenished.
+ */
+export function refillProxyMagazines(snap: GameSnapshot, events: ResolveEvent[]): void {
+  const state = snap.endurance;
+  if (!state?.systems.proxySupply) return;
+  const cadence: Record<string, Record<string, number>> = {
+    houthi: { drone: 2, missile: 3 },
+  };
+  for (const [faction, lines] of Object.entries(cadence)) {
+    for (const unit of snap.units) {
+      if (unit.faction !== faction) continue;
+      const def = unitType(unit.typeId);
+      const every = lines[def.category];
+      if (!every || snap.turn % every !== 0) continue;
+      const cap = def.magazine;
+      if (unit.magazine >= cap) continue;
+      unit.magazine += 1;
+      const book = (state.proxies ??= {})[faction] ??= { refilled: 0, dryTurn: null };
+      book.refilled += 1;
+    }
+  }
+  for (const faction of ['hezbollah', 'hamas', 'pmf']) {
+    const units = snap.units.filter((u) => u.faction === faction);
+    if (units.length === 0) continue;
+    const book = (state.proxies ??= {})[faction] ??= { refilled: 0, dryTurn: null };
+    if (units.every((u) => u.magazine <= 0) && book.dryTurn === null) {
+      book.dryTurn = snap.turn;
+      events.push({
+        text: `${faction === 'hezbollah' ? 'Hezbollah' : faction === 'hamas' ? 'Hamas' : 'The PMF'} has fired its last rounds: no resupply route is open.`,
+        tone: 'warn',
+        faction: faction as FactionId,
+      });
+    }
+  }
+}
+
+/** Cyber may only blind a radar temporarily; it cannot destroy anything. */
+export function cyberRadarFactor(snap: GameSnapshot, defender: FactionId): number {
+  const state = snap.endurance;
+  if (!state?.systems.cyberLimits) return 1;
+  if (defender !== 'iran' && defender !== 'houthi') return 1;
+  return snap.turn < (state.cyber?.radarUntilTurn ?? 0) ? CYBER_RADAR_FACTOR : 1;
+}
+
+/** Record a successful temporary radar-blinding operation. */
+export function applyCyberRadar(snap: GameSnapshot): void {
+  const state = snap.endurance;
+  if (!state?.systems.cyberLimits) return;
+  state.cyber = state.cyber ?? { radarUntilTurn: 0, effects: 0 };
+  state.cyber.radarUntilTurn = snap.turn + CYBER_EFFECT_TURNS;
+  state.cyber.effects += 1;
+}
+
+/**
+ * Reservist fatigue: four months of call-ups (450,000 reservists, a 9% output
+ * gap) erode the edge of Israeli ground formations, 2% a turn to a 75% floor.
+ * Aircrew fatigue is a separate system; this is the land war.
+ */
+export function groundEffectiveness(snap: GameSnapshot, faction: FactionId, category: string): number {
+  const state = snap.endurance;
+  if (!state?.systems.israelMobilization) return 1;
+  if (faction !== 'israel' || category !== 'ground') return 1;
+  return state.israel?.factor ?? 1;
+}
+
 export function advanceEndurance(snap: GameSnapshot, events: ResolveEvent[]): void {
   const state = snap.endurance;
   if (!state) return;
@@ -453,6 +540,23 @@ export function advanceEndurance(snap: GameSnapshot, events: ResolveEvent[]): vo
     // The surge is drawn from the component stockpile; once it is gone the rate
     // settles at the damaged industrial base's steady state.
     state.iran.factor = state.iran.stockpile > 0 ? 1.5 : 0.6;
+  }
+
+  if (state.systems.proxySupply) refillProxyMagazines(snap, events);
+
+  if (state.systems.israelMobilization) {
+    const israel = (state.israel ??= { fatigueTurn: null, factor: 1 });
+    if (snap.turn >= ISRAEL_MOBILIZATION_FATIGUE_TURN) {
+      if (israel.fatigueTurn === null) {
+        israel.fatigueTurn = snap.turn;
+        events.push({
+          text: 'Four months of reservist call-ups: Israeli ground formations are showing fatigue and the output gap is biting.',
+          tone: 'warn',
+          faction: 'israel',
+        });
+      }
+      israel.factor = clamp(israel.factor - 0.02, 0.75, 1);
+    }
   }
 
   if (state.systems.interceptorDepletion) {

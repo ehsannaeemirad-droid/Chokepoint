@@ -504,6 +504,9 @@ export interface EnduranceSystems {
   sortieFatigue?: boolean;
   carrierEndurance?: boolean;
   iranProduction?: boolean;
+  proxySupply?: boolean;
+  cyberLimits?: boolean;
+  israelMobilization?: boolean;
 }
 
 export interface MunitionsPool {
@@ -540,6 +543,12 @@ export interface EnduranceState {
   carriers?: { deployedTurns: number; factor: number; extended: boolean };
   /** Iranian stockpile-based surge and its steady-state decline. */
   iran?: { stockpile: number; producedFromStockpile: number; factor: number };
+  /** Proxy magazine resupply bookkeeping, by proxy faction. */
+  proxies?: Record<string, { refilled: number; dryTurn: number | null }>;
+  /** Cyber effects limited to the documented, temporary ones. */
+  cyber?: { radarUntilTurn: number; effects: number };
+  /** Israeli reservist fatigue from sustained mobilization. */
+  israel?: { fatigueTurn: number | null; factor: number };
 }
 
 export interface GameSnapshot {

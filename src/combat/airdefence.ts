@@ -18,7 +18,7 @@ import { hexDistance } from '../map/hex';
 import type { TheaterMap } from '../map/TheaterMap';
 import { purchaseCostOfInterceptors, russiaTier } from '../politics/politics';
 import { abstractDefenceFactor, defenceNetwork } from './defenceNetwork';
-import { airDefenceEffectiveness, radarDamageMultiplier } from './endurance';
+import { airDefenceEffectiveness, cyberRadarFactor, radarDamageMultiplier } from './endurance';
 
 export type AdLayerName = 'long' | 'medium' | 'point';
 
@@ -127,7 +127,11 @@ export function detectionChance(
 
   const terrain = map.hexAt(col, row)?.terrain;
   if (terrain === 'mountain') chance -= 0.15;
-  chance = clamp(chance * SIGNATURE_VISIBILITY[threat] - stealth * 0.9, 0.03, 0.98);
+  chance = clamp(
+    (chance * SIGNATURE_VISIBILITY[threat] - stealth * 0.9) * cyberRadarFactor(snap, defender),
+    0.03,
+    0.98,
+  );
   return { detected: false, chance, sources };
 }
 

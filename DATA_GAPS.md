@@ -56,6 +56,21 @@ inferring rather than reporting. Labels used:
 Munitions depletion, interceptor depletion, the radar-damage multiplier, sortie
 fatigue, carrier endurance and Iranian production decline are now implemented in `src/combat/endurance.ts` and read `logistics.json`. They are
 off by default (`scenarios.json` → `systems`, all `false`), so the balance
-baseline is unchanged; `README.md` documents the flags. The remaining endurance
-blocks (proxy supply, cyber, Israeli mobilization) are still data only and will
-be added the same way.
+baseline is unchanged; `README.md` documents the flags. All twelve endurance blocks now have live mechanics; the remaining gaps are
+within them: only the Houthis field units, so Hezbollah/Hamas/PMF resupply rows
+are data only, and the turn thresholds (carrier 20, reservist fatigue 12) are
+stated game-scale readings rather than published dates.
+
+## Proxy and cyber modelling gaps
+
+- **Hezbollah, Hamas and the PMF have no units in the order of battle**, so their
+  documented inventories and zero/low resupply cannot yet affect play. Their
+  endurance rows are carried for when those formations are modelled.
+- **Cyber effects are mapped, not simulated in depth.** The record allows only a
+  one-turn sortie delay and a temporary radar-detection reduction; both are
+  implemented as short SEAD suppression and a detection multiplier. No unit
+  destruction is permitted under the flag, which is a deliberate departure from
+  the older abstracted cyber strike.
+- **The reservist-fatigue start turn (12) and the carrier clock (20) are
+  game-scale conversions** of "four months" and "nine months" onto a 30-turn
+  campaign, not published event dates.

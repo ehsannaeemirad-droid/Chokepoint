@@ -1928,3 +1928,30 @@ All three read the endurance state created by 2a/2b and remain gated by
 baseline test still passes.
 
 Checks: typecheck 0, `pnpm test` 51 files / **400 tests** (7 new), build 0.
+
+## 51. Endurance layer, part 3: proxies, cyber limits and reservist fatigue (2f-2h)
+
+- **Proxy supply (2f).** Proxy magazines were static: a Houthi launcher fired its
+  opening rounds and then sat empty forever, while Hezbollah's Syrian resupply
+  route was not represented at all. With the flag on, refills follow what each
+  proxy can actually produce: Houthi drones every second turn, Houthi missiles
+  every third (about 90% indigenous), Hezbollah/Hamas/PMF nothing (route closed,
+  fixed inventories). Refills cap at establishment, so magazines fall under fire
+  and recover only slowly. Only the Houthis currently field units, so the other
+  factions' zero-resupply rows remain data-only until they do.
+- **Cyber limits (2g).** The existing cyber operation destroyed a launcher 70% of
+  the time, which contradicts the record: no documented strategic cyber result in
+  this war. Under the flag, a successful operation instead blinds the Iranian
+  radar picture (detection x0.7 for two turns, wired into `detectionChance`) or
+  delays one launcher for two turns via SEAD suppression. Nothing is destroyed,
+  nothing flips, cooldown is shorter because the effect is smaller. Flag off
+  keeps the original behaviour.
+- **Israeli mobilization fatigue (2h).** 450,000 reservists and a 9% output gap
+  are not free. From turn 12 (four months of call-ups) Israeli ground formations
+  lose 2% effectiveness a turn to a 75% floor, with one warning. Aircrew fatigue
+  stays in the sortie system, so the two do not double-count.
+
+All three are gated by scenario flags that default to `false`; the baseline
+path and the earlier endurance tests are unchanged.
+
+Checks: typecheck 0, `pnpm test` 51 files / **403 tests** (3 new), build 0.

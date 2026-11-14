@@ -13,7 +13,9 @@ import { attackerLossChance, defenceLayers, detectRaid, engageOnce, suppressAfte
 import {
   airDefenceEffectiveness,
   airSortieCap,
+  applyCyberRadar,
   consumeCoalitionMunitions,
+  groundEffectiveness,
   noteHomelandHit,
   radarDamageMultiplier,
   recordPilotLoss,
@@ -388,7 +390,11 @@ export function resolveStrike(
   const rounds = def.bunkerBuster ? 2 : 1;
   // Improvement 6: the ROE posture colours coalition firepower. Iranian
   // strikes are untouched (multiplier 1 for non-coalition attackers).
-  const damage = def.atk * roeDamageMultiplier(snap, unit.faction) * strikeEffectiveness(snap, unit.faction, def.category);
+  const damage =
+    def.atk *
+    roeDamageMultiplier(snap, unit.faction) *
+    strikeEffectiveness(snap, unit.faction, def.category) *
+    groundEffectiveness(snap, unit.faction, def.category);
   const stealth = def.stealth ?? 0;
   const dist = hexDistance({ col: unit.col, row: unit.row }, { col, row });
   const escort = snap.units.some(
@@ -538,6 +544,31 @@ export function resolveCyber(snap: GameSnapshot, unit: UnitInstance, rng: Rng): 
     ];
   }
   const target = launchers[Math.floor(rng() * launchers.length)]!;
+  // With the cyber-limits system on, a cyber operation may only delay sorties
+  // or blind the radar picture for a couple of turns. No unit is destroyed and
+  // nothing strategic flips: that is what the record actually shows.
+  if (snap.endurance?.systems.cyberLimits) {
+    unit.cooldown = 2;
+    if (rng() < 0.5) {
+      applyCyberRadar(snap);
+      return [
+        {
+          text: 'A cyber operation blinded part of the Iranian radar picture for two turns; no launcher was destroyed.',
+          tone: 'good',
+          faction: unit.faction,
+        },
+      ];
+    }
+    target.suppressedUntilTurn = snap.turn + 2;
+    return [
+      {
+        text: `A cyber operation delayed the ${unitType(target.typeId).name} by a turn; the launcher itself is intact.`,
+        tone: 'info',
+        faction: unit.faction,
+        focus: { col: target.col, row: target.row },
+      },
+    ];
+  }
   if (rng() < 0.7) {
     removeUnit(snap, target.uid);
     unit.cooldown = 3;
