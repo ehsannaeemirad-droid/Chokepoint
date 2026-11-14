@@ -1235,8 +1235,9 @@ export class Ui {
               (unit) => `<button class="force-row" data-action="select:${unit.uid}">
                 <span class="dot" style="background:${FACTION_COLORS[unit.faction]}"></span>
                 <span class="f-name">${t('target.hex', { col: unit.col, row: unit.row })}</span>
+                <span class="f-bar" aria-hidden="true"><i style="width:${Math.round(unit.strength)}%"></i></span>
                 <span class="f-stat">${Math.round(unit.strength)}%</span>
-                <span class="f-stat">${def.category === 'defense' ? 'DEF' : `${unit.magazine}`}</span>
+                <span class="f-stat f-ammo">${def.category === 'defense' ? 'DEF' : `${unit.magazine}`}</span>
               </button>`,
             )
             .join('')}

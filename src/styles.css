@@ -2181,6 +2181,11 @@ button:focus-visible, [role='button']:focus-visible, summary:focus-visible { out
   /* Map labels are not buttons: a 44px floor turned every nameplate into a
      slab that covered the terrain it described. */
   .node-label { min-height: 32px !important; padding-block: 5px; }
+  /* The 46px floor is the minimum, not the target for rows that carry two
+     pieces of information. */
+  .force-row { min-height: 52px !important; }
+  .target-row { min-height: 54px !important; }
+  .actions button { min-height: 50px !important; }
   .modal-card header button, .panel-head button, .cin-card header button { min-width: 44px; min-height: 44px; }
   .order-chip button, .slot-actions button, .mode-hint button, .map-controls button { min-width: 44px; min-height: 44px; }
 }
@@ -2549,4 +2554,149 @@ button:focus-visible, [role='button']:focus-visible, summary:focus-visible { out
     min-width: 118px;
     max-width: 118px;
   }
+}
+
+/* ---------------------------------------------------------- design tokens
+   One shape scale and one shadow scale, so the sheet, panels, modal and cards
+   stop each inventing their own radius. */
+:root {
+  --radius-sm: 7px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-1: 0 2px 8px rgba(0, 0, 0, 0.28);
+  --shadow-2: 0 14px 34px rgba(0, 0, 0, 0.46);
+  --surface-1: rgba(17, 21, 26, 0.96);
+}
+
+.sheet,
+.modal-card,
+.slide-panel,
+.log-drawer,
+.cin-card {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+}
+
+.obj-row,
+.force-row,
+.target-row,
+.review-order,
+.coach-card,
+.host-card {
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-1);
+}
+
+/* ------------------------------------------------------------ unit card rhythm
+   The card had its sections pressed together; each block now starts on a
+   consistent 12px baseline with a hairline where the content changes kind. */
+.sheet-head {
+  margin-bottom: 10px;
+}
+#sheet .stat-row {
+  margin-top: 12px;
+  gap: 6px;
+}
+#sheet .targets {
+  margin-top: 14px;
+  padding-top: 10px;
+}
+#sheet .actions {
+  margin-top: 12px;
+}
+#sheet .warn-line,
+#sheet .mode-hint {
+  margin-top: 10px;
+}
+#sheet .note {
+  margin: 12px 0 0;
+  line-height: 1.5;
+}
+#sheet .sheet-more {
+  margin-top: 12px;
+}
+
+/* ------------------------------------------------------------- forces panel */
+.force-group {
+  margin-bottom: 14px;
+}
+.force-group h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 2px 6px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 6px;
+}
+.force-group h4 span {
+  margin-inline-start: auto;
+  padding: 1px 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+  font-variant-numeric: tabular-nums;
+}
+.force-row {
+  min-height: 50px;
+  padding: 6px 8px;
+}
+.force-row .f-bar {
+  flex: 1 1 44px;
+  min-width: 28px;
+  height: 5px;
+  border-radius: 3px;
+  background: #2a313a;
+  overflow: hidden;
+}
+.force-row .f-bar i {
+  display: block;
+  height: 100%;
+  background: var(--ok);
+}
+.force-row .f-stat {
+  font-variant-numeric: tabular-nums;
+  min-width: 34px;
+  text-align: end;
+}
+.force-row .f-ammo {
+  opacity: 0.85;
+}
+
+/* -------------------------------------------------------- resolution report
+   Category headings are rules, not labels floating in space, and each event
+   carries its tone down its leading edge. */
+.cin-headline {
+  border-inline-start-width: 4px;
+}
+.cin-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cin-group::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.cin-line {
+  padding-inline-start: 8px;
+  border-inline-start: 2px solid transparent;
+}
+.cin-line.bad {
+  border-inline-start-color: #e05a5a;
+}
+.cin-line.good {
+  border-inline-start-color: #4fb85a;
+}
+.cin-line.warn {
+  border-inline-start-color: #d99b1f;
+}
+.cin-counts {
+  align-self: flex-start;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
 }

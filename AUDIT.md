@@ -1755,3 +1755,39 @@ truncated action buttons. Not verified: a real 30-turn campaign played by hand
 through the UI (the scripted equivalent is the test above), and the visual
 consistency pass on shadows and corner radii is partial — the sheet, modal and
 panels were not systematically unified.
+
+## 46. Design pass: card rhythm, forces, report hierarchy, selection pulse
+
+The remainder of the update brief, closed item by item.
+
+- **Design tokens.** One shape scale (`--radius-sm/md/lg`) and one shadow scale
+  (`--shadow-1/2`) now drive the sheet, modal, slide panels, log drawer,
+  resolution card and the smaller cards. Previously each surface declared its own
+  radius (6, 7, 10, 12, 14px all appeared), which is why the UI read as assembled
+  rather than designed.
+- **Unit card rhythm.** Section spacing is on a 12px baseline: stats, target list,
+  action row and note no longer touch, and the note's line height was raised to
+  1.5. This also fixed the "MUNITION" label sitting against the DEF row.
+- **Forces panel.** Group headers became a header with a hairline rule and a
+  count chip; each row gained a strength bar beside the percentage, so health is
+  readable without parsing the number. Rows are 52px on coarse pointers.
+- **Hex contrast.** The political layer's ownership wash went from 0.16 to 0.26,
+  which is what separates friendly, hostile and neutral ground at a glance while
+  keeping the muted palette intact; water already reads as water by hue and by
+  the coastline rule.
+- **Selection pulse.** Selecting a unit or hex now draws a second ring that
+  breathes outward at 8 steps per 160ms, and the selected unit marker gets a
+  halo. Because the overlay is cached against a state signature, the pulse
+  invalidates that signature only while a selection exists — and it is disabled
+  entirely under `prefers-reduced-motion`.
+- **Resolution report hierarchy.** Category headings are now rules with the name
+  set into them, each event carries its tone down a leading edge (bad / good /
+  warn), the counts line is a chip, and the headline block keeps a 4px accent.
+  The report should read as a briefing rather than a console log.
+
+Verification: typecheck 0, `pnpm test` 49 files / 368 tests, build 0. Measured in
+the app: sheet radius 14px, force row radius 10px with a strength bar, report
+lines carrying their tone colour, headline and counts present, group headings
+produced. Not verified: a rendered screenshot of this pass — the browser window
+was minimized for the whole session, so nothing could be captured; the checks
+above read computed styles and geometry, which is weaker than looking at it.

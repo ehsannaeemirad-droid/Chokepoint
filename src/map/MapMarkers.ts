@@ -4,6 +4,12 @@
  */
 import Phaser from 'phaser';
 import { COLORS, FACTION_COLORS } from '../core/config';
+
+const PULSE_STEPS = 8;
+const REDUCED_MOTION =
+  typeof window !== 'undefined' && 'matchMedia' in window
+    ? window.matchMedia('(prefers-reduced-motion: reduce)')
+    : ({ matches: false } as MediaQueryList);
 import type { Game } from '../core/Game';
 import type { MapNodeDef, NodeKind, UnitInstance } from '../core/types';
 import { strikeTargetsFor } from '../combat/targets';
@@ -30,6 +36,8 @@ export class MapMarkers {
   private labelLayer: HTMLElement;
   private labels = new Map<string, HTMLElement>();
   private signature = '';
+  /** Step index of the selection pulse, 0..PULSE_STEPS-1. */
+  private phase = 0;
   private staticLayer: Phaser.GameObjects.Graphics;
   private layer: LayerDef = layerDef(DEFAULT_LAYER);
 
@@ -50,6 +58,13 @@ export class MapMarkers {
     this.signature = '';
   }
 
+  /** 0 when motion is reduced, else a 0→1 triangle wave over the pulse steps. */
+  private pulseAmount(): number {
+    if (REDUCED_MOTION.matches) return 0;
+    const t = this.phase / PULSE_STEPS;
+    return t <= 0.5 ? t * 2 : (1 - t) * 2;
+  }
+
   private staticSignature(cam: Phaser.Cameras.Scene2D.Camera): string {
     return [
       this.layer.id,
@@ -68,6 +83,19 @@ export class MapMarkers {
   }
 
   update(cam: Phaser.Cameras.Scene2D.Camera): void {
+    // The overlay is cached against a signature, which is what keeps panning
+    // cheap. A pulsing selection is the one thing that has to change without
+    // the state changing, so while something is selected the signature is
+    // invalidated a few times a second instead of every frame.
+    const selection = this.game.selection;
+    if (!REDUCED_MOTION.matches && (selection.hexId || selection.unitUid)) {
+      const phase = Math.floor(performance.now() / 160) % PULSE_STEPS;
+      if (phase !== this.phase) {
+        this.phase = phase;
+        this.signature = '';
+      }
+    }
+
     const sig = this.staticSignature(cam);
     if (sig === this.signature) return;
     this.signature = sig;
@@ -129,9 +157,17 @@ export class MapMarkers {
     if (center) {
       const tile = this.map.hexAt(center.col, center.row);
       if (tile) {
+        const pulse = this.pulseAmount();
         const pts = hexCorners(tile.x, tile.y, 27).map((p) => new Phaser.Math.Vector2(p.x, p.y));
         this.g.lineStyle(2.5 / zoom, 0xffffff, 0.95);
         this.g.strokePoints(pts, true);
+        // A second ring breathing outward: the selected hex is visible at a
+        // glance even when the label layer is busy.
+        if (pulse > 0) {
+          const outer = hexCorners(tile.x, tile.y, 27 + 6 * pulse).map((p) => new Phaser.Math.Vector2(p.x, p.y));
+          this.g.lineStyle(2 / zoom, 0xffffff, 0.5 * (1 - pulse));
+          this.g.strokePoints(outer, true);
+        }
       }
     }
 
@@ -277,6 +313,11 @@ export class MapMarkers {
       this.g.fillRect(x - r, y - r, r * 2, r * 2);
     }
     if (selected) {
+      const pulse = this.pulseAmount();
+      if (pulse > 0) {
+        this.g.lineStyle(1.5 / zoom, 0xffffff, 0.45 * (1 - pulse));
+        this.g.strokeCircle(x, y, r + 3 / zoom + 7 * pulse / zoom);
+      }
       this.g.lineStyle(2 / zoom, 0xffffff, 1);
       this.g.strokeCircle(x, y, r + 3 / zoom);
     }

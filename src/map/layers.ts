@@ -43,7 +43,9 @@ export const MAP_LAYERS: readonly LayerDef[] = [
     id: 'political',
     label: 'layer.political',
     hint: 'layer.political.hint',
-    ownerTint: 0.16,
+    // Ownership is the whole point of this layer, so the wash carries weight:
+    // friendly, hostile and neutral ground must be separable at a glance.
+    ownerTint: 0.26,
     gridAlpha: 0.05,
     detail: 0.55,
     desaturate: 0,
