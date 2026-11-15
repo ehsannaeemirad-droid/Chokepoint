@@ -30,6 +30,10 @@ const NODE_COLORS: Record<NodeKind, string> = {
   nuclear: '#E05A5A',
   'missile-industry': '#E0A05A',
   port: '#8FD3C0',
+  sam: '#D98C8C',
+  radar: '#9CC2E0',
+  'missile-base': '#C98C4A',
+  command: '#C0A8D8',
 };
 
 export class MapMarkers {

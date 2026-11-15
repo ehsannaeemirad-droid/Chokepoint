@@ -294,8 +294,12 @@ const LOG_PATTERNS: LogPattern[] = [
     template: 'پاکستان مداخله دفاعی کرد (قرعه {roll} < ۰٫۴۰): دو اسکادران شکاری و یک تیپ پدافند به عربستان اعزام می‌شوند. به ایران حمله نمی‌کند.',
   },
   {
-    pattern: /^Saudi Arabia requested Pakistani support; Islamabad declined \(roll (?<roll>[\d.]+) ≥ 0\.40\)\.$/,
+    pattern: /^Saudi Arabia requested Pakistani support; Islamabad declined \(roll (?<roll>[\d.]+) (?:≥|>=) 0\.40\)\.$/,
     template: 'عربستان از پاکستان کمک خواست؛ اسلام‌آباد نپذیرفت (قرعه {roll} ≥ ۰٫۴۰).',
+  },
+  {
+    pattern: /^A (?<who>Iranian|coalition) salvo landed on empty ground at (?<col>\d+),(?<row>\d+)\.$/,
+    template: 'یک رگبار {who} روی زمین خالی در {col}،{row} فرود آمد.',
   },
   {
     pattern: /^Egypt closed the Suez Canal, fearing regional spillover\. US reinforcement transit now takes 2 extra turns\.$/,

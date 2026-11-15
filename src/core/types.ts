@@ -38,7 +38,15 @@ export type NodeKind =
   | 'urban'
   | 'nuclear'
   | 'missile-industry'
-  | 'port';
+  | 'port'
+  /** Surface-to-air battery and its cueing radar. */
+  | 'sam'
+  /** Standalone surveillance or fire-control radar. */
+  | 'radar'
+  /** Missile base or launch complex. */
+  | 'missile-base'
+  /** Command or proxy political-military seat. */
+  | 'command';
 
 /** Munition lines a facility can build. */
 export type ProductionLine = 'missile' | 'drone';
@@ -88,6 +96,12 @@ export interface MapNodeDef {
   undergroundRegen?: { drones?: number; missiles?: number };
   /** Evidence note for sites added from open-source reporting (Phase 1c). */
   provenance?: string;
+  /** Radar/SAM detection reach in kilometres, from the site brief. */
+  detection_radius_km?: number;
+  /** Id of the radar or battery this node depends on, when linked. */
+  linked_system?: string;
+  /** What destroying the node does to the defence network. */
+  degradation_effect?: string;
 }
 
 export type UnitCategory =

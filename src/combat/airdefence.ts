@@ -125,6 +125,22 @@ export function detectionChance(
     sources.push(node.name);
   }
 
+  // Site-level sensors added from the order of battle: SAM batteries and
+  // standalone radars carry their own detection reach instead of the abstract
+  // radar/airbase defaults above.
+  for (const node of map.nodes) {
+    if (!node.detection_radius_km) continue;
+    const state = snap.nodes[node.id];
+    if (!state || state.integrity <= 0) continue;
+    if (!node.operators.includes(defender)) continue;
+    const hex = map.nodeHexOf(node.id);
+    if (!hex) continue;
+    const reach = node.detection_radius_km / 100;
+    if (hexDistance({ col, row }, hex) > reach) continue;
+    chance += 0.18;
+    sources.push(node.name);
+  }
+
   const terrain = map.hexAt(col, row)?.terrain;
   if (terrain === 'mountain') chance -= 0.15;
   chance = clamp(

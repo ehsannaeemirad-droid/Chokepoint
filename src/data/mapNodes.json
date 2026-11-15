@@ -1,49 +1,1634 @@
 [
-{"id":"al_udeid","name":"Al Udeid Air Base","kind":"airbase","facility":"command","lon":51.31,"lat":25.11,"host":"qatar","operators":["usa"],"personnel":11000,"detail":"Forward headquarters of US Air Forces Central; ~11,000 US personnel.","effect":"US air missions. Qatar can restrict offensive sorties when threat perception rises.","strategic":true,"maxIntegrity":100,"name_fa":"پایگاه هوایی العدید","effect_fa":"مأموریت‌های هوایی آمریکا. قطر در صورت بالا رفتن حس تهدید می‌تواند پروازهای تهاجمی را محدود کند."},
-{"id":"al_dhafra","name":"Al Dhafra Air Base","kind":"airbase","facility":"radar","lon":54.55,"lat":24.25,"host":"uae","operators":["usa"],"personnel":5000,"detail":"~5,000 US personnel; tankers, AWACS and fighters.","effect":"US air missions; UAE AWACS and refuelling add +2 strike range.","strategic":true,"maxIntegrity":100,"name_fa":"پایگاه هوایی الظفره","effect_fa":"مأموریت‌های هوایی آمریکا؛ آواکس و سوخت‌رسان امارات +۲ برد حمله می‌دهد."},
-{"id":"ali_al_salem","name":"Ali Al Salem / Camp Arifjan","kind":"airbase","lon":47.72,"lat":29.35,"host":"kuwait","operators":["usa"],"personnel":10000,"detail":"~10,000 US personnel; the closest major basing to Iran.","effect":"US ground and air staging. Kuwait restricts earliest of all hosts.","strategic":true,"maxIntegrity":100,"name_fa":"علی السالم / کمپ عریفجان","effect_fa":"محل استقرار زمینی و هوایی آمریکا. کویت پیش از همه میزبان‌ها محدودیت اعمال می‌کند."},
-{"id":"nsa_bahrain","name":"NSA Bahrain (Fifth Fleet)","kind":"naval","facility":"naval-facility","lon":50.6,"lat":26.05,"host":"bahrain","operators":["usa"],"personnel":8600,"detail":"Home of US Naval Forces Central Command; ~8,600 personnel.","effect":"US naval missions and the Gulf presence that suppresses Hormuz disruption.","strategic":true,"maxIntegrity":100,"name_fa":"پایگاه بحرین (ناوگان پنجم)","effect_fa":"مأموریت‌های دریایی آمریکا و حضوری که اختلال هرمز را مهار می‌کند."},
-{"id":"nevatim","name":"Nevatim Air Base","kind":"airbase","lon":35.01,"lat":31.21,"host":"israel","operators":["israel"],"detail":"Main IAF strike base; F-35I Adir squadrons.","effect":"Israeli air missions.","strategic":true,"maxIntegrity":100,"name_fa":"پایگاه هوایی نواتیم","effect_fa":"مأموریت‌های هوایی اسرائیل."},
-{"id":"hatzerim","name":"Hatzerim Air Base","kind":"airbase","lon":34.66,"lat":31.23,"host":"israel","operators":["israel"],"detail":"IAF F-15I Ra'am base.","effect":"Israeli air missions.","maxIntegrity":100,"name_fa":"پایگاه هوایی حتسریم","effect_fa":"مأموریت‌های هوایی اسرائیل."},
-{"id":"prince_sultan","name":"Prince Sultan Air Base","kind":"airbase","facility":"command","lon":47.15,"lat":24.06,"host":"saudi","operators":["usa"],"detail":"Saudi base at Al Kharj; US access is contingent on Saudi consent.","effect":"US access only if Saudi Arabia grants it — unlikely while its own soil is under threat.","strategic":true,"maxIntegrity":100,"name_fa":"پایگاه شاهزاده سلطان","effect_fa":"دسترسی آمریکا تنها با اجازه عربستان ممکن است؛ تا وقتی خاک خودش تهدید می‌شود بعید است."},
-{"id":"incirlik","name":"Incirlik Air Base","kind":"airbase","lon":35.42,"lat":37,"host":"turkey","operators":["usa"],"detail":"NATO base in southern Turkey.","effect":"US access only if Turkey grants it: needs high US legitimacy and low Turkish threat.","strategic":true,"maxIntegrity":100,"name_fa":"پایگاه اینجیرلیک","effect_fa":"دسترسی آمریکا فقط با اجازه ترکیه: مشروعیت بالا و تهدید پایین ترکیه لازم است."},
-{"id":"bandar_abbas","name":"Bandar Abbas","kind":"naval","facility":"port-logistics","lon":56.28,"lat":27.18,"host":"iran","operators":["iran"],"detail":"IRIN and IRGC-N headquarters overlooking the Strait of Hormuz.","effect":"Iranian naval missions and Hormuz fire control.","strategic":true,"maxIntegrity":100,"name_fa":"بندرعباس","effect_fa":"مأموریت‌های دریایی ایران و کنترل آتش هرمز."},
-{"id":"bushehr","name":"Bushehr","kind":"naval","lon":50.83,"lat":28.92,"host":"iran","operators":["iran"],"detail":"Coastal defence and naval base on the northern Gulf.","effect":"Anti-ship missile coverage across the northern Gulf.","maxIntegrity":100,"name_fa":"بوشهر","effect_fa":"پوشش موشک ضدکشتی در شمال خلیج فارس."},
-{"id":"isfahan","name":"Isfahan Complex","kind":"nuclear","lon":51.67,"lat":32.65,"host":"iran","operators":["iran"],"detail":"Uranium conversion plant and nuclear research complex; munition assembly sits elsewhere.","effect":"Converts yellowcake into UF6 for the enrichment chain. Hardened: needs sustained or bunker-buster strikes.","hardened":true,"terrain":"hardened","strategic":true,"maxIntegrity":100,"name_fa":"مجتمع اصفهان","effect_fa":"کیک زرد را برای زنجیره غنی‌سازی به UF6 تبدیل می‌کند. سخت‌شده: نیازمند حملات پیوسته یا بمب سنگرشکن.","facility":"nuclear-conversion"},
-{"id":"natanz","name":"Natanz","kind":"nuclear","lon":51.72,"lat":33.72,"host":"iran","operators":["iran"],"detail":"Underground enrichment site beneath roughly 8 m of concrete and 25 m of earth.","effect":"Gas-centrifuge enrichment hall 25 m down: only a bunker-buster reaches it. It feeds the programme but builds no munitions.","hardened":true,"terrain":"hardened","strategic":true,"maxIntegrity":100,"name_fa":"نطنز","effect_fa":"سالن غنی‌سازی سانتریفیژ در ۲۵ متری زیر زمین؛ تنها بمب سنگرشکن به آن می‌رسد. برنامه را تغذیه می‌کند اما مهمات نمی‌سازد.","buried":25,"surfaceFloor":55,"facility":"nuclear-enrichment"},
-{"id":"fordow","name":"Fordow","kind":"nuclear","lon":50.95,"lat":34.88,"host":"iran","operators":["iran"],"detail":"Deeply buried enrichment hall inside a mountain; only a B-2 carrying the MOP can reach it.","effect":"Deeply buried enrichment hall: the hardest target in the theatre. It enriches, it does not assemble.","hardened":true,"terrain":"hardened","strategic":true,"maxIntegrity":100,"name_fa":"فردو","effect_fa":"سالن غنی‌سازی ۶۰ متر زیر کوه: سخت‌ترین هدف صحنه. غنی‌سازی می‌کند، مهمات نمی‌سازد.","buried":60,"surfaceFloor":55,"facility":"nuclear-enrichment"},
-{"id":"hormuz","name":"Strait of Hormuz","kind":"chokepoint","lon":56.45,"lat":26.6,"host":"iran","operators":["iran"],"detail":"The world's most important oil chokepoint: ~20% of global oil trade.","effect":"Iranian disruption here moves the oil price and every Gulf state's threat perception.","strategic":true,"maxIntegrity":100,"name_fa":"تنگه هرمز","effect_fa":"اختلال ایران در اینجا قیمت نفت و حس تهدید همه کشورهای خلیج را جابه‌جا می‌کند."},
-{"id":"bab_almandeb","name":"Bab al-Mandeb","kind":"chokepoint","lon":43.4,"lat":12.6,"host":"yemen","operators":["houthi"],"detail":"Southern gate of the Red Sea; Houthi anti-ship missiles dominate it.","effect":"Houthi control raises Red Sea shipping risk and global insurance costs.","strategic":true,"maxIntegrity":100,"name_fa":"باب‌المندب","effect_fa":"کنترل حوثی‌ها ریسک کشتیرانی دریای سرخ و هزینه بیمه جهانی را بالا می‌برد."},
-{"id":"suez","name":"Suez Canal","kind":"chokepoint","lon":32.55,"lat":29.97,"host":"egypt","operators":[],"detail":"Egyptian-controlled sea-level canal carrying ~12% of world trade.","effect":"If closed, US reinforcement transit takes 2 extra turns.","strategic":true,"maxIntegrity":100,"name_fa":"کانال سوئز","effect_fa":"اگر بسته شود، عبور نیروهای کمکی آمریکا ۲ نوبت بیشتر طول می‌کشد."},
-{"id":"abqaiq","name":"Abqaiq Processing","kind":"oil","lon":49.68,"lat":25.93,"host":"saudi","operators":[],"detail":"The largest oil processing facility on earth.","effect":"Damage crashes Saudi revenue and pushes Saudi Arabia toward escalation.","strategic":true,"maxIntegrity":100,"name_fa":"تأسیسات بقیق","effect_fa":"آسیب به آن درآمد سعودی را فرو می‌ریزد و ریاض را به تشدید سوق می‌دهد."},
-{"id":"ras_tanura","name":"Ras Tanura Terminal","kind":"oil","lon":50.16,"lat":26.64,"host":"saudi","operators":[],"detail":"Saudi Arabia's main oil export terminal.","effect":"Damage chokes Saudi exports and raises Saudi threat perception.","maxIntegrity":100,"name_fa":"پایانه راس تنوره","effect_fa":"آسیب به آن صادرات سعودی را می‌بندد و حس تهدید عربستان را بالا می‌برد."},
-{"id":"kharg","name":"Kharg Island","kind":"oil","lon":50.32,"lat":29.25,"host":"iran","operators":["iran"],"detail":"Iran's principal oil export terminal.","effect":"Striking it cuts Iranian revenue, raising Iran's war cost.","maxIntegrity":100,"name_fa":"جزیره خارک","effect_fa":"حمله به آن درآمد ایران را قطع می‌کند و هزینه جنگ ایران را بالا می‌برد."},
-{"id":"gulf_platforms","name":"Gulf Platforms","kind":"oil","lon":51.65,"lat":27.6,"host":"neutral","operators":[],"detail":"Scattered offshore production platforms shared across the Gulf.","effect":"Control or denial affects every Gulf economy.","maxIntegrity":100,"name_fa":"سکوهای خلیج فارس","effect_fa":"کنترل یا تهدید این سکوها بر اقتصاد تمام خلیج اثر می‌گذارد."},
-{"id":"tehran","name":"Tehran","kind":"urban","facility":"command","lon":51.39,"lat":35.69,"host":"iran","operators":["iran"],"detail":"Iranian capital and seat of the regime.","effect":"Strikes here count as leadership strikes and invite escalation.","strategic":true,"maxIntegrity":100,"name_fa":"تهران","effect_fa":"حمله به اینجا ضربه به رهبری شمرده می‌شود و تشدید را دعوت می‌کند."},
-{"id":"jerusalem","name":"Jerusalem","kind":"urban","lon":35.21,"lat":31.77,"host":"israel","operators":["israel"],"detail":"Israeli capital; a single missile impact is a political event.","effect":"Impacts here count toward Israeli domestic collapse.","strategic":true,"maxIntegrity":100,"name_fa":"اورشلیم","effect_fa":"آسیب به اینجا در فروپاشی داخلی اسرائیل شمرده می‌شود."},
-{"id":"tel_aviv","name":"Tel Aviv","kind":"urban","lon":34.78,"lat":32.08,"host":"israel","operators":["israel"],"detail":"Israel's economic centre and densest population.","effect":"Impacts here count toward Israeli domestic collapse.","strategic":true,"maxIntegrity":100,"name_fa":"تل‌آویو","effect_fa":"آسیب به اینجا در فروپاشی داخلی اسرائیل شمرده می‌شود."},
-{"id":"riyadh","name":"Riyadh","kind":"urban","lon":46.72,"lat":24.69,"host":"saudi","operators":[],"detail":"Saudi capital.","effect":"Two missile impacts trigger the Pakistan intervention check.","strategic":true,"maxIntegrity":100,"name_fa":"ریاض","effect_fa":"دو اصابت موشک، بررسی ورود پاکستان را فعال می‌کند."},
-{"id":"sanaa","name":"Sana'a","kind":"urban","lon":44.21,"lat":15.35,"host":"yemen","operators":["houthi"],"detail":"Houthi seat of power.","effect":"Below 20% integrity the Houthis regroup and halve their attack rate.","maxIntegrity":100,"name_fa":"صنعا","effect_fa":"زیر ۲۰٪ یکپارچگی، حوثی‌ها بازسازی می‌شوند و نرخ حمله‌شان نصف می‌شود."},
-{"id":"baghdad","name":"Baghdad","kind":"urban","lon":44.36,"lat":33.31,"host":"iraq","operators":[],"detail":"Iraqi capital, flanked by militia zones.","effect":"Militia activity rises with Iranian resource transfers.","maxIntegrity":100,"name_fa":"بغداد","effect_fa":"با انتقال منابع ایران، فعالیت شبه‌نظامیان بالا می‌گیرد."},
-{"id":"damascus","name":"Damascus","kind":"urban","lon":36.29,"lat":33.51,"host":"syria","operators":[],"detail":"Syrian capital inside the Iranian supply corridor.","effect":"Part of the Iran–Levant land bridge.","maxIntegrity":100,"name_fa":"دمشق","effect_fa":"بخشی از کریدور زمینی ایران تا شام."},
-{"id":"amman","name":"Amman","kind":"urban","lon":35.93,"lat":31.95,"host":"jordan","operators":[],"detail":"Jordanian capital.","effect":"Jordan permits defensive overflight only.","maxIntegrity":100,"name_fa":"امان","effect_fa":"اردن فقط اجازه عبور دفاعی می‌دهد."},
-{"id":"beirut","name":"Beirut","kind":"urban","lon":35.5,"lat":33.89,"host":"lebanon","operators":[],"detail":"Lebanese capital.","effect":"Political flashpoint; no basing rights.","maxIntegrity":100,"name_fa":"بیروت","effect_fa":"نقطه تنش سیاسی؛ حق پایگاه ندارد."},
-{"id":"doha","name":"Doha","kind":"urban","lon":51.53,"lat":25.29,"host":"qatar","operators":[],"detail":"Qatari capital and the political rear of Al Udeid.","effect":"Qatar mediates ceasefires from here.","maxIntegrity":100,"name_fa":"دوحه","effect_fa":"قطر از اینجا میانجی آتش‌بس می‌شود."},
-{"id":"abu_dhabi","name":"Abu Dhabi","kind":"urban","lon":54.37,"lat":24.45,"host":"uae","operators":[],"detail":"UAE capital and financial centre.","effect":"UAE threat perception tracks its trade exposure.","maxIntegrity":100,"name_fa":"ابوظبی","effect_fa":"حس تهدید امارات با ریسک تجاری‌اش هم‌گام است."},
-{"id":"kuwait_city","name":"Kuwait City","kind":"urban","lon":47.98,"lat":29.38,"host":"kuwait","operators":[],"detail":"Kuwaiti capital, within easy reach of Iranian rockets.","effect":"Kuwait restricts base access earliest of all hosts.","maxIntegrity":100,"name_fa":"کویت","effect_fa":"کویت پیش از همه میزبان‌ها دسترسی به پایگاه را محدود می‌کند."},
-{"id":"manama","name":"Manama","kind":"urban","lon":50.59,"lat":26.22,"host":"bahrain","operators":[],"detail":"Bahraini capital, adjacent to the Fifth Fleet base.","effect":"Bahrain's closure removes a coalition naval presence.","maxIntegrity":100,"name_fa":"منامه","effect_fa":"بسته شدن بحرین یک حضور دریایی ائتلاف را حذف می‌کند."},
-{"id":"muscat","name":"Muscat","kind":"urban","lon":58.41,"lat":23.59,"host":"oman","operators":[],"detail":"Omani capital and traditional mediator with Tehran.","effect":"Oman stays neutral and keeps the Hormuz channel open to diplomacy.","maxIntegrity":100,"name_fa":"مسقط","effect_fa":"عمان بی‌طرف می‌ماند و کانال دیپلماتیک هرمز را باز نگه می‌دارد."},
-{"id":"aden","name":"Aden","kind":"port","lon":45.03,"lat":12.79,"host":"yemen","operators":[],"detail":"Yemen's southern port, opposite Bab al-Mandeb.","effect":"Anchor of Red Sea shipping risk.","maxIntegrity":100,"name_fa":"عدن","effect_fa":"لنگرگاه ریسک کشتیرانی دریای سرخ."},
-{"id":"cairo","name":"Cairo","kind":"urban","lon":31.24,"lat":30.04,"host":"egypt","operators":[],"detail":"Egyptian capital; Suez revenue underwrites the state.","effect":"Sustained Hormuz disruption pushes Egypt to close Suez.","maxIntegrity":100,"name_fa":"قاهره","effect_fa":"اختلال پیوسته هرمز، مصر را به بستن سوئز وامی‌دارد."},
-{"id":"haifa","name":"Haifa Port","kind":"port","lon":34.99,"lat":32.82,"host":"israel","operators":["israel"],"detail":"Israel's main commercial and naval port.","effect":"US airlift resupply arrives here.","maxIntegrity":100,"name_fa":"بندر حیفا","effect_fa":"ترابری هوایی آمریکا اینجا فرود می‌آید."},
-{"id":"basra","name":"Basra","kind":"port","lon":47.78,"lat":30.51,"host":"iraq","operators":[],"detail":"Iraq's outlet to the Gulf.","effect":"Militia interference with shipping raises Gulf risk.","maxIntegrity":100,"name_fa":"بصره","effect_fa":"دخالت شبه‌نظامیان در کشتیرانی، ریسک خلیج را بالا می‌برد."},
-{"id":"karachi","name":"Karachi","kind":"port","lon":67.01,"lat":24.86,"host":"pakistan","operators":[],"detail":"Pakistan's main port and naval base.","effect":"Pakistan's intervention force stages from here.","maxIntegrity":100,"name_fa":"کراچی","effect_fa":"نیروی مداخله پاکستان از اینجا سازمان می‌یابد."},
-{"id":"ankara","name":"Ankara","kind":"urban","lon":32.86,"lat":39.93,"host":"turkey","operators":[],"detail":"Turkish capital.","effect":"Turkey trades drone sales for influence; it never fights directly.","maxIntegrity":100,"name_fa":"آنکارا","effect_fa":"ترکیه فروش پهپاد را با نفوذ معامله می‌کند؛ هرگز مستقیم نمی‌جنگد."},
-{"id":"kabul","name":"Kabul","kind":"urban","lon":69.21,"lat":34.53,"host":"afghanistan","operators":[],"detail":"Afghan capital.","effect":"Off-map for combat; a reminder of the region's depth.","maxIntegrity":100,"name_fa":"کابل","effect_fa":"خارج از صحنه نبرد؛ یادآور عمق منطقه."},
-{"id":"khojir","name":"Khojir production complex","name_fa":"مجتمع تولید خجیر","kind":"missile-industry","lon":51.73,"lat":35.6,"host":"iran","operators":["iran"],"detail":"Dispersed underground production complex east of Tehran.","effect":"Regenerates drones and short-range missiles while integrity remains above 20%.","effect_fa":"تا وقتی یکپارچگی بالای ۲۰٪ باشد پهپاد و موشک کوتاه‌برد بازتولید می‌کند.","strategic":true,"hardened":true,"buried":40,"surfaceFloor":55,"terrain":"hardened","maxIntegrity":100,"facility":"missile-production","productionLines":["missile","drone"],"undergroundRegen":{"drones":2,"missiles":2},"provenance":"Open-source reporting places a dispersed underground production complex east of Tehran; coordinates approximate."},
-{"id":"parchin","name":"Parchin complex","name_fa":"مجتمع پارچین","kind":"missile-industry","lon":51.77,"lat":35.52,"host":"iran","operators":["iran"],"detail":"Hardened research and missile-related production complex.","effect":"Regenerates missile stocks slowly while intact.","effect_fa":"تا وقتی سالم باشد موجودی موشک را آهسته بازتولید می‌کند.","strategic":true,"hardened":true,"buried":35,"surfaceFloor":50,"terrain":"hardened","maxIntegrity":100,"facility":"missile-production","productionLines":["missile"],"undergroundRegen":{"missiles":1},"provenance":"Open-source reporting describes a hardened research and missile-production complex; coordinates approximate."},
-{"id":"shahroud","name":"Shahroud missile complex","name_fa":"مجتمع موشکی شاهرود","kind":"missile-industry","lon":55.02,"lat":36.42,"host":"iran","operators":["iran"],"detail":"Long-range storage and TEL dispersal area.","effect":"Regenerates long-range missile stocks while integrity remains above 20%.","effect_fa":"تا وقتی یکپارچگی بالای ۲۰٪ باشد موشک دوربرد بازتولید می‌کند.","strategic":true,"hardened":true,"buried":30,"surfaceFloor":45,"terrain":"hardened","maxIntegrity":100,"facility":"weapons-storage","productionLines":["missile"],"undergroundRegen":{"missiles":1},"provenance":"Open-source reporting describes a long-range missile storage and TEL dispersal area; coordinates approximate."},
-{"id":"bandar_abbas_underground","name":"Bandar Abbas coastal storage","name_fa":"انبار زیرزمینی بندرعباس","kind":"port","lon":56.27,"lat":27.18,"host":"iran","operators":["iran"],"detail":"Coastal underground ASM and drone storage near the strait.","effect":"Regenerates drones while integrity remains above 20%.","effect_fa":"تا وقتی یکپارچگی بالای ۲۰٪ باشد پهپاد بازتولید می‌کند.","strategic":true,"hardened":true,"buried":25,"surfaceFloor":40,"terrain":"hardened","maxIntegrity":100,"facility":"weapons-storage","productionLines":["drone"],"undergroundRegen":{"drones":3},"provenance":"Coastal underground munition storage reported near Bandar Abbas; coordinates approximate."},
-{"id":"tabriz_complex","name":"Tabriz industrial complex","name_fa":"مجتمع صنعتی تبریز","kind":"urban","lon":46.29,"lat":38.08,"host":"iran","operators":["iran"],"detail":"Northwest industrial depth supporting missile and drone production.","effect":"Regenerates mixed stocks while intact.","effect_fa":"تا وقتی سالم باشد تولید مختلط را ادامه می‌دهد.","strategic":false,"hardened":true,"buried":20,"surfaceFloor":40,"terrain":"hardened","maxIntegrity":100,"facility":"defence-industry","productionLines":["missile","drone"],"undergroundRegen":{"drones":1,"missiles":1}},
-{"id":"muwaffaq_salti","name":"Muwaffaq Salti Air Base","name_fa":"پایگاه هوایی موفق الصلطی","kind":"airbase","facility":"radar","lon":36.59,"lat":31.83,"host":"jordan","operators":["usa"],"personnel":2000,"detail":"Jordanian air base hosting a US AN/TPY-2 X-band radar for regional BMD cueing.","effect":"Supports regional BMD coverage. If degraded, Levant sector intercept quality falls.","effect_fa":"پوشش دفاع موشکی منطقه‌ای. در صورت آسیب، کیفیت رهگیری در شام کاهش می‌یابد.","strategic":true,"maxIntegrity":100}
+  {
+    "id": "al_udeid",
+    "name": "Al Udeid Air Base",
+    "kind": "airbase",
+    "facility": "command",
+    "lon": 51.31,
+    "lat": 25.11,
+    "host": "qatar",
+    "operators": [
+      "usa"
+    ],
+    "personnel": 11000,
+    "detail": "Forward headquarters of US Air Forces Central; ~11,000 US personnel.",
+    "effect": "US air missions. Qatar can restrict offensive sorties when threat perception rises.",
+    "strategic": true,
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه هوایی العدید",
+    "effect_fa": "مأموریت‌های هوایی آمریکا. قطر در صورت بالا رفتن حس تهدید می‌تواند پروازهای تهاجمی را محدود کند."
+  },
+  {
+    "id": "al_dhafra",
+    "name": "Al Dhafra Air Base",
+    "kind": "airbase",
+    "facility": "radar",
+    "lon": 54.55,
+    "lat": 24.25,
+    "host": "uae",
+    "operators": [
+      "usa"
+    ],
+    "personnel": 5000,
+    "detail": "~5,000 US personnel; tankers, AWACS and fighters.",
+    "effect": "US air missions; UAE AWACS and refuelling add +2 strike range.",
+    "strategic": true,
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه هوایی الظفره",
+    "effect_fa": "مأموریت‌های هوایی آمریکا؛ آواکس و سوخت‌رسان امارات +۲ برد حمله می‌دهد."
+  },
+  {
+    "id": "ali_al_salem",
+    "name": "Ali Al Salem / Camp Arifjan",
+    "kind": "airbase",
+    "lon": 47.72,
+    "lat": 29.35,
+    "host": "kuwait",
+    "operators": [
+      "usa"
+    ],
+    "personnel": 10000,
+    "detail": "~10,000 US personnel; the closest major basing to Iran.",
+    "effect": "US ground and air staging. Kuwait restricts earliest of all hosts.",
+    "strategic": true,
+    "maxIntegrity": 100,
+    "name_fa": "علی السالم / کمپ عریفجان",
+    "effect_fa": "محل استقرار زمینی و هوایی آمریکا. کویت پیش از همه میزبان‌ها محدودیت اعمال می‌کند."
+  },
+  {
+    "id": "nsa_bahrain",
+    "name": "NSA Bahrain (Fifth Fleet)",
+    "kind": "naval",
+    "facility": "naval-facility",
+    "lon": 50.6,
+    "lat": 26.05,
+    "host": "bahrain",
+    "operators": [
+      "usa"
+    ],
+    "personnel": 8600,
+    "detail": "Home of US Naval Forces Central Command; ~8,600 personnel.",
+    "effect": "US naval missions and the Gulf presence that suppresses Hormuz disruption.",
+    "strategic": true,
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه بحرین (ناوگان پنجم)",
+    "effect_fa": "مأموریت‌های دریایی آمریکا و حضوری که اختلال هرمز را مهار می‌کند."
+  },
+  {
+    "id": "nevatim",
+    "name": "Nevatim Air Base",
+    "kind": "airbase",
+    "lon": 35.01,
+    "lat": 31.21,
+    "host": "israel",
+    "operators": [
+      "israel"
+    ],
+    "detail": "Main IAF strike base; F-35I Adir squadrons.",
+    "effect": "Israeli air missions.",
+    "strategic": true,
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه هوایی نواتیم",
+    "effect_fa": "مأموریت‌های هوایی اسرائیل."
+  },
+  {
+    "id": "hatzerim",
+    "name": "Hatzerim Air Base",
+    "kind": "airbase",
+    "lon": 34.66,
+    "lat": 31.23,
+    "host": "israel",
+    "operators": [
+      "israel"
+    ],
+    "detail": "IAF F-15I Ra'am base.",
+    "effect": "Israeli air missions.",
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه هوایی حتسریم",
+    "effect_fa": "مأموریت‌های هوایی اسرائیل."
+  },
+  {
+    "id": "prince_sultan",
+    "name": "Prince Sultan Air Base",
+    "kind": "airbase",
+    "facility": "command",
+    "lon": 47.15,
+    "lat": 24.06,
+    "host": "saudi",
+    "operators": [
+      "usa"
+    ],
+    "detail": "Saudi base at Al Kharj; US access is contingent on Saudi consent.",
+    "effect": "US access only if Saudi Arabia grants it — unlikely while its own soil is under threat.",
+    "strategic": true,
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه شاهزاده سلطان",
+    "effect_fa": "دسترسی آمریکا تنها با اجازه عربستان ممکن است؛ تا وقتی خاک خودش تهدید می‌شود بعید است."
+  },
+  {
+    "id": "incirlik",
+    "name": "Incirlik Air Base",
+    "kind": "airbase",
+    "lon": 35.42,
+    "lat": 37,
+    "host": "turkey",
+    "operators": [
+      "usa"
+    ],
+    "detail": "NATO base in southern Turkey.",
+    "effect": "US access only if Turkey grants it: needs high US legitimacy and low Turkish threat.",
+    "strategic": true,
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه اینجیرلیک",
+    "effect_fa": "دسترسی آمریکا فقط با اجازه ترکیه: مشروعیت بالا و تهدید پایین ترکیه لازم است."
+  },
+  {
+    "id": "bandar_abbas",
+    "name": "Bandar Abbas",
+    "kind": "naval",
+    "facility": "port-logistics",
+    "lon": 56.28,
+    "lat": 27.18,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "IRIN and IRGC-N headquarters overlooking the Strait of Hormuz.",
+    "effect": "Iranian naval missions and Hormuz fire control.",
+    "strategic": true,
+    "maxIntegrity": 100,
+    "name_fa": "بندرعباس",
+    "effect_fa": "مأموریت‌های دریایی ایران و کنترل آتش هرمز."
+  },
+  {
+    "id": "bushehr",
+    "name": "Bushehr",
+    "kind": "naval",
+    "lon": 50.83,
+    "lat": 28.92,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Coastal defence and naval base on the northern Gulf.",
+    "effect": "Anti-ship missile coverage across the northern Gulf.",
+    "maxIntegrity": 100,
+    "name_fa": "بوشهر",
+    "effect_fa": "پوشش موشک ضدکشتی در شمال خلیج فارس."
+  },
+  {
+    "id": "isfahan",
+    "name": "Isfahan Complex",
+    "kind": "nuclear",
+    "lon": 51.67,
+    "lat": 32.65,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Uranium conversion plant and nuclear research complex; munition assembly sits elsewhere.",
+    "effect": "Converts yellowcake into UF6 for the enrichment chain. Hardened: needs sustained or bunker-buster strikes.",
+    "hardened": true,
+    "terrain": "hardened",
+    "strategic": true,
+    "maxIntegrity": 100,
+    "name_fa": "مجتمع اصفهان",
+    "effect_fa": "کیک زرد را برای زنجیره غنی‌سازی به UF6 تبدیل می‌کند. سخت‌شده: نیازمند حملات پیوسته یا بمب سنگرشکن.",
+    "facility": "nuclear-conversion"
+  },
+  {
+    "id": "natanz",
+    "name": "Natanz",
+    "kind": "nuclear",
+    "lon": 51.72,
+    "lat": 33.72,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Underground enrichment site beneath roughly 8 m of concrete and 25 m of earth.",
+    "effect": "Gas-centrifuge enrichment hall 25 m down: only a bunker-buster reaches it. It feeds the programme but builds no munitions.",
+    "hardened": true,
+    "terrain": "hardened",
+    "strategic": true,
+    "maxIntegrity": 100,
+    "name_fa": "نطنز",
+    "effect_fa": "سالن غنی‌سازی سانتریفیژ در ۲۵ متری زیر زمین؛ تنها بمب سنگرشکن به آن می‌رسد. برنامه را تغذیه می‌کند اما مهمات نمی‌سازد.",
+    "buried": 25,
+    "surfaceFloor": 55,
+    "facility": "nuclear-enrichment"
+  },
+  {
+    "id": "fordow",
+    "name": "Fordow",
+    "kind": "nuclear",
+    "lon": 50.95,
+    "lat": 34.88,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Deeply buried enrichment hall inside a mountain; only a B-2 carrying the MOP can reach it.",
+    "effect": "Deeply buried enrichment hall: the hardest target in the theatre. It enriches, it does not assemble.",
+    "hardened": true,
+    "terrain": "hardened",
+    "strategic": true,
+    "maxIntegrity": 100,
+    "name_fa": "فردو",
+    "effect_fa": "سالن غنی‌سازی ۶۰ متر زیر کوه: سخت‌ترین هدف صحنه. غنی‌سازی می‌کند، مهمات نمی‌سازد.",
+    "buried": 60,
+    "surfaceFloor": 55,
+    "facility": "nuclear-enrichment"
+  },
+  {
+    "id": "hormuz",
+    "name": "Strait of Hormuz",
+    "kind": "chokepoint",
+    "lon": 56.45,
+    "lat": 26.6,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "The world's most important oil chokepoint: ~20% of global oil trade.",
+    "effect": "Iranian disruption here moves the oil price and every Gulf state's threat perception.",
+    "strategic": true,
+    "maxIntegrity": 100,
+    "name_fa": "تنگه هرمز",
+    "effect_fa": "اختلال ایران در اینجا قیمت نفت و حس تهدید همه کشورهای خلیج را جابه‌جا می‌کند."
+  },
+  {
+    "id": "bab_almandeb",
+    "name": "Bab al-Mandeb",
+    "kind": "chokepoint",
+    "lon": 43.4,
+    "lat": 12.6,
+    "host": "yemen",
+    "operators": [
+      "houthi"
+    ],
+    "detail": "Southern gate of the Red Sea; Houthi anti-ship missiles dominate it.",
+    "effect": "Houthi control raises Red Sea shipping risk and global insurance costs.",
+    "strategic": true,
+    "maxIntegrity": 100,
+    "name_fa": "باب‌المندب",
+    "effect_fa": "کنترل حوثی‌ها ریسک کشتیرانی دریای سرخ و هزینه بیمه جهانی را بالا می‌برد."
+  },
+  {
+    "id": "suez",
+    "name": "Suez Canal",
+    "kind": "chokepoint",
+    "lon": 32.55,
+    "lat": 29.97,
+    "host": "egypt",
+    "operators": [],
+    "detail": "Egyptian-controlled sea-level canal carrying ~12% of world trade.",
+    "effect": "If closed, US reinforcement transit takes 2 extra turns.",
+    "strategic": true,
+    "maxIntegrity": 100,
+    "name_fa": "کانال سوئز",
+    "effect_fa": "اگر بسته شود، عبور نیروهای کمکی آمریکا ۲ نوبت بیشتر طول می‌کشد."
+  },
+  {
+    "id": "abqaiq",
+    "name": "Abqaiq Processing",
+    "kind": "oil",
+    "lon": 49.68,
+    "lat": 25.93,
+    "host": "saudi",
+    "operators": [],
+    "detail": "The largest oil processing facility on earth.",
+    "effect": "Damage crashes Saudi revenue and pushes Saudi Arabia toward escalation.",
+    "strategic": true,
+    "maxIntegrity": 100,
+    "name_fa": "تأسیسات بقیق",
+    "effect_fa": "آسیب به آن درآمد سعودی را فرو می‌ریزد و ریاض را به تشدید سوق می‌دهد."
+  },
+  {
+    "id": "ras_tanura",
+    "name": "Ras Tanura Terminal",
+    "kind": "oil",
+    "lon": 50.16,
+    "lat": 26.64,
+    "host": "saudi",
+    "operators": [],
+    "detail": "Saudi Arabia's main oil export terminal.",
+    "effect": "Damage chokes Saudi exports and raises Saudi threat perception.",
+    "maxIntegrity": 100,
+    "name_fa": "پایانه راس تنوره",
+    "effect_fa": "آسیب به آن صادرات سعودی را می‌بندد و حس تهدید عربستان را بالا می‌برد."
+  },
+  {
+    "id": "kharg",
+    "name": "Kharg Island",
+    "kind": "oil",
+    "lon": 50.32,
+    "lat": 29.25,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Iran's principal oil export terminal.",
+    "effect": "Striking it cuts Iranian revenue, raising Iran's war cost.",
+    "maxIntegrity": 100,
+    "name_fa": "جزیره خارک",
+    "effect_fa": "حمله به آن درآمد ایران را قطع می‌کند و هزینه جنگ ایران را بالا می‌برد."
+  },
+  {
+    "id": "gulf_platforms",
+    "name": "Gulf Platforms",
+    "kind": "oil",
+    "lon": 51.65,
+    "lat": 27.6,
+    "host": "neutral",
+    "operators": [],
+    "detail": "Scattered offshore production platforms shared across the Gulf.",
+    "effect": "Control or denial affects every Gulf economy.",
+    "maxIntegrity": 100,
+    "name_fa": "سکوهای خلیج فارس",
+    "effect_fa": "کنترل یا تهدید این سکوها بر اقتصاد تمام خلیج اثر می‌گذارد."
+  },
+  {
+    "id": "tehran",
+    "name": "Tehran",
+    "kind": "urban",
+    "facility": "command",
+    "lon": 51.39,
+    "lat": 35.69,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Iranian capital and seat of the regime.",
+    "effect": "Strikes here count as leadership strikes and invite escalation.",
+    "strategic": true,
+    "maxIntegrity": 100,
+    "name_fa": "تهران",
+    "effect_fa": "حمله به اینجا ضربه به رهبری شمرده می‌شود و تشدید را دعوت می‌کند."
+  },
+  {
+    "id": "jerusalem",
+    "name": "Jerusalem",
+    "kind": "urban",
+    "lon": 35.21,
+    "lat": 31.77,
+    "host": "israel",
+    "operators": [
+      "israel"
+    ],
+    "detail": "Israeli capital; a single missile impact is a political event.",
+    "effect": "Impacts here count toward Israeli domestic collapse.",
+    "strategic": true,
+    "maxIntegrity": 100,
+    "name_fa": "اورشلیم",
+    "effect_fa": "آسیب به اینجا در فروپاشی داخلی اسرائیل شمرده می‌شود."
+  },
+  {
+    "id": "tel_aviv",
+    "name": "Tel Aviv",
+    "kind": "urban",
+    "lon": 34.78,
+    "lat": 32.08,
+    "host": "israel",
+    "operators": [
+      "israel"
+    ],
+    "detail": "Israel's economic centre and densest population.",
+    "effect": "Impacts here count toward Israeli domestic collapse.",
+    "strategic": true,
+    "maxIntegrity": 100,
+    "name_fa": "تل‌آویو",
+    "effect_fa": "آسیب به اینجا در فروپاشی داخلی اسرائیل شمرده می‌شود."
+  },
+  {
+    "id": "riyadh",
+    "name": "Riyadh",
+    "kind": "urban",
+    "lon": 46.72,
+    "lat": 24.69,
+    "host": "saudi",
+    "operators": [],
+    "detail": "Saudi capital.",
+    "effect": "Two missile impacts trigger the Pakistan intervention check.",
+    "strategic": true,
+    "maxIntegrity": 100,
+    "name_fa": "ریاض",
+    "effect_fa": "دو اصابت موشک، بررسی ورود پاکستان را فعال می‌کند."
+  },
+  {
+    "id": "sanaa",
+    "name": "Sana'a",
+    "kind": "urban",
+    "lon": 44.21,
+    "lat": 15.35,
+    "host": "yemen",
+    "operators": [
+      "houthi"
+    ],
+    "detail": "Houthi seat of power.",
+    "effect": "Below 20% integrity the Houthis regroup and halve their attack rate.",
+    "maxIntegrity": 100,
+    "name_fa": "صنعا",
+    "effect_fa": "زیر ۲۰٪ یکپارچگی، حوثی‌ها بازسازی می‌شوند و نرخ حمله‌شان نصف می‌شود."
+  },
+  {
+    "id": "baghdad",
+    "name": "Baghdad",
+    "kind": "urban",
+    "lon": 44.36,
+    "lat": 33.31,
+    "host": "iraq",
+    "operators": [],
+    "detail": "Iraqi capital, flanked by militia zones.",
+    "effect": "Militia activity rises with Iranian resource transfers.",
+    "maxIntegrity": 100,
+    "name_fa": "بغداد",
+    "effect_fa": "با انتقال منابع ایران، فعالیت شبه‌نظامیان بالا می‌گیرد."
+  },
+  {
+    "id": "damascus",
+    "name": "Damascus",
+    "kind": "urban",
+    "lon": 36.29,
+    "lat": 33.51,
+    "host": "syria",
+    "operators": [],
+    "detail": "Syrian capital inside the Iranian supply corridor.",
+    "effect": "Part of the Iran–Levant land bridge.",
+    "maxIntegrity": 100,
+    "name_fa": "دمشق",
+    "effect_fa": "بخشی از کریدور زمینی ایران تا شام."
+  },
+  {
+    "id": "amman",
+    "name": "Amman",
+    "kind": "urban",
+    "lon": 35.93,
+    "lat": 31.95,
+    "host": "jordan",
+    "operators": [],
+    "detail": "Jordanian capital.",
+    "effect": "Jordan permits defensive overflight only.",
+    "maxIntegrity": 100,
+    "name_fa": "امان",
+    "effect_fa": "اردن فقط اجازه عبور دفاعی می‌دهد."
+  },
+  {
+    "id": "beirut",
+    "name": "Beirut",
+    "kind": "urban",
+    "lon": 35.5,
+    "lat": 33.89,
+    "host": "lebanon",
+    "operators": [],
+    "detail": "Lebanese capital.",
+    "effect": "Political flashpoint; no basing rights.",
+    "maxIntegrity": 100,
+    "name_fa": "بیروت",
+    "effect_fa": "نقطه تنش سیاسی؛ حق پایگاه ندارد."
+  },
+  {
+    "id": "doha",
+    "name": "Doha",
+    "kind": "urban",
+    "lon": 51.53,
+    "lat": 25.29,
+    "host": "qatar",
+    "operators": [],
+    "detail": "Qatari capital and the political rear of Al Udeid.",
+    "effect": "Qatar mediates ceasefires from here.",
+    "maxIntegrity": 100,
+    "name_fa": "دوحه",
+    "effect_fa": "قطر از اینجا میانجی آتش‌بس می‌شود."
+  },
+  {
+    "id": "abu_dhabi",
+    "name": "Abu Dhabi",
+    "kind": "urban",
+    "lon": 54.37,
+    "lat": 24.45,
+    "host": "uae",
+    "operators": [],
+    "detail": "UAE capital and financial centre.",
+    "effect": "UAE threat perception tracks its trade exposure.",
+    "maxIntegrity": 100,
+    "name_fa": "ابوظبی",
+    "effect_fa": "حس تهدید امارات با ریسک تجاری‌اش هم‌گام است."
+  },
+  {
+    "id": "kuwait_city",
+    "name": "Kuwait City",
+    "kind": "urban",
+    "lon": 47.98,
+    "lat": 29.38,
+    "host": "kuwait",
+    "operators": [],
+    "detail": "Kuwaiti capital, within easy reach of Iranian rockets.",
+    "effect": "Kuwait restricts base access earliest of all hosts.",
+    "maxIntegrity": 100,
+    "name_fa": "کویت",
+    "effect_fa": "کویت پیش از همه میزبان‌ها دسترسی به پایگاه را محدود می‌کند."
+  },
+  {
+    "id": "manama",
+    "name": "Manama",
+    "kind": "urban",
+    "lon": 50.59,
+    "lat": 26.22,
+    "host": "bahrain",
+    "operators": [],
+    "detail": "Bahraini capital, adjacent to the Fifth Fleet base.",
+    "effect": "Bahrain's closure removes a coalition naval presence.",
+    "maxIntegrity": 100,
+    "name_fa": "منامه",
+    "effect_fa": "بسته شدن بحرین یک حضور دریایی ائتلاف را حذف می‌کند."
+  },
+  {
+    "id": "muscat",
+    "name": "Muscat",
+    "kind": "urban",
+    "lon": 58.41,
+    "lat": 23.59,
+    "host": "oman",
+    "operators": [],
+    "detail": "Omani capital and traditional mediator with Tehran.",
+    "effect": "Oman stays neutral and keeps the Hormuz channel open to diplomacy.",
+    "maxIntegrity": 100,
+    "name_fa": "مسقط",
+    "effect_fa": "عمان بی‌طرف می‌ماند و کانال دیپلماتیک هرمز را باز نگه می‌دارد."
+  },
+  {
+    "id": "aden",
+    "name": "Aden",
+    "kind": "port",
+    "lon": 45.03,
+    "lat": 12.79,
+    "host": "yemen",
+    "operators": [],
+    "detail": "Yemen's southern port, opposite Bab al-Mandeb.",
+    "effect": "Anchor of Red Sea shipping risk.",
+    "maxIntegrity": 100,
+    "name_fa": "عدن",
+    "effect_fa": "لنگرگاه ریسک کشتیرانی دریای سرخ."
+  },
+  {
+    "id": "cairo",
+    "name": "Cairo",
+    "kind": "urban",
+    "lon": 31.24,
+    "lat": 30.04,
+    "host": "egypt",
+    "operators": [],
+    "detail": "Egyptian capital; Suez revenue underwrites the state.",
+    "effect": "Sustained Hormuz disruption pushes Egypt to close Suez.",
+    "maxIntegrity": 100,
+    "name_fa": "قاهره",
+    "effect_fa": "اختلال پیوسته هرمز، مصر را به بستن سوئز وامی‌دارد."
+  },
+  {
+    "id": "haifa",
+    "name": "Haifa Port",
+    "kind": "port",
+    "lon": 34.99,
+    "lat": 32.82,
+    "host": "israel",
+    "operators": [
+      "israel"
+    ],
+    "detail": "Israel's main commercial and naval port.",
+    "effect": "US airlift resupply arrives here.",
+    "maxIntegrity": 100,
+    "name_fa": "بندر حیفا",
+    "effect_fa": "ترابری هوایی آمریکا اینجا فرود می‌آید."
+  },
+  {
+    "id": "basra",
+    "name": "Basra",
+    "kind": "port",
+    "lon": 47.78,
+    "lat": 30.51,
+    "host": "iraq",
+    "operators": [],
+    "detail": "Iraq's outlet to the Gulf.",
+    "effect": "Militia interference with shipping raises Gulf risk.",
+    "maxIntegrity": 100,
+    "name_fa": "بصره",
+    "effect_fa": "دخالت شبه‌نظامیان در کشتیرانی، ریسک خلیج را بالا می‌برد."
+  },
+  {
+    "id": "karachi",
+    "name": "Karachi",
+    "kind": "port",
+    "lon": 67.01,
+    "lat": 24.86,
+    "host": "pakistan",
+    "operators": [],
+    "detail": "Pakistan's main port and naval base.",
+    "effect": "Pakistan's intervention force stages from here.",
+    "maxIntegrity": 100,
+    "name_fa": "کراچی",
+    "effect_fa": "نیروی مداخله پاکستان از اینجا سازمان می‌یابد."
+  },
+  {
+    "id": "ankara",
+    "name": "Ankara",
+    "kind": "urban",
+    "lon": 32.86,
+    "lat": 39.93,
+    "host": "turkey",
+    "operators": [],
+    "detail": "Turkish capital.",
+    "effect": "Turkey trades drone sales for influence; it never fights directly.",
+    "maxIntegrity": 100,
+    "name_fa": "آنکارا",
+    "effect_fa": "ترکیه فروش پهپاد را با نفوذ معامله می‌کند؛ هرگز مستقیم نمی‌جنگد."
+  },
+  {
+    "id": "kabul",
+    "name": "Kabul",
+    "kind": "urban",
+    "lon": 69.21,
+    "lat": 34.53,
+    "host": "afghanistan",
+    "operators": [],
+    "detail": "Afghan capital.",
+    "effect": "Off-map for combat; a reminder of the region's depth.",
+    "maxIntegrity": 100,
+    "name_fa": "کابل",
+    "effect_fa": "خارج از صحنه نبرد؛ یادآور عمق منطقه."
+  },
+  {
+    "id": "khojir",
+    "name": "Khojir production complex",
+    "name_fa": "مجتمع تولید خجیر",
+    "kind": "missile-industry",
+    "lon": 51.73,
+    "lat": 35.6,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Dispersed underground production complex east of Tehran.",
+    "effect": "Regenerates drones and short-range missiles while integrity remains above 20%.",
+    "effect_fa": "تا وقتی یکپارچگی بالای ۲۰٪ باشد پهپاد و موشک کوتاه‌برد بازتولید می‌کند.",
+    "strategic": true,
+    "hardened": true,
+    "buried": 40,
+    "surfaceFloor": 55,
+    "terrain": "hardened",
+    "maxIntegrity": 100,
+    "facility": "missile-production",
+    "productionLines": [
+      "missile",
+      "drone"
+    ],
+    "undergroundRegen": {
+      "drones": 2,
+      "missiles": 2
+    },
+    "provenance": "Open-source reporting places a dispersed underground production complex east of Tehran; coordinates approximate."
+  },
+  {
+    "id": "parchin",
+    "name": "Parchin complex",
+    "name_fa": "مجتمع پارچین",
+    "kind": "missile-industry",
+    "lon": 51.77,
+    "lat": 35.52,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Hardened research and missile-related production complex.",
+    "effect": "Regenerates missile stocks slowly while intact.",
+    "effect_fa": "تا وقتی سالم باشد موجودی موشک را آهسته بازتولید می‌کند.",
+    "strategic": true,
+    "hardened": true,
+    "buried": 35,
+    "surfaceFloor": 50,
+    "terrain": "hardened",
+    "maxIntegrity": 100,
+    "facility": "missile-production",
+    "productionLines": [
+      "missile"
+    ],
+    "undergroundRegen": {
+      "missiles": 1
+    },
+    "provenance": "Open-source reporting describes a hardened research and missile-production complex; coordinates approximate."
+  },
+  {
+    "id": "shahroud",
+    "name": "Shahroud missile complex",
+    "name_fa": "مجتمع موشکی شاهرود",
+    "kind": "missile-industry",
+    "lon": 55.02,
+    "lat": 36.42,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Long-range storage and TEL dispersal area.",
+    "effect": "Regenerates long-range missile stocks while integrity remains above 20%.",
+    "effect_fa": "تا وقتی یکپارچگی بالای ۲۰٪ باشد موشک دوربرد بازتولید می‌کند.",
+    "strategic": true,
+    "hardened": true,
+    "buried": 30,
+    "surfaceFloor": 45,
+    "terrain": "hardened",
+    "maxIntegrity": 100,
+    "facility": "weapons-storage",
+    "productionLines": [
+      "missile"
+    ],
+    "undergroundRegen": {
+      "missiles": 1
+    },
+    "provenance": "Open-source reporting describes a long-range missile storage and TEL dispersal area; coordinates approximate."
+  },
+  {
+    "id": "bandar_abbas_underground",
+    "name": "Bandar Abbas coastal storage",
+    "name_fa": "انبار زیرزمینی بندرعباس",
+    "kind": "port",
+    "lon": 56.27,
+    "lat": 27.18,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Coastal underground ASM and drone storage near the strait.",
+    "effect": "Regenerates drones while integrity remains above 20%.",
+    "effect_fa": "تا وقتی یکپارچگی بالای ۲۰٪ باشد پهپاد بازتولید می‌کند.",
+    "strategic": true,
+    "hardened": true,
+    "buried": 25,
+    "surfaceFloor": 40,
+    "terrain": "hardened",
+    "maxIntegrity": 100,
+    "facility": "weapons-storage",
+    "productionLines": [
+      "drone"
+    ],
+    "undergroundRegen": {
+      "drones": 3
+    },
+    "provenance": "Coastal underground munition storage reported near Bandar Abbas; coordinates approximate."
+  },
+  {
+    "id": "tabriz_complex",
+    "name": "Tabriz industrial complex",
+    "name_fa": "مجتمع صنعتی تبریز",
+    "kind": "urban",
+    "lon": 46.29,
+    "lat": 38.08,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Northwest industrial depth supporting missile and drone production.",
+    "effect": "Regenerates mixed stocks while intact.",
+    "effect_fa": "تا وقتی سالم باشد تولید مختلط را ادامه می‌دهد.",
+    "strategic": false,
+    "hardened": true,
+    "buried": 20,
+    "surfaceFloor": 40,
+    "terrain": "hardened",
+    "maxIntegrity": 100,
+    "facility": "defence-industry",
+    "productionLines": [
+      "missile",
+      "drone"
+    ],
+    "undergroundRegen": {
+      "drones": 1,
+      "missiles": 1
+    }
+  },
+  {
+    "id": "muwaffaq_salti",
+    "name": "Muwaffaq Salti Air Base",
+    "name_fa": "پایگاه هوایی موفق الصلطی",
+    "kind": "airbase",
+    "facility": "radar",
+    "lon": 36.59,
+    "lat": 31.83,
+    "host": "jordan",
+    "operators": [
+      "usa"
+    ],
+    "personnel": 2000,
+    "detail": "Jordanian air base hosting a US AN/TPY-2 X-band radar for regional BMD cueing.",
+    "effect": "Supports regional BMD coverage. If degraded, Levant sector intercept quality falls.",
+    "effect_fa": "پوشش دفاع موشکی منطقه‌ای. در صورت آسیب، کیفیت رهگیری در شام کاهش می‌یابد.",
+    "strategic": true,
+    "maxIntegrity": 100
+  },
+  {
+    "id": "ayn_al_asad",
+    "name": "Ayn al-Asad Airbase",
+    "kind": "command",
+    "lon": 42.4,
+    "lat": 33.8,
+    "host": "iraq",
+    "operators": [
+      "usa"
+    ],
+    "detail": "Iraqi control since January 2026; limited US presence",
+    "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "erbil",
+    "name": "Erbil Air Base",
+    "kind": "command",
+    "lon": 44,
+    "lat": 36.2,
+    "host": "iraq",
+    "operators": [
+      "usa"
+    ],
+    "detail": "US training, ISR and logistics",
+    "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
+    "confidence": "confirmed",
+    "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "duqm",
+    "name": "Port of Duqm",
+    "kind": "command",
+    "lon": 57.7,
+    "lat": 19.6,
+    "host": "oman",
+    "operators": [
+      "usa"
+    ],
+    "detail": "US logistics and air access under the 2019 agreement",
+    "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
+    "confidence": "confirmed",
+    "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "thumrait",
+    "name": "Thumrait Air Base",
+    "kind": "command",
+    "lon": null,
+    "lat": null,
+    "host": "oman",
+    "operators": [
+      "usa"
+    ],
+    "detail": "Oman air access",
+    "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
+    "confidence": "data_gap",
+    "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "masirah",
+    "name": "Masirah Air Base",
+    "kind": "command",
+    "lon": null,
+    "lat": null,
+    "host": "oman",
+    "operators": [
+      "usa"
+    ],
+    "detail": "Oman air access",
+    "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
+    "confidence": "data_gap",
+    "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "ramat_david",
+    "name": "Ramat David Air Base",
+    "kind": "command",
+    "lon": 35.18,
+    "lat": 32.66,
+    "host": "israel",
+    "operators": [
+      "israel"
+    ],
+    "detail": "Northern fighter base",
+    "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
+    "confidence": "confirmed",
+    "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "hatzor",
+    "name": "Hatzor Air Base",
+    "kind": "command",
+    "lon": 34.72,
+    "lat": 31.76,
+    "host": "israel",
+    "operators": [
+      "israel"
+    ],
+    "detail": "Central fighter base; David's Sling HQ",
+    "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
+    "confidence": "confirmed",
+    "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "ramon",
+    "name": "Ramon Air Base",
+    "kind": "command",
+    "lon": 34.66,
+    "lat": 30.78,
+    "host": "israel",
+    "operators": [
+      "israel"
+    ],
+    "detail": "Southern F-16I base",
+    "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
+    "confidence": "confirmed",
+    "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "uvda",
+    "name": "Uvda Air Base",
+    "kind": "command",
+    "lon": 34.94,
+    "lat": 29.94,
+    "host": "israel",
+    "operators": [
+      "israel"
+    ],
+    "detail": "Aggressor and training",
+    "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "idf_naval_haifa",
+    "name": "Haifa Naval Base",
+    "kind": "naval",
+    "lon": null,
+    "lat": null,
+    "host": "israel",
+    "operators": [
+      "israel"
+    ],
+    "detail": "Israeli naval base",
+    "effect": "Destroying this naval base removes coastal missiles and fast-attack craft from the Strait.",
+    "confidence": "data_gap",
+    "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "idf_naval_eilat",
+    "name": "Eilat Naval Base",
+    "kind": "naval",
+    "lon": null,
+    "lat": null,
+    "host": "israel",
+    "operators": [
+      "israel"
+    ],
+    "detail": "Israeli naval base",
+    "effect": "Destroying this naval base removes coastal missiles and fast-attack craft from the Strait.",
+    "confidence": "data_gap",
+    "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "iron_dome_battery",
+    "name": "Iron Dome battery (central Israel example)",
+    "kind": "command",
+    "lon": 34.9503,
+    "lat": 32.3355,
+    "host": "israel",
+    "operators": [
+      "israel"
+    ],
+    "detail": "Iron Dome battery; 7 of 11 identified, 12-14 active",
+    "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "davids_sling_battery",
+    "name": "David's Sling battery (example site)",
+    "kind": "command",
+    "lon": 35.082,
+    "lat": 32.8915,
+    "host": "israel",
+    "operators": [
+      "israel"
+    ],
+    "detail": "David's Sling; 4 of 6 identified",
+    "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "arrow3_battery",
+    "name": "Arrow-3 battery area",
+    "kind": "command",
+    "lon": 35,
+    "lat": 32.4333,
+    "host": "israel",
+    "operators": [
+      "israel"
+    ],
+    "detail": "Arrow-3; 4 of 6 identified",
+    "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "tabriz_north",
+    "name": "Tabriz North missile base",
+    "kind": "command",
+    "lon": 46.117,
+    "lat": 38.251,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "MRBM base; Shahab-3 silos",
+    "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
+    "confidence": "confirmed",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "tabriz_south",
+    "name": "Tabriz South missile base",
+    "kind": "command",
+    "lon": 46.28,
+    "lat": 38.08,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "MRBM base",
+    "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
+    "confidence": "confirmed",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "kermanshah",
+    "name": "Kermanshah (Shahid Montazeri) missile base",
+    "kind": "command",
+    "lon": 47.187,
+    "lat": 34.482,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "MRBM base; bunkers",
+    "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
+    "confidence": "confirmed",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "panj_pelleh",
+    "name": "Panj Pelleh launch site",
+    "kind": "missile-base",
+    "lon": 47.3,
+    "lat": 34.358,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Launch site",
+    "effect": "Destroying this base cuts launchers and reload capacity from the Iranian missile force.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "kamijeh",
+    "name": "Kamijeh launch site",
+    "kind": "missile-base",
+    "lon": 47.355,
+    "lat": 34.52,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Launch site",
+    "effect": "Destroying this base cuts launchers and reload capacity from the Iranian missile force.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "shiraz_north",
+    "name": "Shiraz North missile base",
+    "kind": "missile-base",
+    "lon": 52.558,
+    "lat": 29.723,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Heavy MRBM base; southern launch hub",
+    "effect": "Destroying this base cuts launchers and reload capacity from the Iranian missile force.",
+    "confidence": "confirmed",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "bandar_abbas_khorgu",
+    "name": "Bandar Abbas / Khorgu missile base",
+    "kind": "naval",
+    "lon": 56.27,
+    "lat": 27.18,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Coastal missile base; naval strike",
+    "effect": "Destroying this naval base removes coastal missiles and fast-attack craft from the Strait.",
+    "confidence": "confirmed",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "hajabad",
+    "name": "Hajabad underground launch facility",
+    "kind": "missile-base",
+    "lon": null,
+    "lat": null,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Underground launch facility ~130 km north of Bandar Abbas",
+    "effect": "Destroying this base cuts launchers and reload capacity from the Iranian missile force.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 140
+  },
+  {
+    "id": "khorramabad",
+    "name": "Khorramabad underground missile base",
+    "kind": "missile-base",
+    "lon": 48.3,
+    "lat": 33.5,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Underground missile base",
+    "effect": "Destroying this base cuts launchers and reload capacity from the Iranian missile force.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 140
+  },
+  {
+    "id": "bakhtaran",
+    "name": "Bakhtaran missile base",
+    "kind": "missile-base",
+    "lon": 47.1,
+    "lat": 34.3,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Missile base",
+    "effect": "Destroying this base cuts launchers and reload capacity from the Iranian missile force.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "semnan",
+    "name": "Semnan Missile Complex",
+    "kind": "missile-base",
+    "lon": 53.5,
+    "lat": 35.5,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Production and test facility",
+    "effect": "Destroying this base cuts launchers and reload capacity from the Iranian missile force.",
+    "confidence": "confirmed",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "oghab44",
+    "name": "Oghab 44 underground air base",
+    "kind": "airbase",
+    "lon": null,
+    "lat": null,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Underground air base north of the Strait of Hormuz",
+    "effect": "Destroying this airbase removes sortie generation and its aircraft from the theatre.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 140
+  },
+  {
+    "id": "bandar_abbas_ab",
+    "name": "Bandar Abbas Air Base",
+    "kind": "airbase",
+    "lon": 56.37,
+    "lat": 27.22,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "IRGC/Artesh; drones and maritime strike",
+    "effect": "Destroying this airbase removes sortie generation and its aircraft from the theatre.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "khatam_ab",
+    "name": "Khatam Air Base",
+    "kind": "airbase",
+    "lon": 50.5,
+    "lat": 30.9,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "IRIAF fighter base",
+    "effect": "Destroying this airbase removes sortie generation and its aircraft from the theatre.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "dezful_ab",
+    "name": "Dezful / Vahdati Air Base",
+    "kind": "airbase",
+    "lon": 48.4,
+    "lat": 32.43,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Fighter and attack base",
+    "effect": "Destroying this airbase removes sortie generation and its aircraft from the theatre.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "shiraz_ab",
+    "name": "Shiraz Air Base",
+    "kind": "airbase",
+    "lon": 52.59,
+    "lat": 29.54,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Fighter base; UAV launch sites nearby",
+    "effect": "Destroying this airbase removes sortie generation and its aircraft from the theatre.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "tabriz_ab",
+    "name": "Tabriz Air Base",
+    "kind": "airbase",
+    "lon": 46.24,
+    "lat": 38.13,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Fighter base; IRGC missile complexes nearby",
+    "effect": "Destroying this airbase removes sortie generation and its aircraft from the theatre.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "tehran_mehrabad",
+    "name": "Tehran (Mehrabad / Doshan Tappeh)",
+    "kind": "command",
+    "lon": 51.31,
+    "lat": 35.69,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Command and transport",
+    "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "bandar_abbas_naval",
+    "name": "Bandar Abbas naval base",
+    "kind": "naval",
+    "lon": 56.21,
+    "lat": 27.14,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "IRGCN/IRIN HQ; fast-attack craft; underground FAC base nearby",
+    "effect": "Destroying this naval base removes coastal missiles and fast-attack craft from the Strait.",
+    "confidence": "confirmed",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 140
+  },
+  {
+    "id": "chabahar",
+    "name": "Chabahar naval base",
+    "kind": "naval",
+    "lon": 60.64,
+    "lat": 25.29,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "IRIN/IRGCN; naval facilities struck",
+    "effect": "Destroying this naval base removes coastal missiles and fast-attack craft from the Strait.",
+    "confidence": "confirmed",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "jask",
+    "name": "Jask naval base",
+    "kind": "missile-base",
+    "lon": 57.77,
+    "lat": 25.64,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "IRGCN coastal missiles",
+    "effect": "Destroying this base cuts launchers and reload capacity from the Iranian missile force.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "s300_tehran",
+    "name": "S-300PMU-2 (Tehran)",
+    "kind": "sam",
+    "lon": 51.4,
+    "lat": 35.7,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Long-range SAM; 30N6E2 fire-control radar",
+    "effect": "Destroying this battery opens a hole in its air-defence layer and forces linked batteries onto their own sensors.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100,
+    "detection_radius_km": 200,
+    "linked_system": "meraj4_network",
+    "degradation_effect": "Destroying this battery opens a hole in its air-defence layer and forces linked batteries onto their own sensors."
+  },
+  {
+    "id": "bavar_fordow",
+    "name": "Bavar-373 (Fordow)",
+    "kind": "sam",
+    "lon": 50.99,
+    "lat": 34.88,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Indigenous long-range SAM; Meraj-4 AESA",
+    "effect": "Destroying this battery opens a hole in its air-defence layer and forces linked batteries onto their own sensors.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100,
+    "detection_radius_km": 300,
+    "linked_system": "meraj4_network",
+    "degradation_effect": "Destroying this battery opens a hole in its air-defence layer and forces linked batteries onto their own sensors."
+  },
+  {
+    "id": "khordad15_isfahan",
+    "name": "Khordad-15 (Isfahan)",
+    "kind": "sam",
+    "lon": 51.67,
+    "lat": 32.65,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Medium-range SAM; road-mobile",
+    "effect": "Destroying this battery opens a hole in its air-defence layer and forces linked batteries onto their own sensors.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100,
+    "detection_radius_km": 120,
+    "linked_system": "kavosh_radar",
+    "degradation_effect": "Destroying this battery opens a hole in its air-defence layer and forces linked batteries onto their own sensors."
+  },
+  {
+    "id": "talash_layered",
+    "name": "3rd Khordad / Talash (layered site)",
+    "kind": "sam",
+    "lon": 51,
+    "lat": 33.5,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Medium-range SAM",
+    "effect": "Destroying this battery opens a hole in its air-defence layer and forces linked batteries onto their own sensors.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100,
+    "detection_radius_km": 105,
+    "linked_system": "kavosh_radar",
+    "degradation_effect": "Destroying this battery opens a hole in its air-defence layer and forces linked batteries onto their own sensors."
+  },
+  {
+    "id": "s200_isfahan",
+    "name": "S-200 (Isfahan)",
+    "kind": "sam",
+    "lon": 51.7,
+    "lat": 32.6,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Legacy long-range SAM",
+    "effect": "Destroying this battery opens a hole in its air-defence layer and forces linked batteries onto their own sensors.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100,
+    "detection_radius_km": 250,
+    "linked_system": "meraj4_network",
+    "degradation_effect": "Destroying this battery opens a hole in its air-defence layer and forces linked batteries onto their own sensors."
+  },
+  {
+    "id": "meraj4_network",
+    "name": "Meraj-4 surveillance network",
+    "kind": "radar",
+    "lon": 51.5,
+    "lat": 34,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "S-band AESA surveillance; detection 320-450 km",
+    "effect": "Destroying this radar removes its detection contribution and leaves dependent batteries firing without cueing.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100,
+    "detection_radius_km": 400,
+    "degradation_effect": "Destroying this radar removes its detection contribution and leaves dependent batteries firing without cueing."
+  },
+  {
+    "id": "kavosh_radar",
+    "name": "Kavosh (Kasta 2E2) gap-filler",
+    "kind": "radar",
+    "lon": 51,
+    "lat": 35,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Legacy surveillance radar (~150 km)",
+    "effect": "Destroying this radar removes its detection contribution and leaves dependent batteries firing without cueing.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100,
+    "detection_radius_km": 150,
+    "degradation_effect": "Destroying this radar removes its detection contribution and leaves dependent batteries firing without cueing."
+  },
+  {
+    "id": "ghadir_radar",
+    "name": "Ghadir over-the-horizon radar",
+    "kind": "radar",
+    "lon": 53,
+    "lat": 29,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Strategic early warning (~1,100 km)",
+    "effect": "Destroying this radar removes its detection contribution and leaves dependent batteries firing without cueing.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100,
+    "detection_radius_km": 1100,
+    "degradation_effect": "Destroying this radar removes its detection contribution and leaves dependent batteries firing without cueing."
+  },
+  {
+    "id": "alim_radar",
+    "name": "Alim passive mobile radar",
+    "kind": "radar",
+    "lon": null,
+    "lat": null,
+    "host": "iran",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Mobile air-defence cueing (~250-300 km)",
+    "effect": "Destroying this radar removes its detection contribution and leaves dependent batteries firing without cueing.",
+    "confidence": "data_gap",
+    "provenance": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100,
+    "detection_radius_km": 275,
+    "degradation_effect": "Destroying this radar removes its detection contribution and leaves dependent batteries firing without cueing."
+  },
+  {
+    "id": "hezbollah",
+    "name": "Hezbollah (southern Lebanon, Bekaa, Beirut)",
+    "kind": "command",
+    "lon": 35.5,
+    "lat": 33.4,
+    "host": "lebanon",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Rocket and ATGM force; ~1,000 precision-guided",
+    "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "houthi",
+    "name": "Houthi forces (Bab al-Mandeb, Sanaa, Hodeidah)",
+    "kind": "missile-base",
+    "lon": 44.2,
+    "lat": 15.35,
+    "host": "yemen",
+    "operators": [
+      "houthi"
+    ],
+    "detail": "Missiles and drones; ~90% indigenous production",
+    "effect": "Destroying this base cuts launchers and reload capacity from the Iranian missile force.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "pmf_anbar",
+    "name": "PMF (Anbar: Al-Qaim, Habbaniyah, Taqqudum)",
+    "kind": "command",
+    "lon": 41.9,
+    "lat": 33.4,
+    "host": "iraq",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Rocket, ATGM and drone harassment",
+    "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "pmf_jurf",
+    "name": "PMF (Jurf al-Sakhar, Camp Ashraf, Mosul outskirts, Jisr Diyala)",
+    "kind": "command",
+    "lon": 44.3,
+    "lat": 32.9,
+    "host": "iraq",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Rocket and drone harassment",
+    "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  },
+  {
+    "id": "hamas",
+    "name": "Hamas (Gaza)",
+    "kind": "command",
+    "lon": 34.4,
+    "lat": 31.4,
+    "host": "gaza",
+    "operators": [
+      "iran"
+    ],
+    "detail": "Rocket force, largely paused",
+    "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
+    "confidence": "single_source",
+    "provenance": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief",
+    "maxIntegrity": 100
+  }
 ]
