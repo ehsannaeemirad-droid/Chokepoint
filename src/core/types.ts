@@ -546,9 +546,9 @@ export interface EnduranceState {
   /** Proxy magazine resupply bookkeeping, by proxy faction. */
   proxies?: Record<string, { refilled: number; dryTurn: number | null }>;
   /** Cyber effects limited to the documented, temporary ones. */
-  cyber?: { radarUntilTurn: number; effects: number };
+  cyber?: { radarUntilTurn: number; effects: number; effectiveness?: number };
   /** Israeli reservist fatigue from sustained mobilization. */
-  israel?: { fatigueTurn: number | null; factor: number };
+  israel?: { fatigueTurn: number | null; factor: number; pressure: number; pressureStreak: number };
 }
 
 export interface GameSnapshot {

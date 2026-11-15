@@ -484,6 +484,8 @@ const LOG_PATTERNS: LogPattern[] = [
  * outcome strings emitted by `victory.ts` and the tutorial endings.
  */
 const OUTCOME_FA: Record<string, string> = {
+  'Reservist fatigue and the war’s cost have broken the Israeli home front. The government falls and the campaign ends without a strategic result.':
+    'فرسودگی نیروهای ذخیره و هزینه جنگ جبهه داخلی اسرائیل را شکسته است. دولت سقوط می‌کند و کارزار بدون نتیجه راهبردی پایان می‌یابد.',
   'The campaign has ended. The regime is still standing and its nuclear complex was never pushed below the survival threshold — Iran outlasted the coalition.':
     'کارزار به پایان رسید. رژیم همچنان پابرجاست و مجتمع هسته‌ای‌اش هرگز زیر آستانه بقا نرفت — ایران از ائتلاف فرسوده‌تر شد.',
   'The campaign has ended. American ground forces never held enough Iranian soil for long enough — there is no occupation, and the regime claims the field.':

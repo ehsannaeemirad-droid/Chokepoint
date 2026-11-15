@@ -417,6 +417,16 @@ export function checkOutcome(snap: GameSnapshot, map: TheaterMap): Outcome {
     if (snap.resources.interceptorsIsrael <= 0 && snap.meters.populationImpacts >= 5) {
       return { status: 'lost', outcome: 'Interceptors are exhausted and five missiles have landed on Israeli cities. Domestic collapse.' };
     }
+    // Reservist fatigue and the war's cost, held at the collapse threshold for
+    // two turns, end the campaign the way the US domestic gauge does.
+    const mobilization = snap.endurance?.israel;
+    if (mobilization && mobilization.pressure >= 85 && mobilization.pressureStreak >= 2) {
+      return {
+        status: 'lost',
+        outcome:
+          'Reservist fatigue and the war’s cost have broken the Israeli home front. The government falls and the campaign ends without a strategic result.',
+      };
+    }
   }
 
   if (snap.faction === 'iran') {

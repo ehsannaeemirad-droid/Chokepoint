@@ -59,6 +59,10 @@ export const IRAN_STOCKPILE_ASSEMBLY = 350;
 export const TANKER_SORTIE_BASE = 6;
 /** Turn at which four months of reservist call-ups start to tell. */
 export const ISRAEL_MOBILIZATION_FATIGUE_TURN = 12;
+/** Political will a carrier rotation costs; without it the deployment extends. */
+export const CARRIER_ROTATION_WILL = 6;
+/** Turn after which PMF harassment of US logistics becomes routine. */
+export const PMF_ACTIVATION_TURN = 6;
 /** Detection loss while an Iranian radar network is under cyber attack. */
 export const CYBER_RADAR_FACTOR = 0.7;
 /** Turns a cyber effect holds. */
@@ -183,8 +187,8 @@ export function initEndurance(snap: GameSnapshot): void {
       hamas: { refilled: 0, dryTurn: null },
       pmf: { refilled: 0, dryTurn: null },
     },
-    cyber: { radarUntilTurn: 0, effects: 0 },
-    israel: { fatigueTurn: null, factor: 1 },
+    cyber: { radarUntilTurn: 0, effects: 0, effectiveness: 1 },
+    israel: { fatigueTurn: null, factor: 1, pressure: 0, pressureStreak: 0 },
   };
   refreshSortieFactor(snap);
 }
@@ -445,13 +449,33 @@ export function cyberRadarFactor(snap: GameSnapshot, defender: FactionId): numbe
   return snap.turn < (state.cyber?.radarUntilTurn ?? 0) ? CYBER_RADAR_FACTOR : 1;
 }
 
+/**
+ * Cyber effectiveness decays as leadership and infrastructure losses mount.
+ * Each operation costs a sixth of the remaining edge, floored at 30%: later
+ * operations are less likely to land and never hold for more than a turn.
+ */
+export function cyberEffectiveness(snap: GameSnapshot): number {
+  return snap.endurance?.cyber?.effectiveness ?? 1;
+}
+
+export function decayCyberEffectiveness(snap: GameSnapshot): void {
+  const state = snap.endurance;
+  if (state) decayCyber(state);
+}
+
+function decayCyber(state: NonNullable<GameSnapshot['endurance']>): void {
+  if (!state.cyber) return;
+  state.cyber.effectiveness = clamp((state.cyber.effectiveness ?? 1) - 0.15, 0.3, 1);
+}
+
 /** Record a successful temporary radar-blinding operation. */
 export function applyCyberRadar(snap: GameSnapshot): void {
   const state = snap.endurance;
   if (!state?.systems.cyberLimits) return;
-  state.cyber = state.cyber ?? { radarUntilTurn: 0, effects: 0 };
+  state.cyber = state.cyber ?? { radarUntilTurn: 0, effects: 0, effectiveness: 1 };
   state.cyber.radarUntilTurn = snap.turn + CYBER_EFFECT_TURNS;
   state.cyber.effects += 1;
+  decayCyber(state);
 }
 
 /**
@@ -459,6 +483,11 @@ export function applyCyberRadar(snap: GameSnapshot): void {
  * gap) erode the edge of Israeli ground formations, 2% a turn to a 75% floor.
  * Aircrew fatigue is a separate system; this is the land war.
  */
+/** Israeli home-front pressure, 0-100, from sustained mobilization. */
+export function israelMobilizationPressure(snap: GameSnapshot): number {
+  return snap.endurance?.israel?.pressure ?? 0;
+}
+
 export function groundEffectiveness(snap: GameSnapshot, faction: FactionId, category: string): number {
   const state = snap.endurance;
   if (!state?.systems.israelMobilization) return 1;
@@ -546,15 +575,28 @@ export function advanceEndurance(snap: GameSnapshot, events: ResolveEvent[]): vo
     const carriers = state.carriers ?? { deployedTurns: 0, factor: 1, extended: false };
     carriers.deployedTurns += 1;
     if (carriers.deployedTurns > CARRIER_ENDURANCE_TURNS) {
-      if (!carriers.extended) {
-        carriers.extended = true;
+      // Rotate the crew home if the political cost can be paid; otherwise
+      // extend the deployment and accept declining sortie generation.
+      if (!carriers.extended && snap.resources.politicalWill >= CARRIER_ROTATION_WILL) {
+        snap.resources.politicalWill = clamp(snap.resources.politicalWill - CARRIER_ROTATION_WILL, 0, 100);
+        carriers.deployedTurns = 0;
+        carriers.factor = 1;
         events.push({
-          text: 'Carrier crews are past deployment endurance; no relief carrier is available, so the deployment is extended at rising cost.',
-          tone: 'warn',
+          text: `A relief carrier is available: the deployment is rotated home at a cost of ${CARRIER_ROTATION_WILL} political will.`,
+          tone: 'good',
           faction: 'usa',
         });
+      } else {
+        if (!carriers.extended) {
+          carriers.extended = true;
+          events.push({
+            text: 'Carrier crews are past deployment endurance; no relief carrier is available, so the deployment is extended at rising cost.',
+            tone: 'warn',
+            faction: 'usa',
+          });
+        }
+        carriers.factor = clamp(carriers.factor - 0.04, 0.6, 1);
       }
-      carriers.factor = clamp(carriers.factor - 0.04, 0.6, 1);
     }
     state.carriers = carriers;
   }
@@ -565,10 +607,24 @@ export function advanceEndurance(snap: GameSnapshot, events: ResolveEvent[]): vo
     state.iran.factor = state.iran.stockpile > 0 ? 1.5 : 0.6;
   }
 
-  if (state.systems.proxySupply) refillProxyMagazines(snap, events);
+  if (state.systems.proxySupply) {
+    refillProxyMagazines(snap, events);
+    // PMF harassment is a periodic drain on US logistics rather than a front:
+    // 65 attacks in the opening months, then a low-intensity tempo.
+    const pmf = (state.proxies ??= {}).pmf ??= { refilled: 0, dryTurn: null };
+    const active = snap.turn >= PMF_ACTIVATION_TURN || (snap.domestic?.casualtiesTotal ?? 0) >= 50;
+    if (active && pmf.dryTurn === null && snap.turn % 3 === 0) {
+      snap.resources.politicalWill = clamp(snap.resources.politicalWill - 1, 0, 100);
+      events.push({
+        text: 'PMF rocket and drone harassment drains US base logistics and costs a point of political will.',
+        tone: 'warn',
+        faction: 'usa',
+      });
+    }
+  }
 
   if (state.systems.israelMobilization) {
-    const israel = (state.israel ??= { fatigueTurn: null, factor: 1 });
+    const israel = (state.israel ??= { fatigueTurn: null, factor: 1, pressure: 0, pressureStreak: 0 });
     if (snap.turn >= ISRAEL_MOBILIZATION_FATIGUE_TURN) {
       if (israel.fatigueTurn === null) {
         israel.fatigueTurn = snap.turn;
@@ -579,6 +635,11 @@ export function advanceEndurance(snap: GameSnapshot, events: ResolveEvent[]): vo
         });
       }
       israel.factor = clamp(israel.factor - 0.02, 0.75, 1);
+      // Reservist call-ups and the war's cost feed the same kind of home-front
+      // pressure the US domestic gauge models; it is what ends the campaign,
+      // not the ground-combat penalty on its own.
+      israel.pressure = clamp(israel.pressure + 2, 0, 100);
+      israel.pressureStreak = israel.pressure >= 85 ? israel.pressureStreak + 1 : 0;
     }
   }
 

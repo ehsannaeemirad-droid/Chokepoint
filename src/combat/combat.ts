@@ -15,6 +15,8 @@ import {
   airSortieCap,
   applyCyberRadar,
   consumeCoalitionMunitions,
+  cyberEffectiveness,
+  decayCyberEffectiveness,
   groundEffectiveness,
   noteHomelandHit,
   radarDamageMultiplier,
@@ -549,7 +551,9 @@ export function resolveCyber(snap: GameSnapshot, unit: UnitInstance, rng: Rng): 
   // nothing strategic flips: that is what the record actually shows.
   if (snap.endurance?.systems.cyberLimits) {
     unit.cooldown = 2;
-    if (rng() < 0.5) {
+    // Later operations are less likely to land as leadership and
+    // infrastructure losses accumulate.
+    if (rng() < 0.5 * cyberEffectiveness(snap)) {
       applyCyberRadar(snap);
       return [
         {
@@ -560,6 +564,7 @@ export function resolveCyber(snap: GameSnapshot, unit: UnitInstance, rng: Rng): 
       ];
     }
     target.suppressedUntilTurn = snap.turn + 2;
+    decayCyberEffectiveness(snap);
     return [
       {
         text: `A cyber operation delayed the ${unitType(target.typeId).name} by a turn; the launcher itself is intact.`,

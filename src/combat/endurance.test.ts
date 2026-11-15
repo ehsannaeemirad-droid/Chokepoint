@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { Game, SCENARIOS } from '../core/Game';
 import { defenderOfNode, nodeState, unitType } from '../core/world';
 import { cyberTargets, hostileTo, resolveCyber, strikeRange, validateStrike } from './combat';
-import { detectionChance } from './airdefence';
+import { defenceLayers, detectionChance } from './airdefence';
+import { checkOutcome } from '../politics/victory';
 import {
   CARRIER_ENDURANCE_TURNS,
   COALITION_AIR_SORTIES_PER_TURN,
@@ -14,9 +15,11 @@ import {
   ENDURANCE_PRESET,
   enduranceEnabled,
   applyCyberRadar,
+  cyberEffectiveness,
   cyberRadarFactor,
   groundEffectiveness,
   iranProductionFactor,
+  israelMobilizationPressure,
   radarDamageMultiplier,
   refillProxyMagazines,
   recordPilotLoss,
@@ -190,18 +193,26 @@ describe('endurance integration', () => {
     game.start('campaign', 'iran', 7);
     setEnduranceSystems(game.snap, ALL_ON);
     const startingStock = Object.values(game.snap.endurance!.munitions).reduce((sum, pool) => sum + pool.stock, 0);
-    let previousSpent = 0;
+    const initialStock = Object.fromEntries(
+      Object.entries(game.snap.endurance!.munitions).map(([id, pool]) => [id, pool.stock]),
+    );
+    const previousSpent = Object.fromEntries(Object.keys(initialStock).map((id) => [id, 0]));
     for (let i = 0; i < 30 && game.snap.status === 'playing'; i++) {
       game.endTurn();
-      const pools = Object.values(game.snap.endurance!.munitions);
-      for (const pool of pools) {
-        expect(pool.stock).toBeGreaterThanOrEqual(0);
-        expect(pool.spent).toBeGreaterThanOrEqual(previousSpent >= 0 ? 0 : -1);
+      const pools = Object.entries(game.snap.endurance!.munitions);
+      for (const [id, pool] of pools) {
+        expect(pool.stock, `${id} stock`).toBeGreaterThanOrEqual(0);
+        // Counters only move forward: spent never decreases, stock never grows
+        // without production.
+        expect(pool.spent, `${id} spent monotonic`).toBeGreaterThanOrEqual(previousSpent[id] ?? 0);
+        previousSpent[id] = pool.spent;
+        expect(pool.stock, `${id} ledger`).toBe((initialStock[id] ?? 0) + pool.produced - pool.spent);
         expect(Number.isFinite(pool.stock)).toBe(true);
       }
-      previousSpent = pools.reduce((sum, pool) => sum + pool.spent, 0);
     }
     expect(game.snap.turn).toBeGreaterThan(1);
+    // No faction may be decided before the opening has actually been played.
+    if (game.snap.status !== 'playing') expect(game.snap.turn).toBeGreaterThanOrEqual(5);
     const pools = Object.values(game.snap.endurance!.munitions);
     const finalStock = pools.reduce((sum, pool) => sum + pool.stock, 0);
     const produced = pools.reduce((sum, pool) => sum + pool.produced, 0);
@@ -323,6 +334,7 @@ describe('carrier endurance and the tanker cap (2d)', () => {
     const game = new Game();
     game.start('campaign', 'usa', 11);
     setEnduranceSystems(game.snap, { carrierEndurance: true });
+    game.snap.resources.politicalWill = 0;
     const events: ResolveEvent[] = [];
     for (let turn = 1; turn <= CARRIER_ENDURANCE_TURNS + 2; turn++) {
       game.snap.turn = turn;
@@ -518,5 +530,80 @@ describe('endurance preset from the menu (playable path)', () => {
     plain.start('campaign', 'usa', 11);
     expect(plain.snap.endurance).toBeUndefined();
     expect(SCENARIOS.campaign!.systems?.munitionsDepletion ?? false).toBe(false);
+  });
+});
+
+describe('Israeli mobilization pressures the home front (2h)', () => {
+  it('accumulates political pressure and loses the campaign at the threshold', () => {
+    const game = new Game();
+    game.start('campaign', 'israel', 11);
+    setEnduranceSystems(game.snap, { israelMobilization: true });
+    for (let turn = 1; turn <= 14; turn++) {
+      game.snap.turn = turn;
+      advanceEndurance(game.snap, []);
+    }
+    expect(game.snap.endurance!.israel!.pressure).toBeGreaterThan(0);
+    expect(israelMobilizationPressure(game.snap)).toBe(game.snap.endurance!.israel!.pressure);
+
+    game.snap.endurance!.israel!.pressure = 90;
+    game.snap.endurance!.israel!.pressureStreak = 2;
+    expect(checkOutcome(game.snap, game.map).status).toBe('lost');
+  });
+});
+
+describe('magazine exhaustion, rotation, PMF and cyber decay (2b/2d/2f/2g)', () => {
+  it('stops sector interception when the interceptor pool is empty', () => {
+    const game = new Game();
+    game.start('campaign', 'israel', 11);
+    setEnduranceSystems(game.snap, { interceptorDepletion: true });
+    const hex = game.map.nodeHexOf('tel_aviv') ?? game.map.nodeHexOf(game.map.nodes[0]!.id)!;
+    game.snap.resources.interceptorsIsrael = 0;
+    expect(defenceLayers(game.snap, game.map, hex.col, hex.row, 'israel', 'ballistic')).toHaveLength(0);
+  });
+
+  it('rotates a carrier home when political will allows it', () => {
+    const game = new Game();
+    game.start('campaign', 'usa', 11);
+    setEnduranceSystems(game.snap, { carrierEndurance: true });
+    const events: ResolveEvent[] = [];
+    const will = game.snap.resources.politicalWill;
+    for (let turn = 1; turn <= CARRIER_ENDURANCE_TURNS + 1; turn++) {
+      game.snap.turn = turn;
+      advanceEndurance(game.snap, events);
+    }
+    expect(events.some((e) => /relief carrier/i.test(e.text))).toBe(true);
+    expect(game.snap.resources.politicalWill).toBeLessThan(will);
+    expect(game.snap.endurance!.carriers!.deployedTurns).toBe(0);
+    expect(game.snap.endurance!.carriers!.factor).toBe(1);
+  });
+
+  it('drains political will through PMF harassment after activation', () => {
+    const game = new Game();
+    game.start('campaign', 'usa', 11);
+    setEnduranceSystems(game.snap, { proxySupply: true });
+    game.snap.turn = 6;
+    const will = game.snap.resources.politicalWill;
+    const events: ResolveEvent[] = [];
+    advanceEndurance(game.snap, events);
+    expect(game.snap.resources.politicalWill).toBe(will - 1);
+    expect(events.some((e) => /PMF/i.test(e.text))).toBe(true);
+  });
+
+  it('degrades cyber effectiveness with each operation', () => {
+    const game = new Game();
+    game.start('campaign', 'israel', 11);
+    setEnduranceSystems(game.snap, { cyberLimits: true });
+    const cyber = game.snap.units.find((u) => u.typeId === 'unit8200')!;
+    const launcher = game.snap.units.find(
+      (u) => u.faction === 'iran' && ['fateh110', 'khorramshahr', 'asm_launcher'].includes(u.typeId),
+    )!;
+    launcher.revealed = true;
+    expect(cyberEffectiveness(game.snap)).toBe(1);
+    resolveCyber(game.snap, cyber, () => 0.1);
+    const first = cyberEffectiveness(game.snap);
+    expect(first).toBeLessThan(1);
+    launcher.revealed = true;
+    resolveCyber(game.snap, cyber, () => 0.1);
+    expect(cyberEffectiveness(game.snap)).toBeLessThan(first);
   });
 });
