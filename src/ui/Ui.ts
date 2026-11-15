@@ -5,7 +5,7 @@
  * The interface is bilingual (English / Persian). All chrome goes through
  * `t()`; map nodes and units use their localised data fields.
  */
-import { strikeCandidates, strikeTargetsFor, type StrikeTarget } from '../combat/targets';
+import { strikeCandidates, strikeTargetNodeId, strikeTargetsFor, type StrikeTarget } from '../combat/targets';
 import { FACTION_COLORS } from '../core/config';
 import { ISRAEL_AIRLIFT, REINFORCEMENTS, effectiveArrival } from '../core/engine';
 import { ARSENAL_UNCERTAINTY_PCT, arsenalRows, deliveryClassFor } from '../core/inventory';
@@ -323,6 +323,52 @@ export class Ui {
     for (const type of ['pointerup', 'pointermove', 'pointercancel']) {
       this.root.addEventListener(type, () => window.clearTimeout(this.tipTimer));
     }
+
+    // A mouse or pen can read a tooltip by hovering; the press-and-hold path
+    // above remains for touch, where there is no hover. Keep the hover tooltip
+    // up until the pointer leaves so long explanations stay readable.
+    this.root.addEventListener('pointerover', (event) => {
+      if (event.pointerType === 'touch') return;
+      const target = (event.target as HTMLElement).closest('[data-tip]') as HTMLElement | null;
+      if (!target) return;
+      const related = event.relatedTarget as Node | null;
+      if (related && target.contains(related)) return;
+      const tip = target.dataset.tip ?? '';
+      if (!tip) return;
+      window.clearTimeout(this.tipTimer);
+      this.showTooltip(tip, event.clientX, event.clientY, false);
+    });
+    this.root.addEventListener('pointerout', (event) => {
+      if (event.pointerType === 'touch') return;
+      const target = (event.target as HTMLElement).closest('[data-tip]') as HTMLElement | null;
+      if (!target) return;
+      const related = event.relatedTarget as Node | null;
+      if (related && target.contains(related)) return;
+      this.hideTooltip();
+    });
+    this.root.addEventListener('focusin', (event) => {
+      const target = (event.target as HTMLElement).closest('[data-tip]') as HTMLElement | null;
+      if (!target) return;
+      const tip = target.dataset.tip ?? '';
+      if (!tip) return;
+      const rect = target.getBoundingClientRect();
+      this.showTooltip(tip, rect.left, rect.bottom, false);
+    });
+    this.root.addEventListener('focusout', (event) => {
+      const target = (event.target as HTMLElement).closest('[data-tip]');
+      if (target) this.hideTooltip();
+    });
+
+    // Informational strips have no action of their own, so a tap (or a click
+    // with a mouse) can reveal their explanation on touch screens too.
+    this.root.addEventListener('click', (event) => {
+      const target = (event.target as HTMLElement).closest('[data-tip]') as HTMLElement | null;
+      if (!target || target.dataset.action) return;
+      const tip = target.dataset.tip ?? '';
+      if (!tip) return;
+      const rect = target.getBoundingClientRect();
+      this.showTooltip(tip, rect.left, rect.bottom);
+    });
 
     window.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape') return;
@@ -819,8 +865,8 @@ export class Ui {
       pills.push({ label: t('gauge.res'), value: Math.round(s.iran.resources), tip: t('tip.res'), warn: 40, alert: 15 });
       pills.push({ label: t('gauge.will'), value: Math.round(s.resources.politicalWill), tip: t('tip.willIran'), warn: 40, alert: 20 });
       const favors = favorsOf(s);
-      pills.push({ label: t('gauge.ru'), value: favors.russia, tip: t('tip.favors'), ...none });
-      pills.push({ label: t('gauge.cn'), value: favors.china, tip: t('tip.favors'), ...none });
+      pills.push({ label: t('gauge.ru'), value: favors.russia, tip: t('tip.favorsRussia'), ...none });
+      pills.push({ label: t('gauge.cn'), value: favors.china, tip: t('tip.favorsChina'), ...none });
     }
     const gps = s.systems?.gpsDenial
       ? `<div class="pill tone-alert" data-tip="${t('tip.gpsDenial')}"><span>GPS</span><b>OFF</b></div>`
@@ -1201,18 +1247,28 @@ export class Ui {
    */
   private attackersHtml(col: number, row: number, nodeId?: string): string {
     const snap = this.game.snap;
-    const node = nodeId ? this.game.map.nodeById.get(nodeId) : undefined;
-    const defender = node ? defenderOfNode(node) : null;
-    const hostile = node
-      ? !!defender && hostileTo(snap.faction, defender)
-      : this.game.unitsAt(col, row).some((u) => u.faction !== snap.faction && u.revealed && hostileTo(snap.faction, u.faction));
-    if (!hostile) return '';
+    // A hostile facility is the target; a neutral city with hostile aircraft is
+    // a unit target. Keeping the node id in that case would make the strike
+    // damage Doha instead of the aircraft parked there.
+    const targetNodeId = strikeTargetNodeId(snap, this.game.map, snap.faction, col, row, nodeId);
+    const enemiesHere = this.game
+      .unitsAt(col, row)
+      .filter((u) => u.faction !== snap.faction && hostileTo(snap.faction, u.faction));
+    const hostileUnits = enemiesHere.some((u) => u.revealed);
+    if (!targetNodeId && !hostileUnits) {
+      // Hidden enemies are real targets once identified. Say why the location
+      // cannot be struck yet instead of silently offering nothing.
+      const hidden = enemiesHere.some((u) => !u.revealed);
+      return hidden
+        ? `<section class="targets"><h4>${t('sheet.attackers')}</h4><p class="note">${t('intel.requiredHere')}</p></section>`
+        : '';
+    }
     const candidates = strikeCandidates(
       snap,
       this.game.map,
       col,
       row,
-      nodeId,
+      targetNodeId,
       (id) => {
         const target = this.game.map.nodeById.get(id);
         return target ? localName(target) : id;
@@ -1228,7 +1284,7 @@ export class Ui {
 
     const rows = available
       .map(
-        ({ unit, dist }) => `<button class="target-row" data-action="attack:${unit.uid}:${col},${row}:${nodeId ?? ''}">
+        ({ unit, dist }) => `<button class="target-row" data-action="attack:${unit.uid}:${col},${row}:${targetNodeId ?? ''}">
           <span class="t-main"><b>${unitLabel(unit)}</b></span>
           <span class="t-meta">${t('target.metaAttacker', { dist, weapon: categoryLabel(unitType(unit.typeId).category) })}</span>
           <span class="t-go">${t('btn.strike')}</span>
@@ -2259,7 +2315,7 @@ export class Ui {
     }, 2600);
   }
 
-  private showTooltip(text: string, x: number, y: number): void {
+  private showTooltip(text: string, x: number, y: number, autoHide = true): void {
     const tip = $('#tooltip');
     if (!tip) return;
     tip.textContent = text;
@@ -2271,7 +2327,14 @@ export class Ui {
     tip.style.left = `${left}px`;
     tip.style.top = `${Math.min(y + 14, window.innerHeight - 110)}px`;
     window.clearTimeout(this.tipHideTimer);
-    this.tipHideTimer = window.setTimeout(() => tip.classList.remove('show'), 3200);
+    if (autoHide) {
+      this.tipHideTimer = window.setTimeout(() => tip.classList.remove('show'), 3200);
+    }
+  }
+
+  private hideTooltip(): void {
+    window.clearTimeout(this.tipHideTimer);
+    $('#tooltip')?.classList.remove('show');
   }
 
   // ---------------------------------------------------------- objectives / coach

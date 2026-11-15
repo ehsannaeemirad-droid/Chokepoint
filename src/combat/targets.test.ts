@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { attackersForHex, strikeCandidates, strikeTargetsFor } from './targets';
+import { attackersForHex, strikeCandidates, strikeTargetNodeId, strikeTargetsFor } from './targets';
 import { applyOrder, validateOrder } from '../core/engine';
 import { Game } from '../core/Game';
 import { defenderOfNode, unitType } from '../core/world';
@@ -42,6 +42,36 @@ describe('target-first attacker discovery', () => {
       expect(unit.faction).toBe('usa');
       expect(unitType(unit.typeId).atk).toBeGreaterThan(0);
     }
+  });
+
+  it('offers a neutral city containing hostile aircraft as a unit target', () => {
+    const game = start('iran');
+    const doha = game.map.nodeHexOf('doha')!;
+    const aircraft = game.snap.units.find((u) => u.faction === 'usa' && u.typeId === 'f35a')!;
+    const launcher = game.snap.units.find((u) => u.faction === 'iran' && u.typeId === 'fateh110')!;
+    aircraft.col = doha.col;
+    aircraft.row = doha.row;
+    aircraft.revealed = true;
+    launcher.col = doha.col;
+    launcher.row = doha.row;
+
+    const attackers = attackersForHex(game.snap, game.map, doha.col, doha.row, 'doha');
+    expect(attackers.length).toBeGreaterThan(0);
+    expect(attackers[0]!.unit.uid).toBe(launcher.uid);
+
+    // Doha shares its hex with Al Udeid, so the actionable target is the base
+    // on that hex, not neutral Doha itself.
+    const targetNodeId = strikeTargetNodeId(game.snap, game.map, 'iran', doha.col, doha.row, 'doha');
+    expect(targetNodeId).toBe('al_udeid');
+    expect(
+      game.queueOrder({
+        kind: 'strike',
+        unitUid: launcher.uid,
+        col: doha.col,
+        row: doha.row,
+        nodeId: targetNodeId,
+      }).ok,
+    ).toBe(true);
   });
 
   it('does not list attackers for a friendly facility', () => {

@@ -11,6 +11,51 @@ import { deliveryClassFor, launcherSortiesLeft } from '../core/inventory';
 import { hexDistance } from '../map/hex';
 import type { TheaterMap } from '../map/TheaterMap';
 
+/**
+ * A node is only the target when its defender is hostile. A neutral city that
+ * happens to contain hostile aircraft is a unit target, not a facility target:
+ * striking the city itself would damage the host, not the aircraft.
+ */
+export function strikeTargetNodeId(
+  snap: GameSnapshot,
+  map: TheaterMap,
+  faction: GameSnapshot['faction'],
+  _col: number,
+  _row: number,
+  nodeId?: string,
+): string | undefined {
+  if (!nodeId) return undefined;
+  const node = map.nodeById.get(nodeId);
+  if (!node) return undefined;
+  const state = snap.nodes[nodeId];
+  const defender = defenderOfNode(node);
+  // A city with no facility state left is not a facility target, even if its
+  // nominal host is hostile; any strike there is against the units present.
+  if (state && state.integrity > 0 && defender && hostileTo(faction, defender)) return nodeId;
+
+  // Cities can share a hex with a base (Doha and Al Udeid). Selecting the city
+  // must still offer the hostile facility on that hex, because the facility
+  // target is what suppresses the unit target for the same hex.
+  const hex = map.nodeHexOf(nodeId);
+  if (!hex) return undefined;
+  for (const candidate of map.nodes) {
+    if (candidate.id === nodeId) continue;
+    const candidateHex = map.nodeHexOf(candidate.id);
+    if (!candidateHex || candidateHex.col !== hex.col || candidateHex.row !== hex.row) continue;
+    const candidateState = snap.nodes[candidate.id];
+    const candidateDefender = defenderOfNode(candidate);
+    if (
+      candidateState &&
+      candidateState.integrity > 0 &&
+      candidateDefender &&
+      hostileTo(faction, candidateDefender)
+    ) {
+      return candidate.id;
+    }
+  }
+  return undefined;
+}
+
 export interface StrikeTarget {
   col: number;
   row: number;
@@ -130,6 +175,7 @@ export function strikeCandidates(
   const tasked = new Set(
     snap.orders.filter((o) => 'unitUid' in o).map((o) => (o as { unitUid: string }).unitUid),
   );
+  const targetNodeId = strikeTargetNodeId(snap, map, snap.faction, col, row, nodeId);
   const out: StrikeCandidate[] = [];
   for (const unit of snap.units) {
     if (unit.faction !== snap.faction) continue;
@@ -171,7 +217,10 @@ export function strikeCandidates(
       continue;
     }
     const hits = strikeTargetsFor(snap, map, unit, labelFor, hexLabel, unitLabel).some(
-      (target) => target.col === col && target.row === row && (nodeId ? target.nodeId === nodeId : !target.nodeId),
+      (target) =>
+        target.col === col &&
+        target.row === row &&
+        (targetNodeId ? target.nodeId === targetNodeId : !target.nodeId),
     );
     out.push(hits ? { unit, dist, available: true } : blocked('not-a-target'));
   }
