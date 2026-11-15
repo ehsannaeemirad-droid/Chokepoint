@@ -89,9 +89,10 @@ Reading:
   figure would have been an unmeasured change.
 - **The baseline table above predates the launcher-reload fix.** It is kept as
   the pre-fix measurement; the table in this section is the current one.
-- **`base_pk` / `interception_pk` are model values, not published facts.**
-  Guided weapons derive Pk from their CEP band; interceptors copy their unit's
-  intercept probability. Each row records `pk_basis`.
+- **`base_pk` / `interception_pk` are model values, not published facts, and are
+  used in combat.** Interception reads the data row; mapped strike units scale
+  damage by `0.6 + 0.4 × Pk`. This eight-seed table is unchanged by that wiring
+  because the policy mostly flies unmapped airframes; per-strike damage differs.
 
 Parameters calibrated (all game-scale readings, each stated in code and README):
 

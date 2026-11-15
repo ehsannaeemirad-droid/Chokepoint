@@ -25,6 +25,7 @@ import {
   strikeSortieWeight,
 } from './endurance';
 import { addCasualties, restrictionBlocksStrike } from '../politics/domestic';
+import { strikePkFactor } from './pk';
 import { reject, type OrderRejectCode, type RejectParams } from '../core/rejection';
 import { roeBlocksStrike, roeDamageMultiplier } from '../politics/roe';
 import {
@@ -394,6 +395,7 @@ export function resolveStrike(
   // strikes are untouched (multiplier 1 for non-coalition attackers).
   const damage =
     def.atk *
+    strikePkFactor(def.id) *
     roeDamageMultiplier(snap, unit.faction) *
     strikeEffectiveness(snap, unit.faction, def.category) *
     groundEffectiveness(snap, unit.faction, def.category);

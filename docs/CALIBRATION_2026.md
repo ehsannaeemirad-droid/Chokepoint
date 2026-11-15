@@ -25,6 +25,14 @@ This replaces the earlier "leave both null" decision at the user's request. The
 numbers remain fully auditable: none is presented as a sourced fact, and the
 formula is reproducible from the data in the repository.
 
+Combat consumes them in `src/combat/pk.ts`: interceptor rows provide the general
+engagement probability (hypersonic engagements keep their dedicated value), and
+strike rows scale damage by `0.6 + 0.4 × base_pk` for the units they are mapped
+to. Units without a weapon record are unchanged. The eight-seed outcome table in
+`BALANCE.md` is identical before and after this wiring, because the policy flies
+mostly unmapped airframes; the effect is visible per strike, not in the aggregate
+table.
+
 ## Old → new → source (task 3.4)
 
 | Field | Old | New | Source | Confidence | Game field |

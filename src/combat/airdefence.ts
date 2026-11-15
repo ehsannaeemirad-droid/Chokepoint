@@ -19,6 +19,7 @@ import type { TheaterMap } from '../map/TheaterMap';
 import { purchaseCostOfInterceptors, russiaTier } from '../politics/politics';
 import { abstractDefenceFactor, defenceNetwork } from './defenceNetwork';
 import { airDefenceEffectiveness, cyberRadarFactor, radarDamageMultiplier } from './endurance';
+import { interceptionPk } from './pk';
 
 export type AdLayerName = 'long' | 'medium' | 'point';
 
@@ -203,7 +204,12 @@ export function defenceLayers(
     const baseCost = def.interceptCost ?? 0;
     const cost = baseCost > 0 ? Math.ceil(baseCost * radarDamageMultiplier(snap, map, defender)) : 0;
     if (poolFor(snap, defender) < cost) continue;
-    const raw = threat === 'hypersonic' ? (def.hypersonicIntercept ?? 0) : (def.intercept ?? 0);
+    // The weapon-performance record is the source of truth for the general
+    // intercept probability; hypersonic engagements keep their dedicated value.
+    const raw =
+      threat === 'hypersonic'
+        ? (def.hypersonicIntercept ?? 0)
+        : interceptionPk(def.id) ?? def.intercept ?? 0;
     const probability = raw * airDefenceEffectiveness(snap, defender);
     if (probability <= 0) continue;
     const current = byLayer.get(def.adLayer);
