@@ -68,8 +68,8 @@ mechanics engage and do not freeze a side, **not** a win-rate claim.
 | off | israel | 0 | 8 | 0 | 30.0 |
 | off | iran | 6 | 2 | 0 | 26.9 |
 | on | usa | 0 | 8 | 0 | 21.4 |
-| on | israel | 1 | 7 | 0 | 30.0 |
-| on | iran | 8 | 0 | 0 | 27.1 |
+| on | israel | 0 | 8 | 0 | 30.0 |
+| on | iran | 8 | 0 | 0 | 26.5 |
 
 Reading:
 
@@ -92,8 +92,11 @@ Reading:
 - **`base_pk` / `interception_pk` are model values, not published facts, and are
   used in combat.** Interception reads the data row; mapped strike units scale
   damage by `0.6 + 0.4 × Pk`. Coalition airframes now map to sourced JDAM,
-  SPICE, JASSM and Hellfire records, all with CEP-derived Pk 1.00. This eight-seed
-  table is unchanged by that wiring; per-strike damage differs.
+  SPICE, JASSM and Hellfire records.
+- **GPS denial changes the `on` row.** With the Endurance preset, JDAM falls back
+  to 30 m INS-only CEP and JASSM to 13 m against a 10 m aim point, so their Pk
+  drops to 0.07 and 0.34. Israel loses its single `on` win and Iran's average end
+  turn falls from 27.1 to 26.5; the USA row is unchanged.
 
 Parameters calibrated (all game-scale readings, each stated in code and README):
 

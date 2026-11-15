@@ -41,8 +41,27 @@ to. Coalition airframes are now mapped to sourced records:
 Sources are recorded on each row: US Air Force/Navy fact sheets for JDAM and
 Hellfire, the DoD JASSM selected-acquisition report, and Rafael's SPICE brochure.
 A 0.85 `COALITION_AIR_MODEL_PK` remains as a fallback for any future airframe
-without a record. The eight-seed outcome table in `BALANCE.md` is unchanged; the
-effect is per strike, not in the aggregate table.
+without a record.
+
+### GPS denial
+
+With `systems.gpsDenial` (part of the Endurance preset, off in the scenario
+defaults), GPS-guided weapons are scored against a **10 m point target** rather
+than the 100 m area used for the normal Pk:
+
+`Pk_denied = 1 − 0.5^((10 / INS CEP)²)`
+
+- JDAM uses its published INS-only CEP of 30 m (98 ft): Pk 0.074, strike factor
+  0.63 (down from 1.00).
+- JASSM uses its published GPS/INS-only CEP of 13 m: Pk 0.336, strike factor 0.73.
+- SPICE 2000 is electro-optical and GPS-denied capable, and Hellfire is laser
+  guided, so neither is affected. The B-2's MOP is unchanged.
+
+The 10 m radius is a game-scale aim point (a hall, shelter or command post); it
+is the smallest radius at which the published GPS and INS CEPs are meaningfully
+distinguishable. The eight-seed campaign table in `BALANCE.md` shifts only in the
+`on` rows: Israel's single win becomes a loss and Iran's average end turn falls
+from 27.1 to 26.5.
 
 ## Old → new → source (task 3.4)
 

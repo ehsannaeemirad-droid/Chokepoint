@@ -27,6 +27,7 @@ const ALL_ON = {
   iranProduction: true,
   proxySupply: true,
   cyberLimits: true,
+  gpsDenial: true,
   israelMobilization: true,
 };
 

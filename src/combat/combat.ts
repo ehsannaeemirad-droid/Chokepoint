@@ -395,7 +395,7 @@ export function resolveStrike(
   // strikes are untouched (multiplier 1 for non-coalition attackers).
   const damage =
     def.atk *
-    strikePkFactor(def.id) *
+    strikePkFactor(def.id, snap.endurance?.systems.gpsDenial ?? snap.systems?.gpsDenial ?? false) *
     roeDamageMultiplier(snap, unit.faction) *
     strikeEffectiveness(snap, unit.faction, def.category) *
     groundEffectiveness(snap, unit.faction, def.category);

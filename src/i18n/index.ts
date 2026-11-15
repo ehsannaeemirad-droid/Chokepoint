@@ -152,6 +152,10 @@ const DICT = {
   'gauge.ball': ['BALL', 'موشک'],
   'gauge.res': ['RES', 'منابع'],
 
+  'tip.gpsDenial': [
+    'GPS jamming is active: JDAM and JASSM fall back to INS-only accuracy against a 10 m point target, so their strikes do far less damage. Laser and electro-optical weapons are unaffected.',
+    'اخلال GPS فعال است: جدام و جاسم به دقت INS-only علیه هدف نقطه‌ای ۱۰ متری بازمی‌گردند و ضربه‌هایشان بسیار کم‌اثرتر می‌شود. سلاح‌های لیزری و الکترواپتیکی تحت تأثیر نیستند.',
+  ],
   'tip.intUS': [
     'Interceptors ready (Patriot/THAAD), 0–100+. Each incoming raid spends 1–2. Below 30 is thin, below 12 is critical; airlift resupplies them every few turns.',
     'رهگیرهای آماده (پاتریوت/تاد)، ۰ تا ۱۰۰ و بیشتر. هر یورش ۱ تا ۲ فروند مصرف می‌کند. زیر ۳۰ کم و زیر ۱۲ بحرانی است؛ ترابری هوایی هر چند نوبت آن را پر می‌کند.',

@@ -822,12 +822,17 @@ export class Ui {
       pills.push({ label: t('gauge.ru'), value: favors.russia, tip: t('tip.favors'), ...none });
       pills.push({ label: t('gauge.cn'), value: favors.china, tip: t('tip.favors'), ...none });
     }
-    return pills
-      .map((pill) => {
-        const tone = gaugeTone(pill.value, pill.warn, pill.alert);
-        return `<div class="pill tone-${tone}" data-tip="${pill.tip}"><span>${pill.label}</span><b>${pill.value}</b></div>`;
-      })
-      .join('');
+    const gps = s.systems?.gpsDenial
+      ? `<div class="pill tone-alert" data-tip="${t('tip.gpsDenial')}"><span>GPS</span><b>OFF</b></div>`
+      : '';
+    return (
+      pills
+        .map((pill) => {
+          const tone = gaugeTone(pill.value, pill.warn, pill.alert);
+          return `<div class="pill tone-${tone}" data-tip="${pill.tip}"><span>${pill.label}</span><b>${pill.value}</b></div>`;
+        })
+        .join('') + gps
+    );
   }
 
   /**

@@ -526,6 +526,8 @@ export interface EnduranceSystems {
   iranProduction?: boolean;
   proxySupply?: boolean;
   cyberLimits?: boolean;
+  /** GPS jamming degrades GPS-guided munitions to INS-only accuracy. */
+  gpsDenial?: boolean;
   israelMobilization?: boolean;
   /** Apply each host's documented opening access posture at game start. */
   hostAccess?: boolean;

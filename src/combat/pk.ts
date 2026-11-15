@@ -18,6 +18,8 @@ interface WeaponRow {
   id: string;
   base_pk: number | null;
   interception_pk: number | null;
+  /** Published GPS/INS-only CEP, used when GPS is denied. */
+  ins_cep_m?: number | null;
   game_field?: { unit_type_id?: string | null; unit_type_ids?: string[] };
 }
 
@@ -40,6 +42,14 @@ for (const row of rows) {
  */
 export const COALITION_AIR_MODEL_PK = 0.85;
 
+/**
+ * GPS-denied accuracy is scored against a point target, not the 100 m area
+ * used for the normal Pk. Ten metres is a hardened aim point (a hall, a
+ * launcher shelter, a command post); at that radius a 5 m CEP is excellent and
+ * a 30 m INS-only CEP is poor, which is the difference the briefs describe.
+ */
+export const GPS_DENIED_TARGET_RADIUS_M = 10;
+
 const airUnitIds = new Set<string>();
 for (const list of Object.values(units)) {
   if (!Array.isArray(list)) continue;
@@ -60,8 +70,20 @@ export function interceptionPk(unitTypeId: string): number | null {
  * leaves 60% (the floor represents collateral effect from a near miss). Units
  * without a weapon record return 1.
  */
-export function strikePkFactor(unitTypeId: string): number {
+/** Pk against a 10 m point target when GPS is unavailable, if documented. */
+export function gpsDeniedPk(unitTypeId: string): number | null {
   const row = byUnit.get(unitTypeId);
+  const insCep = row?.ins_cep_m;
+  if (!insCep || insCep <= 0) return null;
+  return 1 - Math.pow(0.5, Math.pow(GPS_DENIED_TARGET_RADIUS_M / insCep, 2));
+}
+
+export function strikePkFactor(unitTypeId: string, gpsDenied = false): number {
+  const row = byUnit.get(unitTypeId);
+  if (row && gpsDenied) {
+    const pk = gpsDeniedPk(unitTypeId);
+    if (pk !== null) return 0.6 + 0.4 * pk;
+  }
   if (row && row.base_pk !== null) return 0.6 + 0.4 * row.base_pk;
   if (airUnitIds.has(unitTypeId)) return 0.6 + 0.4 * COALITION_AIR_MODEL_PK;
   return 1;

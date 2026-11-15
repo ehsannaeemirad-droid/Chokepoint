@@ -25,7 +25,7 @@ site now changes the air-defence picture.
 
 ## Mechanics
 
-The nine endurance flags live in `src/combat/endurance.ts`; hooks are in
+The ten endurance flags live in `src/combat/endurance.ts`; hooks are in
 `Game.start`, `combat.validateStrike`, `combat.resolveStrike`,
 `combat.bestDefence`, `airdefence.detectionChance`,
 `airdefence.defenceLayers` and `engine.runTurn`. Two further scenario flags,
@@ -42,6 +42,7 @@ third-party triggers (Pakistan, Egypt, Hezbollah, Houthis, PMF) once each.
 | `iranProduction` | Output surges at 150% on stockpiled components, then 60%; blockade halves solid fuel only | 200–500 assembleable rounds, 0.5 solid-fuel modifier |
 | `proxySupply` | Proxy magazines refill only at indigenous production rates, capped at establishment | Houthi ~90% indigenous; Hezbollah route closed |
 | `cyberLimits` | Cyber may only blind radar (0.7 detection, two turns) or delay one launcher; nothing is destroyed | "Temporary disruption only" |
+| `gpsDenial` | JDAM and JASSM fall back to INS-only CEP against a 10 m point target; Pk drops to 0.07 and 0.34 | Published INS-only CEPs: JDAM 30 m, JASSM 13 m |
 | `israelMobilization` | Israeli ground formations lose 2% a turn from turn 12 to a 75% floor, while home-front pressure can end the war at 85 for two turns | 450,000 reservists, 9% output gap |
 | `hostAccess` | Each host starts at its documented access posture | OOB host table |
 | `interventions` | Third-party triggers fire once under their stated conditions | OOB intervention table |
@@ -81,7 +82,7 @@ when a mapping does not explain the conversion.
 
 ## Verification
 
-`pnpm run typecheck` 0, `pnpm test` 55 files / 429 tests, `pnpm run build` 0, CI
+`pnpm run typecheck` 0, `pnpm test` 56 files / 432 tests, `pnpm run build` 0, CI
 green on every commit on the branch.
 
 Coverage highlights: pools initialise from sourced inventories; a strike spends a

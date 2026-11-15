@@ -2470,7 +2470,8 @@
       },
       "base_pk": 1,
       "interception_pk": 0,
-      "pk_basis": "CEP model: target radius 100 m, 1-0.5^(100/CEP)^2"
+      "pk_basis": "CEP model: target radius 100 m, 1-0.5^(100/CEP)^2",
+      "ins_cep_m": 30
     },
     {
       "id": "jassm-er",
@@ -2499,7 +2500,8 @@
       },
       "base_pk": 1,
       "interception_pk": 0,
-      "pk_basis": "CEP model: target radius 100 m, 1-0.5^(100/CEP)^2"
+      "pk_basis": "CEP model: target radius 100 m, 1-0.5^(100/CEP)^2",
+      "ins_cep_m": 13
     },
     {
       "id": "hellfire-agm114",
