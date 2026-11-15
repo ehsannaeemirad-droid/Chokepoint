@@ -521,6 +521,10 @@ export interface EnduranceSystems {
   proxySupply?: boolean;
   cyberLimits?: boolean;
   israelMobilization?: boolean;
+  /** Apply each host's documented opening access posture at game start. */
+  hostAccess?: boolean;
+  /** Fire the documented third-party intervention triggers during play. */
+  interventions?: boolean;
 }
 
 export interface MunitionsPool {
@@ -563,6 +567,8 @@ export interface EnduranceState {
   cyber?: { radarUntilTurn: number; effects: number; effectiveness?: number };
   /** Israeli reservist fatigue from sustained mobilization. */
   israel?: { fatigueTurn: number | null; factor: number; pressure: number; pressureStreak: number };
+  /** Intervention ids already fired, so each trigger lands once. */
+  firedInterventions?: string[];
 }
 
 export interface GameSnapshot {

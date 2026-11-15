@@ -362,10 +362,19 @@
         "Patriot",
         "AN/FPS-132 \"Desert Eye\""
       ],
-      "aircraft": [],
+      "aircraft": [
+        {
+          "type": "mixed coalition wing",
+          "count": 100
+        }
+      ],
       "confidence": "confirmed",
       "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-      "note": "Radar status per IRGC claim: destroyed."
+      "note": "Radar status per IRGC claim: destroyed.",
+      "personnel_range": [
+        9000,
+        11000
+      ]
     },
     {
       "id": "al_dhafra",
@@ -382,15 +391,34 @@
         "Patriot"
       ],
       "aircraft": [
-        "F-22",
-        "F-15",
-        "MQ-9",
-        "E-3 AWACS",
-        "KC-135/KC-46"
+        {
+          "type": "F-22A",
+          "count": null
+        },
+        {
+          "type": "F-15E",
+          "count": null
+        },
+        {
+          "type": "MQ-9",
+          "count": null
+        },
+        {
+          "type": "E-3 AWACS",
+          "count": null
+        },
+        {
+          "type": "KC-135/KC-46 tankers",
+          "count": null
+        }
       ],
       "confidence": "single_source",
       "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-      "note": "THAAD radar struck per IRGC claim (damage unconfirmed)."
+      "note": "THAAD radar struck per IRGC claim (damage unconfirmed).",
+      "personnel_range": [
+        3500,
+        5000
+      ]
     },
     {
       "id": "nsa_bahrain",
@@ -408,7 +436,11 @@
       "aircraft": [],
       "confidence": "single_source",
       "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-      "note": "SATCOM terminal struck per IRGC claim."
+      "note": "SATCOM terminal struck per IRGC claim.",
+      "personnel_range": [
+        8000,
+        9000
+      ]
     },
     {
       "id": "prince_sultan",
@@ -427,7 +459,11 @@
       "aircraft": [],
       "confidence": "confirmed",
       "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-      "note": "Coordinates approximate (Al Kharj). Saudi Arabia holds 108 Patriot launchers."
+      "note": "Coordinates approximate (Al Kharj). Saudi Arabia holds 108 Patriot launchers.",
+      "personnel_range": [
+        2300,
+        2300
+      ]
     },
     {
       "id": "muwaffaq_salti",
@@ -444,10 +480,22 @@
         "Patriot"
       ],
       "aircraft": [
-        "F-35A",
-        "F-15E",
-        "F-16",
-        "A-10"
+        {
+          "type": "F-35A",
+          "count": null
+        },
+        {
+          "type": "F-15E",
+          "count": null
+        },
+        {
+          "type": "F-16",
+          "count": null
+        },
+        {
+          "type": "A-10C",
+          "count": null
+        }
       ],
       "confidence": "single_source",
       "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
@@ -469,7 +517,11 @@
       "aircraft": [],
       "confidence": "confirmed",
       "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-      "note": "Base struck by Iran during the campaign."
+      "note": "Base struck by Iran during the campaign.",
+      "personnel_range": [
+        13500,
+        13500
+      ]
     },
     {
       "id": "ayn_al_asad",
@@ -615,14 +667,52 @@
       "personnel": null,
       "air_defence": [],
       "aircraft": [
-        "116th Lions of the South (F-35I)",
-        "117th First Jet (F-35I)",
-        "140th Golden Eagle (F-35I)",
-        "120th Desert Giants (tankers)"
+        {
+          "type": "F-35I",
+          "count": null,
+          "squadron": "116"
+        },
+        {
+          "type": "F-35I",
+          "count": null,
+          "squadron": "117"
+        },
+        {
+          "type": "F-35I",
+          "count": null,
+          "squadron": "140"
+        },
+        {
+          "type": "KC-707 tankers",
+          "count": null,
+          "squadron": "120"
+        }
       ],
       "confidence": "confirmed",
       "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-      "note": "Runway and fuel infrastructure damaged during the war."
+      "note": "Runway and fuel infrastructure damaged during the war.",
+      "squadrons": [
+        {
+          "number": "116",
+          "name": "Lions of the South",
+          "aircraft": "F-35I"
+        },
+        {
+          "number": "117",
+          "name": "First Jet",
+          "aircraft": "F-35I"
+        },
+        {
+          "number": "140",
+          "name": "Golden Eagle",
+          "aircraft": "F-35I"
+        },
+        {
+          "number": "120",
+          "name": "Desert Giants",
+          "aircraft": "KC-707 tankers"
+        }
+      ]
     },
     {
       "id": "ramat_david",
@@ -636,13 +726,41 @@
       "personnel": null,
       "air_defence": [],
       "aircraft": [
-        "109th (F-16C/D)",
-        "110th (F-16C/D)",
-        "117th (F-16C/D)",
-        "101st First Fighter (F-16C/D)"
+        {
+          "type": "F-16C/D",
+          "count": null,
+          "squadron": "109"
+        },
+        {
+          "type": "F-16C/D",
+          "count": null,
+          "squadron": "110"
+        },
+        {
+          "type": "F-16C/D",
+          "count": null,
+          "squadron": "101"
+        }
       ],
       "confidence": "confirmed",
-      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "squadrons": [
+        {
+          "number": "109",
+          "name": null,
+          "aircraft": "F-16C/D"
+        },
+        {
+          "number": "110",
+          "name": null,
+          "aircraft": "F-16C/D"
+        },
+        {
+          "number": "101",
+          "name": "First Fighter",
+          "aircraft": "F-16C/D"
+        }
+      ]
     },
     {
       "id": "hatzerim",
@@ -656,11 +774,31 @@
       "personnel": null,
       "air_defence": [],
       "aircraft": [
-        "107th (F-16I)",
-        "69th Hammers (F-15I)"
+        {
+          "type": "F-16I",
+          "count": null,
+          "squadron": "107"
+        },
+        {
+          "type": "F-15I",
+          "count": null,
+          "squadron": "69"
+        }
       ],
       "confidence": "confirmed",
-      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "squadrons": [
+        {
+          "number": "107",
+          "name": null,
+          "aircraft": "F-16I"
+        },
+        {
+          "number": "69",
+          "name": "Hammers",
+          "aircraft": "F-15I"
+        }
+      ]
     },
     {
       "id": "hatzor",
@@ -674,11 +812,31 @@
       "personnel": null,
       "air_defence": [],
       "aircraft": [
-        "101st (F-16C/D)",
-        "105th (F-16C/D)"
+        {
+          "type": "F-16C/D",
+          "count": null,
+          "squadron": "101"
+        },
+        {
+          "type": "F-16C/D",
+          "count": null,
+          "squadron": "105"
+        }
       ],
       "confidence": "confirmed",
-      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "squadrons": [
+        {
+          "number": "101",
+          "name": null,
+          "aircraft": "F-16C/D"
+        },
+        {
+          "number": "105",
+          "name": null,
+          "aircraft": "F-16C/D"
+        }
+      ]
     },
     {
       "id": "ramon",
@@ -692,13 +850,42 @@
       "personnel": null,
       "air_defence": [],
       "aircraft": [
-        "119th",
-        "201st",
-        "253rd (F-16I)"
+        {
+          "type": "F-16I",
+          "count": null,
+          "squadron": "119"
+        },
+        {
+          "type": "F-16I",
+          "count": null,
+          "squadron": "201"
+        },
+        {
+          "type": "F-16I",
+          "count": null,
+          "squadron": "253"
+        }
       ],
       "confidence": "confirmed",
       "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-      "note": "Runway damaged during the war."
+      "note": "Runway damaged during the war.",
+      "squadrons": [
+        {
+          "number": "119",
+          "name": null,
+          "aircraft": "F-16I"
+        },
+        {
+          "number": "201",
+          "name": null,
+          "aircraft": "F-16I"
+        },
+        {
+          "number": "253",
+          "name": null,
+          "aircraft": "F-16I"
+        }
+      ]
     },
     {
       "id": "uvda",
@@ -712,10 +899,21 @@
       "personnel": null,
       "air_defence": [],
       "aircraft": [
-        "115th (F-16A/B)"
+        {
+          "type": "F-16A/B",
+          "count": null,
+          "squadron": "115"
+        }
       ],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "squadrons": [
+        {
+          "number": "115",
+          "name": null,
+          "aircraft": "F-16A/B"
+        }
+      ]
     },
     {
       "id": "idf_naval_haifa",

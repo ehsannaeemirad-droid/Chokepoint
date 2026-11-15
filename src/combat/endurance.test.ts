@@ -15,6 +15,7 @@ import {
   ENDURANCE_PRESET,
   enduranceEnabled,
   applyCyberRadar,
+  applyInterventions,
   cyberEffectiveness,
   cyberRadarFactor,
   groundEffectiveness,
@@ -605,5 +606,38 @@ describe('magazine exhaustion, rotation, PMF and cyber decay (2b/2d/2f/2g)', () 
     launcher.revealed = true;
     resolveCyber(game.snap, cyber, () => 0.1);
     expect(cyberEffectiveness(game.snap)).toBeLessThan(first);
+  });
+});
+
+describe('host access and interventions from the brief (1e)', () => {
+  it('applies the documented opening access posture only when opted in', () => {
+    const plain = new Game();
+    plain.start('campaign', 'usa', 11);
+    expect(Object.values(plain.snap.hosts).every((h) => h.status === 'open')).toBe(true);
+
+    const game = new Game();
+    game.start('campaign', 'usa', 11, { systems: { hostAccess: true } });
+    const statuses = Object.values(game.snap.hosts).map((h) => h.status);
+    expect(statuses).toContain('restricted');
+    expect(statuses.some((status) => status !== 'open')).toBe(true);
+  });
+
+  it('fires each third-party trigger once', () => {
+    const game = new Game();
+    game.start('campaign', 'usa', 11);
+    setEnduranceSystems(game.snap, { interventions: true });
+    game.snap.turn = 12;
+    game.snap.meters.oilPrice = 140;
+    game.snap.domestic!.casualtiesTotal = 30;
+    const events: ResolveEvent[] = [];
+    applyInterventions(game.snap, events);
+    applyInterventions(game.snap, events);
+    const text = events.map((e) => e.text).join('|');
+    expect(text).toMatch(/Hezbollah/);
+    expect(text).toMatch(/Bab al-Mandeb/);
+    expect(text).toMatch(/PMF/);
+    expect(text).toMatch(/Pakistan/);
+    expect(game.snap.pakistanTriggered).toBe(true);
+    expect(events.filter((event) => event.text.startsWith('Pakistan intervenes')).length).toBe(1);
   });
 });

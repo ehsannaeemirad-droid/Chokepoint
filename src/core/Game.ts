@@ -76,6 +76,8 @@ export interface ScenarioDef {
   phase?: 'prewar' | 'war';
   /** Optional endurance systems (munitions, interceptors, radar damage). */
   systems?: EnduranceSystems;
+  /** Opening host-nation access posture from the order-of-battle brief. */
+  hostAccess?: { hosts: Record<string, { access_status_start?: string }> };
 }
 
 export const SCENARIOS = { ...scenarioData, ...LATE_SCENARIOS } as unknown as Record<string, ScenarioDef>;
@@ -119,9 +121,22 @@ export class Game {
     // the scenario definition itself is never mutated.
     if (options?.systems) this.snap.systems = structuredClone(options.systems);
     initEndurance(this.snap);
+    this.applyHostAccess(scenario);
     this.selection = { hexId: null, unitUid: null, mode: 'idle' };
     this.lastEvents = [];
     this.emit();
+  }
+
+  /** Apply the brief's opening access posture when the scenario opts in. */
+  private applyHostAccess(scenario: ScenarioDef): void {
+    if (!this.snap.systems?.hostAccess || !scenario.hostAccess?.hosts) return;
+    for (const [id, entry] of Object.entries(scenario.hostAccess.hosts)) {
+      const host = this.snap.hosts[id];
+      if (!host) continue;
+      const posture = entry.access_status_start ?? 'full';
+      host.status = posture === 'denied' ? 'closed' : posture === 'restricted' ? 'restricted' : 'open';
+      if (host.status !== 'open') host.reason = `Opening access posture: ${posture}`;
+    }
   }
 
   private buildSnapshot(scenario: ScenarioDef, faction: PlayableFactionId, seed: number): GameSnapshot {

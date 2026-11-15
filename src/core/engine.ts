@@ -12,7 +12,7 @@ import type { DeliveryClass } from './types';
 import { runAiPhase, runHostPostures } from '../ai/ai';
 import { maybeStartWar, readyReserves, regenerateUnderground } from './prewar';
 import { resolveCyber, resolveSabotage, resolveStrike, validateStrike } from '../combat/combat';
-import { advanceEndurance, consumeIranStockpile, iranProductionFactor } from '../combat/endurance';
+import { advanceEndurance, applyInterventions, consumeIranStockpile, iranProductionFactor } from '../combat/endurance';
 import { canPlayerOrder } from './permissions';
 import { reject, type OrderRejectCode, type RejectParams } from './rejection';
 import { updateIntelligence } from './intel';
@@ -985,6 +985,7 @@ export function runTurn(snap: GameSnapshot, map: TheaterMap): TurnResult {
   }
 
   advanceEndurance(snap, events);
+  applyInterventions(snap, events);
   updateVictoryClocks(snap, map);
   const result = checkOutcome(snap, map);
   snap.status = result.status;

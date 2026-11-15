@@ -116,6 +116,8 @@ export const ENDURANCE_PRESET: Required<EnduranceSystems> = {
   proxySupply: true,
   cyberLimits: true,
   israelMobilization: true,
+  hostAccess: true,
+  interventions: true,
 };
 
 export function enduranceSystems(snap: GameSnapshot): Required<EnduranceSystems> {
@@ -130,6 +132,8 @@ export function enduranceSystems(snap: GameSnapshot): Required<EnduranceSystems>
     proxySupply: systems.proxySupply ?? false,
     cyberLimits: systems.cyberLimits ?? false,
     israelMobilization: systems.israelMobilization ?? false,
+    hostAccess: systems.hostAccess ?? false,
+    interventions: systems.interventions ?? false,
   };
 }
 
@@ -493,6 +497,44 @@ export function groundEffectiveness(snap: GameSnapshot, faction: FactionId, cate
   if (!state?.systems.israelMobilization) return 1;
   if (faction !== 'israel' || category !== 'ground') return 1;
   return state.israel?.factor ?? 1;
+}
+
+/**
+ * Third-party triggers from the order-of-battle brief. Thresholds are the
+ * documented conditions where they exist; proxy activation otherwise uses a
+ * stated turn, because the brief gives a condition rather than a date.
+ */
+export function applyInterventions(snap: GameSnapshot, events: ResolveEvent[]): void {
+  const state = snap.endurance;
+  if (!state?.systems.interventions) return;
+  const fired = (state.firedInterventions ??= []);
+  const fire = (id: string, text: string, faction: FactionId, tone: ResolveEvent['tone'] = 'warn') => {
+    if (fired.includes(id)) return;
+    fired.push(id);
+    events.push({ text, tone, faction });
+  };
+
+  if (snap.meters.oilPrice >= 130 && (snap.domestic?.casualtiesTotal ?? 0) >= 25) {
+    snap.pakistanTriggered = true;
+    fire(
+      'pakistan',
+      'Pakistan intervenes defensively on the Saudi axis; no strikes on Iran proper.',
+      'pakistan',
+    );
+  }
+  if (snap.meters.hormuz < 25) {
+    snap.suezClosed = true;
+    fire('egypt', 'Egypt closes the Suez Canal as the Hormuz disruption spreads.', 'egypt');
+  }
+  if (snap.turn >= 10) {
+    fire('hezbollah', 'Hezbollah activates fully; its rocket inventory begins to deplete.', 'iran');
+  }
+  if (snap.turn >= 12) {
+    fire('houthi', 'The Houthis declare a Bab al-Mandeb blockade; escort demand persists.', 'houthi');
+  }
+  if (snap.turn >= PMF_ACTIVATION_TURN) {
+    fire('pmf', 'Iraqi PMF harassment of US bases begins in earnest.', 'iran');
+  }
 }
 
 export function advanceEndurance(snap: GameSnapshot, events: ResolveEvent[]): void {

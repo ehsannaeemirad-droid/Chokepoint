@@ -82,3 +82,21 @@ calibration. The briefs give range, warhead, CEP, propulsion and reliability, bu
 no hit probability against a defended target; the game resolves damage from unit
 attack/defence statistics and the interceptor model instead. Filling these fields
 would be a fabricated number, so they are left empty and listed here.
+
+## Map nodes added for named sites (task 1b)
+
+- **No Persian names for the 49 generated nodes.** Transliterating 49 place names
+  would be invention at the margin, so `name_fa` is omitted and the UI falls back
+  to the English label. Existing 47 nodes keep their Persian names.
+- **Personnel counts exist for only five sites** (Al Udeid, Al Dhafra, Bahrain,
+  Prince Sultan, Arifjan); other sites carry no number rather than a guess.
+- **Aircraft counts are mostly unknown.** Al Udeid's "about 100 aircraft" is
+  recorded as a single mixed wing; Al Dhafra and Muwaffaq list types without
+  counts; Israeli bases list named squadrons and airframes without totals.
+- **Iranian aircraft and personnel counts are not in the briefs**, so most
+  Iranian airbases have no structured manning or airframe data.
+- **Hezbollah's rocket family is not split** into Katyusha/Grad/Fajr/Zelzal rows
+  because the brief gives types but no ranges or inventories; splitting them
+  would require invented numbers.
+- **Proxy activation turns** (Hezbollah 10, Houthi 12, PMF 6) are game-scale
+  readings of qualitative "activation" language, not published dates.
