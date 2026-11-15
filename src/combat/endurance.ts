@@ -97,6 +97,23 @@ function yearlyProduction(id: string, surge: boolean): number {
   return perYear / 12 / MUNITIONS_PER_PACKAGE;
 }
 
+/**
+ * Menu preset: every endurance system on, for a campaign that keeps the war's
+ * magazine and crew limits. Exposed here so the menu does not duplicate a flag
+ * list that could drift from the scenario schema.
+ */
+export const ENDURANCE_PRESET: Required<EnduranceSystems> = {
+  munitionsDepletion: true,
+  interceptorDepletion: true,
+  radarDamageMultiplier: true,
+  sortieFatigue: true,
+  carrierEndurance: true,
+  iranProduction: true,
+  proxySupply: true,
+  cyberLimits: true,
+  israelMobilization: true,
+};
+
 export function enduranceSystems(snap: GameSnapshot): Required<EnduranceSystems> {
   const systems = snap.systems ?? {};
   return {

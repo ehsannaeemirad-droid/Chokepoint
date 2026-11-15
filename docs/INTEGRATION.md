@@ -38,6 +38,10 @@ All nine flags live in `src/combat/endurance.ts`; hooks are in `Game.start`,
 | `cyberLimits` | Cyber may only blind radar (0.7 detection, two turns) or delay one launcher; nothing is destroyed | "Temporary disruption only" |
 | `israelMobilization` | Israeli ground formations lose 2% a turn from turn 12 to a 75% floor | 450,000 reservists, 9% output gap |
 
+The **playable path** is a new-campaign menu toggle: choosing *Endurance systems*
+passes the preset into `Game.start`, which overrides the scenario flags for that
+campaign only (the scenario definition is never mutated).
+
 With the flags off, `snap.endurance` is `undefined` and every helper returns its
 neutral value, so the pre-integration path — and the 8/8 Iran baseline — is
 unchanged. A test asserts this explicitly.

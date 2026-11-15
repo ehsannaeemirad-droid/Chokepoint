@@ -106,10 +106,18 @@ export class Game {
     this.start('campaign', 'usa', 20260101);
   }
 
-  start(scenarioId: string, faction: PlayableFactionId, seed = 20260101): void {
+  start(
+    scenarioId: string,
+    faction: PlayableFactionId,
+    seed = 20260101,
+    options?: { systems?: EnduranceSystems },
+  ): void {
     const scenario = SCENARIOS[scenarioId] ?? SCENARIOS.campaign!;
     this.uidCounter = 0;
     this.snap = this.buildSnapshot(structuredClone(scenario), faction, seed);
+    // The menu preset overrides the scenario's flags for this campaign only;
+    // the scenario definition itself is never mutated.
+    if (options?.systems) this.snap.systems = structuredClone(options.systems);
     initEndurance(this.snap);
     this.selection = { hexId: null, unitUid: null, mode: 'idle' };
     this.lastEvents = [];

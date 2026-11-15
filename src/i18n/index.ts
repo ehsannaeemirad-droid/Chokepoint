@@ -699,6 +699,10 @@ const DICT = {
     'سی نوبت برای بردن یا باختن خلیج. کارزار اعزامی آمریکا، جنگ دفاعی اسرائیل یا جنگ نامتقارن ایران را فرماندهی کنید — و هم‌زمان متحدانی که میزبان پایگاه‌های شما هستند تصمیم می‌گیرند اجازه پرواز بدهند یا نه.',
   ],
   'menu.new': ['New campaign', 'کارزار تازه'],
+  'menu.standard': ['Standard', 'استاندارد'],
+  'menu.standardNote': ['Scenario defaults', 'پیش‌فرض سناریو'],
+  'menu.endurance': ['Endurance systems', 'سامانه‌های استقامت'],
+  'menu.enduranceNote': ['Munitions, crews and production run down', 'مهمات، خدمه و تولید تحلیل می‌روند'],
   'menu.saves': ['Saves', 'ذخیره‌ها'],
   'menu.replay': ['Replay', 'بازپخش'],
   'menu.replayNote': [

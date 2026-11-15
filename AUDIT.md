@@ -2019,3 +2019,15 @@ their anchors, calibration results, the provenance mechanism, verification and
 the remaining gaps in one place. README links it beside the endurance section.
 
 Checks: typecheck 0, `pnpm test` 52 files / **408 tests**, build 0.
+
+## 55. Playable endurance preset
+
+The flags were only reachable by editing JSON. The new-campaign menu now offers
+a Standard / Endurance systems choice; the latter passes `ENDURANCE_PRESET`
+(all nine flags) into `Game.start`, which applies it to that campaign's snapshot
+only. `Game.start` gained an optional fourth argument so existing callers, saves
+and replays are unchanged, and a test covers both the preset start and the
+untouched default. The menu was clicked through in the running app: both choices
+render, the briefing opens and the campaign begins.
+
+Checks: typecheck 0, `pnpm test` 52 files / **409 tests**, build 0.

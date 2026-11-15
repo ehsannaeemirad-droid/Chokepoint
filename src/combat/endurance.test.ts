@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Game } from '../core/Game';
+import { Game, SCENARIOS } from '../core/Game';
 import { defenderOfNode, nodeState, unitType } from '../core/world';
 import { cyberTargets, hostileTo, resolveCyber, strikeRange, validateStrike } from './combat';
 import { detectionChance } from './airdefence';
@@ -11,6 +11,7 @@ import {
   airDefenceEffectiveness,
   airSortieCap,
   consumeCoalitionMunitions,
+  ENDURANCE_PRESET,
   enduranceEnabled,
   applyCyberRadar,
   cyberRadarFactor,
@@ -501,5 +502,21 @@ describe('endurance wiring at the order boundary (task 5)', () => {
     game.snap.turn += 3;
     const after = detectionChance(game.snap, game.map, hex!.col, hex!.row, 'iran', 'ballistic', 0).chance;
     expect(after).toBeCloseTo(before, 6);
+  });
+});
+
+describe('endurance preset from the menu (playable path)', () => {
+  it('starts a campaign with every system on without touching the scenario', () => {
+    const game = new Game();
+    game.start('campaign', 'usa', 11, { systems: ENDURANCE_PRESET });
+    expect(game.snap.endurance).toBeTruthy();
+    expect(enduranceEnabled(game.snap)).toBe(true);
+    const systems = game.snap.endurance!.systems;
+    expect(Object.values(systems).every(Boolean)).toBe(true);
+    // The scenario definition is untouched: a normal start is still neutral.
+    const plain = new Game();
+    plain.start('campaign', 'usa', 11);
+    expect(plain.snap.endurance).toBeUndefined();
+    expect(SCENARIOS.campaign!.systems?.munitionsDepletion ?? false).toBe(false);
   });
 });

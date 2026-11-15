@@ -13,6 +13,7 @@ import { game, SCENARIOS, type Game, type InteractionMode } from '../core/Game';
 import type { FactionId, Order, PlayableFactionId, ResolveEvent, UnitInstance } from '../core/types';
 import { defenderOfNode, unitType } from '../core/world';
 import { hostileTo } from '../combat/combat';
+import { ENDURANCE_PRESET } from '../combat/endurance';
 import {
   getLang,
   localEffect,
@@ -215,6 +216,8 @@ export class Ui {
   private layer: MapLayerId = DEFAULT_LAYER;
   private menuScenario = 'campaign';
   private menuFaction: PlayableFactionId = 'usa';
+  /** Start the next campaign with every endurance system enabled. */
+  private menuEndurance = false;
   private toastTimer = 0;
   private tipTimer = 0;
   private tipHideTimer = 0;
@@ -544,7 +547,12 @@ export class Ui {
       this.closeModal();
       this.openPanel = null;
       this.navOpen = false;
-      this.game.start(scenario, faction, Math.floor(Math.random() * 900000) + 1000);
+      this.game.start(
+        scenario,
+        faction,
+        Math.floor(Math.random() * 900000) + 1000,
+        this.menuEndurance ? { systems: ENDURANCE_PRESET } : undefined,
+      );
       const hex = this.homeHex();
       if (hex) focusHex(hex);
       this.showToast(t('toast.newCampaign'), 'good');
@@ -570,6 +578,11 @@ export class Ui {
     if (verb === 'import-replay') return this.importReplay();
     if (verb === 'scenario') {
       this.menuScenario = a ?? 'campaign';
+      this.openMenu();
+      return;
+    }
+    if (verb === 'endurance') {
+      this.menuEndurance = a === 'on';
       this.openMenu();
       return;
     }
@@ -2127,6 +2140,10 @@ export class Ui {
                   return `<button class="choice ${this.menuScenario === scenario.id ? 'active' : ''}" data-action="scenario:${scenario.id}">${name}<small>${t('menu.turns', { n: scenario.turns })}${scenario.tutorial ? ` · ${t('menu.tutorial')}` : ''}</small></button>`;
                 })
                 .join('')}
+            </div>
+            <div class="choice-row">
+              <button class="choice ${this.menuEndurance ? '' : 'active'}" data-action="endurance:off">${t('menu.standard')}<small>${t('menu.standardNote')}</small></button>
+              <button class="choice ${this.menuEndurance ? 'active' : ''}" data-action="endurance:on">${t('menu.endurance')}<small>${t('menu.enduranceNote')}</small></button>
             </div>
             <div class="choice-row factions">
               ${(['usa', 'israel', 'iran'] as const)
