@@ -440,6 +440,9 @@
       "personnel_range": [
         8000,
         9000
+      ],
+      "data_gaps": [
+        "aircraft"
       ]
     },
     {
@@ -463,6 +466,9 @@
       "personnel_range": [
         2300,
         2300
+      ],
+      "data_gaps": [
+        "aircraft"
       ]
     },
     {
@@ -499,7 +505,10 @@
       ],
       "confidence": "single_source",
       "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-      "note": "~60 aircraft; THAAD radar struck per IRGC claim."
+      "note": "~60 aircraft; THAAD radar struck per IRGC claim.",
+      "data_gaps": [
+        "personnel"
+      ]
     },
     {
       "id": "camp_arifjan",
@@ -521,6 +530,9 @@
       "personnel_range": [
         13500,
         13500
+      ],
+      "data_gaps": [
+        "aircraft"
       ]
     },
     {
@@ -536,7 +548,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "erbil",
@@ -551,7 +567,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "confirmed",
-      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "incirlik",
@@ -566,7 +586,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "confirmed",
-      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "duqm",
@@ -581,7 +605,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "confirmed",
-      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "thumrait",
@@ -597,7 +625,11 @@
       "aircraft": [],
       "confidence": "data_gap",
       "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-      "note": "Listed in the brief without coordinates."
+      "note": "Listed in the brief without coordinates.",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "masirah",
@@ -613,7 +645,11 @@
       "aircraft": [],
       "confidence": "data_gap",
       "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-      "note": "Listed in the brief without coordinates."
+      "note": "Listed in the brief without coordinates.",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "cvn72",
@@ -636,7 +672,10 @@
       "confidence": "single_source",
       "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
       "mobile": true,
-      "note": "Mobile carrier strike group: position changes, so no fixed coordinates."
+      "note": "Mobile carrier strike group: position changes, so no fixed coordinates.",
+      "data_gaps": [
+        "personnel"
+      ]
     },
     {
       "id": "cvn78",
@@ -653,7 +692,11 @@
       "confidence": "single_source",
       "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
       "mobile": true,
-      "note": "Mobile carrier strike group: position changes, so no fixed coordinates."
+      "note": "Mobile carrier strike group: position changes, so no fixed coordinates.",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "nevatim",
@@ -712,6 +755,9 @@
           "name": "Desert Giants",
           "aircraft": "KC-707 tankers"
         }
+      ],
+      "data_gaps": [
+        "personnel"
       ]
     },
     {
@@ -760,6 +806,9 @@
           "name": "First Fighter",
           "aircraft": "F-16C/D"
         }
+      ],
+      "data_gaps": [
+        "personnel"
       ]
     },
     {
@@ -798,6 +847,9 @@
           "name": "Hammers",
           "aircraft": "F-15I"
         }
+      ],
+      "data_gaps": [
+        "personnel"
       ]
     },
     {
@@ -836,6 +888,9 @@
           "name": null,
           "aircraft": "F-16C/D"
         }
+      ],
+      "data_gaps": [
+        "personnel"
       ]
     },
     {
@@ -885,6 +940,9 @@
           "name": null,
           "aircraft": "F-16I"
         }
+      ],
+      "data_gaps": [
+        "personnel"
       ]
     },
     {
@@ -913,6 +971,9 @@
           "name": null,
           "aircraft": "F-16A/B"
         }
+      ],
+      "data_gaps": [
+        "personnel"
       ]
     },
     {
@@ -929,7 +990,11 @@
       "aircraft": [],
       "confidence": "data_gap",
       "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-      "note": "Named in the brief; coordinates not supplied."
+      "note": "Named in the brief; coordinates not supplied.",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "idf_naval_eilat",
@@ -945,7 +1010,11 @@
       "aircraft": [],
       "confidence": "data_gap",
       "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-      "note": "Named in the brief; coordinates not supplied."
+      "note": "Named in the brief; coordinates not supplied.",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "iron_dome_battery",
@@ -962,7 +1031,11 @@
       ],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "davids_sling_battery",
@@ -979,7 +1052,11 @@
       ],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "arrow3_battery",
@@ -996,7 +1073,11 @@
       ],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "tabriz_north",
@@ -1011,7 +1092,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "confirmed",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "tabriz_south",
@@ -1026,7 +1111,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "confirmed",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "kermanshah",
@@ -1041,7 +1130,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "confirmed",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "panj_pelleh",
@@ -1056,7 +1149,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "kamijeh",
@@ -1071,7 +1168,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "shiraz_north",
@@ -1086,7 +1187,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "confirmed",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "bandar_abbas_khorgu",
@@ -1101,7 +1206,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "confirmed",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "hajabad",
@@ -1117,7 +1226,11 @@
       "aircraft": [],
       "confidence": "single_source",
       "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-      "note": "Approximate location only; coordinates not supplied."
+      "note": "Approximate location only; coordinates not supplied.",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "khorramabad",
@@ -1132,7 +1245,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "bakhtaran",
@@ -1147,7 +1264,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "semnan",
@@ -1162,7 +1283,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "confirmed",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "khojir",
@@ -1177,7 +1302,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "confirmed",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "parchin",
@@ -1192,7 +1321,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "confirmed",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "shahroud",
@@ -1207,7 +1340,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "oghab44",
@@ -1223,7 +1360,11 @@
       "aircraft": [],
       "confidence": "single_source",
       "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-      "note": "Named, no coordinates supplied."
+      "note": "Named, no coordinates supplied.",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "bandar_abbas_ab",
@@ -1238,7 +1379,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "khatam_ab",
@@ -1253,7 +1398,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "dezful_ab",
@@ -1268,7 +1417,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "shiraz_ab",
@@ -1283,7 +1436,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "tabriz_ab",
@@ -1298,7 +1455,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "tehran_mehrabad",
@@ -1313,7 +1474,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "bandar_abbas_naval",
@@ -1328,7 +1493,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "confirmed",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "chabahar",
@@ -1343,7 +1512,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "confirmed",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "jask",
@@ -1358,7 +1531,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "kharg",
@@ -1373,7 +1550,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "confirmed",
-      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "s300_tehran",
@@ -1391,7 +1572,11 @@
       "aircraft": [],
       "confidence": "single_source",
       "source": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
-      "note": "Engagement ~200 km. After 30N6E2 losses TELs were mated to Bavar-373."
+      "note": "Engagement ~200 km. After 30N6E2 losses TELs were mated to Bavar-373.",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "bavar_fordow",
@@ -1410,7 +1595,11 @@
       "aircraft": [],
       "confidence": "single_source",
       "source": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
-      "note": "Engagement ~200-300 km; Meraj-4 detection 320-450 km."
+      "note": "Engagement ~200-300 km; Meraj-4 detection 320-450 km.",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "khordad15_isfahan",
@@ -1428,7 +1617,11 @@
       "aircraft": [],
       "confidence": "single_source",
       "source": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
-      "note": "Engagement ~120 km; anti-stealth detection ~85 km."
+      "note": "Engagement ~120 km; anti-stealth detection ~85 km.",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "talash_layered",
@@ -1447,7 +1640,11 @@
       "aircraft": [],
       "confidence": "single_source",
       "source": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
-      "note": "Engagement ~105 km; Ofogh radar track ~200 km."
+      "note": "Engagement ~105 km; Ofogh radar track ~200 km.",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "s200_isfahan",
@@ -1465,7 +1662,11 @@
       "aircraft": [],
       "confidence": "single_source",
       "source": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
-      "note": "Range ~250 km."
+      "note": "Range ~250 km.",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "meraj4_network",
@@ -1481,7 +1682,11 @@
       "aircraft": [],
       "confidence": "single_source",
       "source": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
-      "note": "Deployed nationwide; count unknown."
+      "note": "Deployed nationwide; count unknown.",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "kavosh_radar",
@@ -1496,7 +1701,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "ghadir_radar",
@@ -1511,7 +1720,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "alim_radar",
@@ -1527,7 +1740,11 @@
       "aircraft": [],
       "confidence": "data_gap",
       "source": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
-      "note": "Mobile; no fixed coordinates supplied."
+      "note": "Mobile; no fixed coordinates supplied.",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "hezbollah",
@@ -1543,7 +1760,11 @@
       "aircraft": [],
       "confidence": "single_source",
       "source": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief",
-      "note": "15,000-20,000 rockets remaining (11k-13k in competing estimates)."
+      "note": "15,000-20,000 rockets remaining (11k-13k in competing estimates).",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "houthi",
@@ -1558,7 +1779,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "pmf_anbar",
@@ -1573,7 +1798,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "pmf_jurf",
@@ -1588,7 +1817,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     },
     {
       "id": "hamas",
@@ -1603,7 +1836,11 @@
       "air_defence": [],
       "aircraft": [],
       "confidence": "single_source",
-      "source": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief"
+      "source": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief",
+      "data_gaps": [
+        "personnel",
+        "aircraft"
+      ]
     }
   ],
   "weaponPerformance": [
@@ -1625,14 +1862,15 @@
         1000
       ],
       "reliability": "reported issues",
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 0.01,
+      "interception_pk": 0,
       "confidence": "estimate_range",
       "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
       "game_field": {
         "unit_type_id": null,
         "use": "data only: no Emad launcher unit in the order of battle"
-      }
+      },
+      "pk_basis": "CEP model: target radius 100 m, 1-0.5^(100/CEP)^2"
     },
     {
       "id": "kheibar_shekan",
@@ -1652,15 +1890,16 @@
         500
       ],
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 0.074,
+      "interception_pk": 0,
       "confidence": "estimate_range",
       "note": "CEP claimed <100 m; stored band is the defensible calibration range.",
       "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
       "game_field": {
         "unit_type_id": null,
         "use": "data only: no Kheibar Shekan launcher unit in the order of battle"
-      }
+      },
+      "pk_basis": "CEP model: target radius 100 m, 1-0.5^(100/CEP)^2"
     },
     {
       "id": "fattah-1",
@@ -1680,14 +1919,15 @@
         500
       ],
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 0.074,
+      "interception_pk": 0,
       "confidence": "belligerent_claim",
       "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
       "game_field": {
         "unit_type_id": "fattah",
         "use": "Iranian hypersonic strike unit"
-      }
+      },
+      "pk_basis": "CEP model: target radius 100 m, 1-0.5^(100/CEP)^2"
     },
     {
       "id": "fattah-2",
@@ -1707,14 +1947,15 @@
         500
       ],
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 0.074,
+      "interception_pk": 0,
       "confidence": "belligerent_claim",
       "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
       "game_field": {
         "unit_type_id": "fattah",
         "use": "Iranian hypersonic strike unit"
-      }
+      },
+      "pk_basis": "CEP model: target radius 100 m, 1-0.5^(100/CEP)^2"
     },
     {
       "id": "ghadr",
@@ -1734,14 +1975,15 @@
         500
       ],
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 0.042,
+      "interception_pk": 0,
       "confidence": "estimate_range",
       "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
       "game_field": {
         "unit_type_id": null,
         "use": "data only: no Ghadr launcher unit in the order of battle"
-      }
+      },
+      "pk_basis": "CEP model: target radius 100 m, 1-0.5^(100/CEP)^2"
     },
     {
       "id": "fateh-110",
@@ -1761,14 +2003,15 @@
         30
       ],
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 1,
+      "interception_pk": 0,
       "confidence": "confirmed",
       "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
       "game_field": {
         "unit_type_id": "fateh110",
         "use": "Iranian SRBM launcher and its rounds"
-      }
+      },
+      "pk_basis": "CEP model: target radius 100 m, 1-0.5^(100/CEP)^2"
     },
     {
       "id": "shahab-3",
@@ -1788,14 +2031,15 @@
         2500
       ],
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 0.003,
+      "interception_pk": 0,
       "confidence": "estimate_range",
       "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
       "game_field": {
         "unit_type_id": null,
         "use": "data only: no Shahab-3 launcher unit in the order of battle"
-      }
+      },
+      "pk_basis": "CEP model: target radius 100 m, 1-0.5^(100/CEP)^2"
     },
     {
       "id": "shahed-136",
@@ -1812,8 +2056,8 @@
       ],
       "cep_m": null,
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 0.15,
+      "interception_pk": 0,
       "unit_cost_usd": [
         20000,
         50000
@@ -1827,7 +2071,8 @@
       "game_field": {
         "unit_type_id": "shahed136",
         "use": "Iranian one-way attack drone unit"
-      }
+      },
+      "pk_basis": "area-effect drone model (CEP not published)"
     },
     {
       "id": "shahed-238",
@@ -1844,14 +2089,15 @@
       ],
       "cep_m": null,
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 0.15,
+      "interception_pk": 0,
       "confidence": "single_source",
       "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
       "game_field": {
         "unit_type_id": null,
         "use": "data only: jet drone not fielded as a separate unit"
-      }
+      },
+      "pk_basis": "area-effect drone model (CEP not published)"
     },
     {
       "id": "samad-3",
@@ -1868,14 +2114,15 @@
       ],
       "cep_m": null,
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 0.15,
+      "interception_pk": 0,
       "confidence": "single_source",
       "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
       "game_field": {
         "unit_type_id": "houthi_drone",
         "use": "Houthi drone unit"
-      }
+      },
+      "pk_basis": "area-effect drone model (CEP not published)"
     },
     {
       "id": "samad-4",
@@ -1892,14 +2139,15 @@
       ],
       "cep_m": null,
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 0.15,
+      "interception_pk": 0,
       "confidence": "single_source",
       "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
       "game_field": {
         "unit_type_id": "houthi_drone",
         "use": "Houthi drone unit"
-      }
+      },
+      "pk_basis": "area-effect drone model (CEP not published)"
     },
     {
       "id": "thaad",
@@ -1912,8 +2160,8 @@
       "warhead_kg": null,
       "cep_m": null,
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 0.8,
+      "interception_pk": 0.8,
       "unit_cost_usd": [
         12000000,
         15000000
@@ -1931,7 +2179,8 @@
       "game_field": {
         "unit_type_id": "thaad",
         "use": "US THAAD battery, interceptor magazine and long layer"
-      }
+      },
+      "pk_basis": "interceptor unit model (see units.json intercept)"
     },
     {
       "id": "patriot-pac3-mse",
@@ -1944,8 +2193,8 @@
       "warhead_kg": null,
       "cep_m": null,
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 0.65,
+      "interception_pk": 0.65,
       "unit_cost_usd": [
         4000000,
         4000000
@@ -1963,7 +2212,8 @@
       "game_field": {
         "unit_type_id": "patriot",
         "use": "US Patriot battery, interceptor magazine and medium layer"
-      }
+      },
+      "pk_basis": "interceptor unit model (see units.json intercept)"
     },
     {
       "id": "arrow-2-3",
@@ -1976,8 +2226,8 @@
       "warhead_kg": null,
       "cep_m": null,
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 0.8,
+      "interception_pk": 0.8,
       "unit_cost_usd": [
         1500000,
         3000000
@@ -1990,7 +2240,8 @@
       "game_field": {
         "unit_type_id": "arrow2",
         "use": "Israeli Arrow battery; Arrow 3 shares the long layer"
-      }
+      },
+      "pk_basis": "interceptor unit model (see units.json intercept)"
     },
     {
       "id": "davids-sling",
@@ -2003,8 +2254,8 @@
       "warhead_kg": null,
       "cep_m": null,
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 0.75,
+      "interception_pk": 0.75,
       "unit_cost_usd": [
         1000000,
         2000000
@@ -2018,7 +2269,8 @@
       "game_field": {
         "unit_type_id": "davids_sling",
         "use": "Israeli David's Sling battery, medium layer"
-      }
+      },
+      "pk_basis": "interceptor unit model (see units.json intercept)"
     },
     {
       "id": "iron-dome-tamir",
@@ -2031,8 +2283,8 @@
       "warhead_kg": null,
       "cep_m": null,
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 0.85,
+      "interception_pk": 0.85,
       "unit_cost_usd": [
         50000,
         50000
@@ -2050,7 +2302,8 @@
       "game_field": {
         "unit_type_id": "iron_dome",
         "use": "Israeli Iron Dome battery, point layer and Tamir magazine"
-      }
+      },
+      "pk_basis": "interceptor unit model (see units.json intercept)"
     },
     {
       "id": "gbu-57-mop",
@@ -2066,8 +2319,8 @@
         5
       ],
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 1,
+      "interception_pk": 0,
       "penetration_m": [
         60,
         80
@@ -2078,7 +2331,8 @@
       "game_field": {
         "unit_type_id": "b2",
         "use": "B-2 penetration strike against hardened nodes"
-      }
+      },
+      "pk_basis": "CEP model: target radius 100 m, 1-0.5^(100/CEP)^2"
     },
     {
       "id": "burkan",
@@ -2091,14 +2345,15 @@
       "warhead_kg": null,
       "cep_m": null,
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 0.1,
+      "interception_pk": 0,
       "confidence": "single_source",
       "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
       "game_field": {
         "unit_type_id": "houthi_missile",
         "use": "Houthi ballistic missile unit"
-      }
+      },
+      "pk_basis": "unguided rocket area model"
     },
     {
       "id": "palestine-2",
@@ -2111,14 +2366,15 @@
       "warhead_kg": null,
       "cep_m": null,
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 0.1,
+      "interception_pk": 0,
       "confidence": "belligerent_claim",
       "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
       "game_field": {
         "unit_type_id": null,
         "use": "data only: belligerent claim, not fielded as a separate unit"
-      }
+      },
+      "pk_basis": "unguided rocket area model"
     },
     {
       "id": "quds-1",
@@ -2131,14 +2387,15 @@
       "warhead_kg": null,
       "cep_m": null,
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 0.1,
+      "interception_pk": 0,
       "confidence": "single_source",
       "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
       "game_field": {
         "unit_type_id": "houthi_asm",
         "use": "Houthi anti-ship cruise missile unit"
-      }
+      },
+      "pk_basis": "unguided rocket area model"
     },
     {
       "id": "hezbollah-rocket-family",
@@ -2151,14 +2408,15 @@
       "warhead_kg": null,
       "cep_m": null,
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 0.1,
+      "interception_pk": 0,
       "confidence": "estimate_range",
       "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
       "game_field": {
         "unit_type_id": null,
         "use": "data only: no Hezbollah units in the order of battle"
-      }
+      },
+      "pk_basis": "unguided rocket area model"
     },
     {
       "id": "hezbollah-atgm",
@@ -2171,14 +2429,15 @@
       "warhead_kg": null,
       "cep_m": null,
       "reliability": null,
-      "base_pk": null,
-      "interception_pk": null,
+      "base_pk": 0.6,
+      "interception_pk": 0,
       "confidence": "estimate_range",
       "source": "Supplementary brief A, module 5 (missile, drone and interceptor performance tables)",
       "game_field": {
         "unit_type_id": null,
         "use": "data only: no Hezbollah units in the order of battle"
-      }
+      },
+      "pk_basis": "line-of-sight ATGM model"
     }
   ]
 }

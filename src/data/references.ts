@@ -1309,3 +1309,81 @@ REFERENCES.push(
     }),
   ),
 );
+
+// ---- proxy formations (added with their units) ------------------------------
+REFERENCES.push(
+  ref({
+    id: 'ref-weapon-hezbollah-rocket',
+    subjectId: 'hezbollah_rocket',
+    category: 'weapon',
+    validAt: PREWAR,
+    min: 15000,
+    max: 20000,
+    unit: 'rockets_inventory',
+    evidenceType: 'game-abstraction',
+    confidence: 'low',
+    notes:
+      'Hezbollah is assessed to hold 15,000-20,000 rockets, with a low estimate of 11,000 after losses; the Syrian resupply route has been closed since December 2024.',
+    gameMapping:
+      'Three abstract salvo batteries represent the inventory at campaign scale. Each carries three magazine loads and never reloads, so the whole force can fire nine salvos before it is dry.',
+  }),
+  ref({
+    id: 'ref-weapon-hezbollah-atgm',
+    subjectId: 'hezbollah_atgm',
+    category: 'weapon',
+    validAt: PREWAR,
+    evidenceType: 'game-abstraction',
+    confidence: 'low',
+    min: 2,
+    max: 6,
+    unit: 'km_range',
+    sourceName: 'Supplementary brief B, module 6',
+    sourcePublishedAt: '2026-01-15',
+    notes: 'Anti-tank guided-missile cells are counted as a short-range precision threat, not as artillery.',
+    gameMapping:
+      'Range 3 hexes, two magazine loads, low attack value; represents the border ATGM belt rather than a specific launcher count.',
+  }),
+  ref({
+    id: 'ref-weapon-hamas-rocket',
+    subjectId: 'hamas_rocket',
+    category: 'weapon',
+    validAt: PREWAR,
+    value: 10000,
+    unit: 'rockets_inventory',
+    evidenceType: 'game-abstraction',
+    confidence: 'low',
+    notes: 'Hamas is assessed at roughly 10,000 rockets before the war, with no domestic replacement at campaign scale.',
+    gameMapping:
+      'Three cells with three loads each, range 4 hexes; enough to threaten southern Israel early but not to sustain a long campaign.',
+  }),
+  ref({
+    id: 'ref-weapon-pmf-rocket',
+    subjectId: 'pmf_rocket',
+    category: 'weapon',
+    validAt: PREWAR,
+    evidenceType: 'game-abstraction',
+    confidence: 'low',
+    value: 65,
+    unit: 'attacks_feb_mar_2026',
+    sourceName: 'Supplementary brief B, module 6',
+    sourcePublishedAt: '2026-01-15',
+    notes: 'The PMF carried out 65 attacks in February-March 2026; resupply is rated low.',
+    gameMapping:
+      'Two rocket cells with two loads each, range 6 hexes, plus a five-turn low resupply cadence. The attack count is not converted one-to-one into salvos.',
+  }),
+  ref({
+    id: 'ref-weapon-pmf-drone',
+    subjectId: 'pmf_drone',
+    category: 'weapon',
+    validAt: PREWAR,
+    evidenceType: 'game-abstraction',
+    confidence: 'low',
+    min: 2,
+    max: 8,
+    unit: 'km_range',
+    sourceName: 'Supplementary brief B, module 6',
+    sourcePublishedAt: '2026-01-15',
+    notes: 'One-way attack drones are part of the PMF harassment campaign against US bases in Iraq and Syria.',
+    gameMapping: 'Two drone cells, two loads each, range 8 hexes.',
+  }),
+);

@@ -416,6 +416,8 @@ export function refillProxyMagazines(snap: GameSnapshot, events: ResolveEvent[])
   if (!state?.systems.proxySupply) return;
   const cadence: Record<string, Record<string, number>> = {
     houthi: { drone: 2, missile: 3 },
+    // PMF resupply is rated "low": one replacement salvo every five turns.
+    pmf: { drone: 5, missile: 5 },
   };
   for (const [faction, lines] of Object.entries(cadence)) {
     for (const unit of snap.units) {

@@ -77,11 +77,12 @@ stated game-scale readings rather than published dates.
 
 ## Weapon Pk fields
 
-`base_pk` and `interception_pk` in `weaponPerformance` remain **null** after
-calibration. The briefs give range, warhead, CEP, propulsion and reliability, but
-no hit probability against a defended target; the game resolves damage from unit
-attack/defence statistics and the interceptor model instead. Filling these fields
-would be a fabricated number, so they are left empty and listed here.
+`base_pk` and `interception_pk` are **model values**, not published hit
+probabilities. Guided weapons derive Pk from their stored CEP band with a 100 m
+target radius; weapons without a CEP use a stated class model; interceptor rows
+copy the defence unit's intercept probability. Every row carries `pk_basis` so
+the derivation is visible. The briefs still do not publish a Pk against a
+defended target, so these values must not be quoted as sourced facts.
 
 ## Map nodes added for named sites (task 1b)
 
@@ -89,10 +90,12 @@ would be a fabricated number, so they are left empty and listed here.
   brief's place names, not sourced translations. They follow the same spelling
   conventions as the existing map labels; a native review is still worthwhile.
 - **Personnel counts exist for only five sites** (Al Udeid, Al Dhafra, Bahrain,
-  Prince Sultan, Arifjan); other sites carry no number rather than a guess.
+  Prince Sultan, Arifjan). Every other site carries an explicit
+  `data_gaps: ['personnel']` marker instead of a guessed number.
 - **Aircraft counts are mostly unknown.** Al Udeid's "about 100 aircraft" is
   recorded as a single mixed wing; Al Dhafra and Muwaffaq list types without
-  counts; Israeli bases list named squadrons and airframes without totals.
+  counts; Israeli bases list named squadrons and airframes without totals. Sites
+  without any structured airframe list carry `data_gaps: ['aircraft']`.
 - **Iranian aircraft and personnel counts are not in the briefs**, so most
   Iranian airbases have no structured manning or airframe data.
 - **Hezbollah's rocket family is not split** into Katyusha/Grad/Fajr/Zelzal rows

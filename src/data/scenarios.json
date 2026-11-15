@@ -470,6 +470,42 @@
           "lat": 13.2,
           "count": 1
         }
+      ],
+      "hezbollah": [
+        {
+          "type": "hezbollah_rocket",
+          "lon": 35.4,
+          "lat": 33.2,
+          "count": 3
+        },
+        {
+          "type": "hezbollah_atgm",
+          "lon": 35.55,
+          "lat": 33.15,
+          "count": 2
+        }
+      ],
+      "hamas": [
+        {
+          "type": "hamas_rocket",
+          "lon": 34.4,
+          "lat": 31.4,
+          "count": 3
+        }
+      ],
+      "pmf": [
+        {
+          "type": "pmf_rocket",
+          "lon": 43.3,
+          "lat": 33.4,
+          "count": 2
+        },
+        {
+          "type": "pmf_drone",
+          "lon": 44.3,
+          "lat": 32.9,
+          "count": 2
+        }
       ]
     },
     "hosts": {

@@ -5,16 +5,25 @@ Nothing is inferred from a vendor brochure, and no hit probability was invented.
 
 ## Pk policy (task 3.1)
 
-`base_pk` and `interception_pk` remain `null` for all 22 `weaponPerformance`
-rows. The briefs supply range, warhead, CEP, propulsion and reliability, but no
-probability of a hit against a defended target; published interception figures
-that do exist (for example Patriot's test record) are not transferable to a
-campaign model and would overstate performance against manoeuvring targets.
+Every `weaponPerformance` row now has numeric `base_pk` and `interception_pk`
+values. They are **model outputs, not published hit probabilities**, and each row
+says so in `pk_basis`:
 
-Resolution therefore stays with the unit attack/defence statistics and the
-interceptor model. A future Pk would need a per-system, per-target-class table
-with its own confidence grade; until then the fields stay empty and are listed in
-`DATA_GAPS.md`.
+- **`base_pk` for guided weapons** is derived from the stored CEP band with a
+  100 m target radius: `1 − 0.5^(100/CEP)²`. A weapon with a 100 m CEP therefore
+  scores 0.5, while a 1 km CEP scores about 0.007. Emad's reported reliability
+  issues apply a further ×0.8.
+- **Weapons without a published CEP** (drones, unguided rockets, ATGMs) use a
+  stated class model: 0.15 for area-effect drones, 0.10 for unguided rockets,
+  0.60 for line-of-sight ATGMs.
+- **`interception_pk` for interceptor rows** is the same probability stored on
+the corresponding defence unit (`units.json → intercept`): THAAD 0.80, Patriot
+  0.65, Arrow 0.80, David's Sling 0.75, Iron Dome 0.85. Non-interceptor rows
+  carry 0 because they cannot intercept.
+
+This replaces the earlier "leave both null" decision at the user's request. The
+numbers remain fully auditable: none is presented as a sourced fact, and the
+formula is reproducible from the data in the repository.
 
 ## Old → new → source (task 3.4)
 

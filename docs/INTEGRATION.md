@@ -63,11 +63,11 @@ strikes, spends munitions and terminates. Iran's 2/8 → 0/8 shift tracks
 constant was fitted to it. An experiment raising IRIAF effectiveness from 0.2 to
 0.5 changed no outcome and was reverted.
 
-`base_pk` and `interception_pk` remain **null**: the briefs give range, warhead,
-CEP, propulsion and reliability, but no published hit probability against a
-defended target. `DATA_GAPS.md` records this rather than filling the columns with
-invented numbers. The full old → new → source table, including the Pk decision,
-is in `docs/CALIBRATION_2026.md`.
+`base_pk` and `interception_pk` are filled with **model values** and a per-row
+`pk_basis`: CEP-derived for guided weapons, class models where no CEP is
+published, and the defence unit's intercept probability for interceptors. They
+are not presented as published facts. The full derivation and old → new table is
+in `docs/CALIBRATION_2026.md`.
 
 ## Provenance
 
@@ -81,7 +81,7 @@ when a mapping does not explain the conversion.
 
 ## Verification
 
-`pnpm run typecheck` 0, `pnpm test` 53 files / 422 tests, `pnpm run build` 0, CI
+`pnpm run typecheck` 0, `pnpm test` 55 files / 429 tests, `pnpm run build` 0, CI
 green on every commit on the branch.
 
 Coverage highlights: pools initialise from sourced inventories; a strike spends a
@@ -96,9 +96,11 @@ an opening salvo then confirms Iran can still strike several turns later.
 
 ## Known gaps
 
-- **No published Pk values.** Both probability fields stay null (see above).
-- **Only the Houthis field proxy units**, so Hezbollah/Hamas/PMF inventories and
-  their zero-resupply rows are data only.
+- **Pk fields are model values, not published hit probabilities.** Each row
+  states its `pk_basis`; see `docs/CALIBRATION_2026.md`.
+- **Hezbollah, Hamas and the PMF field abstract formations** built from their
+  documented inventories: finite magazines, no Hezbollah/Hamas reload, and a
+  five-turn low PMF resupply. They are not modelled down to launcher level.
 - **AI air strikes share one coalition sortie budget per AI phase.** The cap in
   `validateStrike` cannot see AI sorties because `snap.orders` is empty by then,
   so `runAiPhase` carries the budget across US and Israeli packages.

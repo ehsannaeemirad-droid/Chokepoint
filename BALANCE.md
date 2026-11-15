@@ -64,30 +64,34 @@ mechanics engage and do not freeze a side, **not** a win-rate claim.
 
 | Systems | Faction | Won | Lost | Playing | Avg end turn |
 | --- | --- | ---: | ---: | ---: | ---: |
-| off | usa | 2 | 6 | 0 | 30.0 (one loss at 24, wins at 10 and 11) |
+| off | usa | 0 | 8 | 0 | 23.0 |
 | off | israel | 0 | 8 | 0 | 30.0 |
-| off | iran | 2 | 6 | 0 | 30.0 |
-| on | usa | 1 | 7 | 0 | 27.4 |
-| on | israel | 0 | 8 | 0 | 30.0 |
-| on | iran | 0 | 8 | 0 | 30.0 |
+| off | iran | 6 | 2 | 0 | 26.9 |
+| on | usa | 0 | 8 | 0 | 21.4 |
+| on | israel | 1 | 7 | 0 | 30.0 |
+| on | iran | 8 | 0 | 0 | 27.1 |
 
 Reading:
 
 - **No side is frozen.** Every run issues strikes and terminates; munitions are
   spent, carriers and crews age, and Iran's production curve runs.
-- **The Iranian player's 2/8 → 0/8 shift tracks `munitionsDepletion`.** Dropping
-  that one flag restores 2/8; dropping any other single flag leaves 0-1/8. The
-  mechanism is that a coalition that cannot generate sorties does not close the
-  war, and Iran's outcome at the 30-turn limit turns on the coalition's residual
-  capability, not on Iranian damage. With eight seeds this is not separable from
-  noise, so no constant was fitted to it.
+- **Iran now wins 6/8 off and 8/8 on after the launcher-reload fix.** Before it,
+  every Iranian launch unit fired once and went dry, so the player's campaign
+  collapsed after a few turns. The reload restored the intended tempo; the
+  remaining coalition losses are driven by the coalition's own sortie and
+  interceptor economy, not by Iranian units freezing.
+- **The proxy formations contributed to the coalition's losses.** Hezbollah,
+  Hamas and the PMF now fire finite magazines from Lebanon, Gaza and Iraq; their
+  opening salvos add pressure on Israeli interceptors and US bases, then decline
+  as their stocks run out.
 - **IRIAF effectiveness stayed at the sourced 0.2.** Raising it to 0.5 changed
-  no outcome across the eight seeds, so weakening a documented figure would have
-  been an unmeasured change. The constant is now named and commented instead.
-- **`base_pk` / `interception_pk` remain null.** The briefs carry range, warhead,
-  CEP, propulsion and reliability, but no published hit probability against a
-  defended target; the game resolves damage from unit attack/defence statistics.
-  Filling these fields would be invention, so they are recorded as a data gap.
+  no outcome across an earlier eight-seed sample, so weakening a documented
+  figure would have been an unmeasured change.
+- **The baseline table above predates the launcher-reload fix.** It is kept as
+  the pre-fix measurement; the table in this section is the current one.
+- **`base_pk` / `interception_pk` are model values, not published facts.**
+  Guided weapons derive Pk from their CEP band; interceptors copy their unit's
+  intercept probability. Each row records `pk_basis`.
 
 Parameters calibrated (all game-scale readings, each stated in code and README):
 

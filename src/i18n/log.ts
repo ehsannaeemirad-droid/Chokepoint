@@ -298,6 +298,10 @@ const LOG_PATTERNS: LogPattern[] = [
     template: 'عربستان از پاکستان کمک خواست؛ اسلام‌آباد نپذیرفت (قرعه {roll} ≥ ۰٫۴۰).',
   },
   {
+    pattern: /^(?<who>Hezbollah|Hamas|The PMF) fires (?<unit>.+) at (?<target>.+)\.$/,
+    template: '{who} یگان {unit} را به سوی {target} شلیک کرد.',
+  },
+  {
     pattern: /^A (?<who>Iranian|coalition) salvo landed on empty ground at (?<col>\d+),(?<row>\d+)\.$/,
     template: 'یک رگبار {who} روی زمین خالی در {col}،{row} فرود آمد.',
   },

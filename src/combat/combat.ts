@@ -38,7 +38,7 @@ import {
 export type Rng = () => number;
 
 const WEST = new Set<FactionId>(['usa', 'israel']);
-const IRAN_BLOC = new Set<FactionId>(['iran', 'houthi']);
+const IRAN_BLOC = new Set<FactionId>(['iran', 'houthi', 'hezbollah', 'hamas', 'pmf']);
 
 export function hostileTo(a: FactionId, b: FactionId): boolean {
   if (a === b) return false;

@@ -457,5 +457,86 @@
       "note": "Anti-ship missiles covering Bab al-Mandeb.",
       "name_fa": "سامانه ضدکشتی حوثی"
     }
+  ],
+  "hezbollah": [
+    {
+      "id": "hezbollah_rocket",
+      "faction": "hezbollah",
+      "name": "Hezbollah Rocket Battery",
+      "name_fa": "باتری راکتی حزب‌الله",
+      "category": "missile",
+      "atk": 4,
+      "def": 1,
+      "mov": 1,
+      "rng": 12,
+      "magazine": 3,
+      "threatClass": "ballistic",
+      "note": "Abstract salvo battery for the 15,000–20,000 rocket inventory; the Syrian resupply route is closed, so it never reloads.",
+      "source": "Brief B module 6; IDF assessment"
+    },
+    {
+      "id": "hezbollah_atgm",
+      "faction": "hezbollah",
+      "name": "Hezbollah ATGM Cell",
+      "name_fa": "یگان موشک ضدزره حزب‌الله",
+      "category": "missile",
+      "atk": 2,
+      "def": 1,
+      "mov": 1,
+      "rng": 3,
+      "magazine": 2,
+      "threatClass": "cruise",
+      "note": "Anti-tank guided-missile cells covering the northern border.",
+      "source": "Brief B module 6"
+    }
+  ],
+  "hamas": [
+    {
+      "id": "hamas_rocket",
+      "faction": "hamas",
+      "name": "Hamas Rocket Cell",
+      "name_fa": "یگان راکتی حماس",
+      "category": "missile",
+      "atk": 2,
+      "def": 1,
+      "mov": 1,
+      "rng": 4,
+      "magazine": 3,
+      "threatClass": "ballistic",
+      "note": "Abstract salvo cell for the fixed pre-war inventory of about 10,000 rockets; no resupply.",
+      "source": "Brief A module 6"
+    }
+  ],
+  "pmf": [
+    {
+      "id": "pmf_rocket",
+      "faction": "pmf",
+      "name": "PMF Rocket Cell",
+      "name_fa": "یگان راکتی حشد شعبی",
+      "category": "missile",
+      "atk": 3,
+      "def": 1,
+      "mov": 1,
+      "rng": 6,
+      "magazine": 2,
+      "threatClass": "ballistic",
+      "note": "Rocket cells used in the 65 attacks of February–March 2026; low resupply.",
+      "source": "Brief B module 6"
+    },
+    {
+      "id": "pmf_drone",
+      "faction": "pmf",
+      "name": "PMF Drone Cell",
+      "name_fa": "یگان پهپاد حشد شعبی",
+      "category": "drone",
+      "atk": 2,
+      "def": 1,
+      "mov": 1,
+      "rng": 8,
+      "magazine": 2,
+      "threatClass": "drone",
+      "note": "One-way attack drones against US bases in Iraq and Syria.",
+      "source": "Brief B module 6"
+    }
   ]
 }

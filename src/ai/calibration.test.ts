@@ -9,8 +9,9 @@ import { Game } from '../core/Game';
  * Calibration evidence for the endurance layer (task 3).
  *
  * The briefs supply inventories, production rates and documented expenditure,
- * but no hit probabilities; `base_pk`/`interception_pk` stay null for that
- * reason. What can be calibrated is behaviour: the same simple player policy is
+ * but no hit probabilities; `base_pk`/`interception_pk` are therefore explicit
+ * model values with a per-row `pk_basis`, not sourced facts. What can be
+ * calibrated is behaviour: the same simple player policy is
  * run with the endurance flags off and on, and the resulting distribution is
  * asserted to stay sane rather than to match a fabricated win rate. The
  * measured distribution is recorded in BALANCE.md.
@@ -101,7 +102,7 @@ describe('endurance calibration', () => {
     const rows = [];
     for (const systems of [false, true]) {
       for (const faction of ['usa', 'israel', 'iran'] as const) {
-        for (const seed of [11, 22, 33]) rows.push(play(faction, seed, systems));
+        for (const seed of [11, 22, 33, 44, 55, 66, 77, 88]) rows.push(play(faction, seed, systems));
       }
     }
     console.log('Calibration rows:', JSON.stringify(rows));

@@ -11,7 +11,7 @@ import { hexDistance } from '../map/hex';
 import { productionSites } from '../core/production';
 import { deliverMatedRounds, spendIranRounds, totalRounds } from '../core/inventory';
 import type { TheaterMap } from '../map/TheaterMap';
-import { resolveIncoming, resolveStrike, strikeRange, validateStrike } from '../combat/combat';
+import { hostileTo, resolveIncoming, resolveStrike, strikeRange, validateStrike } from '../combat/combat';
 import { iranLaunchPressure, initiativeCfg, israelPackages } from '../politics/initiative';
 import { addIranWarCost, nodeImpactCount, setHostStatus } from '../politics/politics';
 import { runTree, type ActionNode, type AiContext, type ConditionNode, type TreeNode } from './tree';
@@ -679,10 +679,57 @@ function evaluate(_faction: FactionId, ctx: AiContext, treeName: string): void {
   runTree(tree, ctx, checks, actions);
 }
 
+/**
+ * Proxy strike phase for the formations that only exist as abstract batteries:
+ * Hezbollah, Hamas and the PMF fire what their magazines hold and are not
+ * reloaded between turns (their resupply is handled by `refillProxyMagazines`).
+ */
+function proxyStrikePhase(ctx: AiContext, faction: 'hezbollah' | 'hamas' | 'pmf'): boolean {
+  const units = ctx.snap.units.filter((u) => u.faction === faction && u.magazine > 0);
+  if (units.length === 0) return false;
+  const candidates = ctx.map.nodes.filter((node) => {
+    const defender = defenderOfNode(node);
+    const state = ctx.snap.nodes[node.id];
+    return !!defender && !!state && state.integrity > 0 && hostileTo(faction, defender);
+  });
+  let fired = 0;
+  for (const unit of units) {
+    const def = unitType(unit.typeId);
+    let best: { col: number; row: number; nodeId: string; name: string; distance: number } | null = null;
+    for (const node of candidates) {
+      const hex = ctx.map.nodeHexOf(node.id);
+      if (!hex) continue;
+      const distance = hexDistance({ col: unit.col, row: unit.row }, hex);
+      if (distance > strikeRange(ctx.snap, unit)) continue;
+      if (!validateStrike(ctx.snap, ctx.map, unit, hex.col, hex.row, node.id).ok) continue;
+      if (!best || distance < best.distance) best = { col: hex.col, row: hex.row, nodeId: node.id, name: node.name, distance };
+    }
+    if (!best) continue;
+    ctx.events.push({
+      text: `${faction === 'hezbollah' ? 'Hezbollah' : faction === 'hamas' ? 'Hamas' : 'The PMF'} fires ${def.name} at ${best.name}.`,
+      tone: 'warn',
+      faction,
+      focus: { col: best.col, row: best.row },
+    });
+    const result = resolveStrike(ctx.snap, ctx.map, unit, best.col, best.row, best.nodeId, ctx.rng);
+    ctx.events.push(...result.events);
+    fired++;
+  }
+  return fired > 0;
+}
+
 /** Full AI military phase, in fixed order for determinism. */
 export function runAiPhase(snap: GameSnapshot, map: TheaterMap, events: ResolveEvent[]): void {
   const player = snap.faction;
-  const order: Array<'houthi' | 'iran' | 'usa' | 'israel'> = ['houthi', 'iran', 'usa', 'israel'];
+  const order: Array<'houthi' | 'hezbollah' | 'hamas' | 'pmf' | 'iran' | 'usa' | 'israel'> = [
+    'houthi',
+    'hezbollah',
+    'hamas',
+    'pmf',
+    'iran',
+    'usa',
+    'israel',
+  ];
   // US and Israeli AI share one coalition sortie budget for the phase; the
   // snapshot's order list is empty here, so validateStrike cannot enforce it.
   const coalitionBudget = { remaining: airSortieCap(snap) };
@@ -698,7 +745,9 @@ export function runAiPhase(snap: GameSnapshot, map: TheaterMap, events: ResolveE
       events,
     };
     if (faction === 'houthi') evaluate(faction, ctx, 'houthi');
-    else if (faction === 'iran') {
+    else if (faction === 'hezbollah' || faction === 'hamas' || faction === 'pmf') {
+      proxyStrikePhase(ctx, faction);
+    } else if (faction === 'iran') {
       if (snap.scenarioId === 'tutorial') tutorialIran(ctx);
       else {
         // Maritime pressure is part of the Iranian plan, not a random rider on
