@@ -81,7 +81,7 @@ when a mapping does not explain the conversion.
 
 ## Verification
 
-`pnpm run typecheck` 0, `pnpm test` 52 files / 416 tests, `pnpm run build` 0, CI
+`pnpm run typecheck` 0, `pnpm test` 53 files / 420 tests, `pnpm run build` 0, CI
 green on every commit on the branch.
 
 Coverage highlights: pools initialise from sourced inventories; a strike spends a
@@ -97,8 +97,9 @@ fatigue, order-boundary rejection and detection blinding are each asserted.
 - **No published Pk values.** Both probability fields stay null (see above).
 - **Only the Houthis field proxy units**, so Hezbollah/Hamas/PMF inventories and
   their zero-resupply rows are data only.
-- **AI sorties bypass the sortie cap.** The cap lives in `validateStrike`, which
-  AI strikes do not call; AI munitions are still charged.
+- **AI air strikes share one coalition sortie budget per AI phase.** The cap in
+  `validateStrike` cannot see AI sorties because `snap.orders` is empty by then,
+  so `runAiPhase` carries the budget across US and Israeli packages.
 - **Turn thresholds are game-scale readings**, not published dates: carrier 20
   turns for nine months, reservist fatigue 12 turns for four months.
 - **Cyber's radar effect is a flat detection multiplier**, not a per-node

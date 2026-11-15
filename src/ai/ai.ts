@@ -16,6 +16,7 @@ import { iranLaunchPressure, initiativeCfg, israelPackages } from '../politics/i
 import { addIranWarCost, nodeImpactCount, setHostStatus } from '../politics/politics';
 import { runTree, type ActionNode, type AiContext, type ConditionNode, type TreeNode } from './tree';
 import { applyOrder, validateOrder } from '../core/engine';
+import { airSortieCap, strikeSortieWeight } from '../combat/endurance';
 import { isSeaHex, minefields } from '../core/maritime';
 import {
   belowReserve,
@@ -550,7 +551,11 @@ function coalitionMaritime(ctx: AiContext, doctrine: DoctrineProfile): number {
   return 0;
 }
 
-function coalitionAi(ctx: AiContext, faction: 'usa' | 'israel'): boolean {
+function coalitionAi(
+  ctx: AiContext,
+  faction: 'usa' | 'israel',
+  budget: { remaining: number },
+): boolean {
   const doctrine = doctrineFor(faction, ctx.snap.scenarioId);
   const aircraft = ctx.snap.units.filter(
     (u) =>
@@ -560,6 +565,10 @@ function coalitionAi(ctx: AiContext, faction: 'usa' | 'israel'): boolean {
       u.cooldown === 0,
   );
   if (aircraft.length === 0) return false;
+  // `snap.orders` is cleared before the AI phase, so `validateStrike` cannot
+  // see sorties already flown this phase. Carry the budget explicitly or a
+  // multi-package AI turn would spend a fresh cap on every package.
+
 
   if (coalitionShouldStandDown(ctx.snap, doctrine)) {
     ctx.events.push({
@@ -596,7 +605,10 @@ function coalitionAi(ctx: AiContext, faction: 'usa' | 'israel'): boolean {
         if (plane.magazine <= 0 || plane.cooldown > 0) continue;
         const check = validateStrike(ctx.snap, ctx.map, plane, target.col, target.row, target.id);
         if (!check.ok) continue;
-        if (hexDistance({ col: plane.col, row: plane.row }, target) > strikeRange(ctx.snap, plane)) continue;
+        const distance = hexDistance({ col: plane.col, row: plane.row }, target);
+        if (distance > strikeRange(ctx.snap, plane)) continue;
+        const weight = strikeSortieWeight(distance);
+        if (weight > budget.remaining) continue;
         ctx.events.push({
           text: `${faction === 'usa' ? 'US' : 'Israeli'} aircraft launched against ${ctx.map.nodeById.get(target.id)?.name} (doctrine: ${doctrine.label}).`,
           tone: 'info',
@@ -605,6 +617,7 @@ function coalitionAi(ctx: AiContext, faction: 'usa' | 'israel'): boolean {
         });
         const result = resolveStrike(ctx.snap, ctx.map, plane, target.col, target.row, target.id, ctx.rng);
         ctx.events.push(...result.events);
+        budget.remaining -= weight;
         struck = true;
         flown++;
         break;
@@ -612,7 +625,9 @@ function coalitionAi(ctx: AiContext, faction: 'usa' | 'israel'): boolean {
     }
   }
 
-  if (flown < doctrine.strikeCap) flown += coalitionCounterBattery(ctx, faction, aircraft, doctrine);
+  if (flown < doctrine.strikeCap) {
+    flown += coalitionCounterBattery(ctx, faction, aircraft, doctrine, budget.remaining);
+  }
   if (flown < doctrine.strikeCap) flown += coalitionMaritime(ctx, doctrine);
 
   if (packages > 1 && flown > 0) {
@@ -632,6 +647,7 @@ function coalitionCounterBattery(
   faction: 'usa' | 'israel',
   aircraft: UnitInstance[],
   doctrine: DoctrineProfile,
+  remainingSorties = Number.POSITIVE_INFINITY,
 ): number {
   const launchers = ctx.snap.units.filter(
     (u) => u.faction === 'iran' && u.revealed && unitType(u.typeId).category === 'missile',
@@ -639,7 +655,9 @@ function coalitionCounterBattery(
   for (const launcher of launchers) {
     for (const plane of aircraft) {
       if (plane.magazine <= 0 || plane.cooldown > 0) continue;
-      if (hexDistance({ col: plane.col, row: plane.row }, { col: launcher.col, row: launcher.row }) > strikeRange(ctx.snap, plane)) continue;
+      const distance = hexDistance({ col: plane.col, row: plane.row }, { col: launcher.col, row: launcher.row });
+      if (distance > strikeRange(ctx.snap, plane)) continue;
+      if (strikeSortieWeight(distance) > remainingSorties) continue;
       if (!validateStrike(ctx.snap, ctx.map, plane, launcher.col, launcher.row).ok) continue;
       ctx.events.push({
         text: `${faction === 'usa' ? 'US' : 'Israeli'} aircraft hit a revealed Iranian launch crew (doctrine: ${doctrine.label}).`,
@@ -665,6 +683,10 @@ function evaluate(_faction: FactionId, ctx: AiContext, treeName: string): void {
 export function runAiPhase(snap: GameSnapshot, map: TheaterMap, events: ResolveEvent[]): void {
   const player = snap.faction;
   const order: Array<'houthi' | 'iran' | 'usa' | 'israel'> = ['houthi', 'iran', 'usa', 'israel'];
+  // US and Israeli AI share one coalition sortie budget for the phase; the
+  // snapshot's order list is empty here, so validateStrike cannot enforce it.
+  const coalitionBudget = { remaining: airSortieCap(snap) };
+  console.log('DBG phase cap', coalitionBudget.remaining);
 
   for (const faction of order) {
     if (faction === player) continue;
@@ -684,7 +706,7 @@ export function runAiPhase(snap: GameSnapshot, map: TheaterMap, events: ResolveE
         iranMaritime(ctx, doctrineFor('iran', snap.scenarioId));
         evaluate(faction, ctx, 'iranMilitary');
       }
-    } else coalitionAi(ctx, faction);
+    } else coalitionAi(ctx, faction, coalitionBudget);
   }
 
   // Saudi Arabia's own military posture (counter-battery against the Houthis).

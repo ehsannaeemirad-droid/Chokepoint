@@ -641,3 +641,21 @@ describe('host access and interventions from the brief (1e)', () => {
     expect(events.filter((event) => event.text.startsWith('Pakistan intervenes')).length).toBe(1);
   });
 });
+
+describe('AI sortie accounting', () => {
+  it('does not let the AI exceed a one-sortie cap across packages and air forces', () => {
+    const game = new Game();
+    game.start('campaign', 'iran', 7);
+    setEnduranceSystems(game.snap, { munitionsDepletion: true });
+    game.snap.endurance!.sortieFactor = 0.1; // cap = max(1, round(8 * 0.1)) = 1
+    game.snap.warStarted = true;
+    for (let turn = 0; turn < 5; turn++) {
+      const cap = airSortieCap(game.snap);
+      const { events } = game.endTurn();
+      const strikes = events.filter((e) => /aircraft launched|hit a revealed Iranian launch crew/.test(e.text));
+      expect(strikes.length, `turn ${turn + 1} cap ${cap}: ${strikes.map((e) => e.text).join(' | ')}`).toBeLessThanOrEqual(
+        Number.isFinite(cap) ? cap : Number.POSITIVE_INFINITY,
+      );
+    }
+  });
+});
