@@ -105,3 +105,14 @@ Parameters calibrated (all game-scale readings, each stated in code and README):
 | Tanker sortie base | 6 | tanker-supported strike rhythm |
 | Reservist fatigue start | turn 12 | four months of call-ups |
 | Cyber radar factor / duration | 0.7 / 2 turns | documented "temporary disruption only" |
+| Cyber effectiveness decay | 0.15/op, floor 0.3 | diminishing returns, no published curve |
+| Reservist fatigue rate / floor | 0.15/turn / 0.65 | reservist rotation |
+| Israeli pressure gain / relief / loss | +12 / −8 / 85 × 2 turns | home-front mobilisation reporting |
+| Carrier rotation will / extension penalty | 6 / 4% per turn | political constraint on deployment |
+| PMF activation / harassment cadence | turn 6 or 50 casualties / every 3rd turn | PMF brief |
+| Host access posture | per brief | OOB host table |
+| Intervention thresholds | oil 130 + 25 casualties, Hormuz < 25 | OOB intervention table |
+
+These additions were not tuned against outcomes: they are anchored to the
+briefs, run behind flags, and covered by per-system tests. Host access and
+interventions remain off in the default campaign.

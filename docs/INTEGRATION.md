@@ -16,15 +16,21 @@ by a scenario flag that defaults to `false`.
 | Interventions | `src/data/scenarios.json` → `interventions` | Five external-actor options |
 | Flags | `src/data/scenarios.json` → `systems` | Nine endurance flags, all `false` in `campaign` and `tutorial` |
 
-Playable map nodes were deliberately not expanded: every playable node needs a
-`HistoricalReference` and would move the 8/8 baseline. The 64 sites therefore
-carry `node_id` links instead, so map resolution stays intact.
+Every named site is now playable. The 47 original nodes are joined by 49
+site-derived nodes (96 total), with kind, opening integrity, the brief's
+detection radius for SAMs and radars, the cueing radar each battery depends on,
+and a stated degradation effect. All 64 sites carry a `node_id`; only the two
+mobile carriers stay units. Radar reach feeds `detectionChance`, so destroying a
+site now changes the air-defence picture.
 
 ## Mechanics
 
-All nine flags live in `src/combat/endurance.ts`; hooks are in `Game.start`,
-`combat.validateStrike`, `combat.resolveStrike`, `combat.bestDefence`,
-`airdefence.detectionChance`, `airdefence.defenceLayers` and `engine.runTurn`.
+The nine endurance flags live in `src/combat/endurance.ts`; hooks are in
+`Game.start`, `combat.validateStrike`, `combat.resolveStrike`,
+`combat.bestDefence`, `airdefence.detectionChance`,
+`airdefence.defenceLayers` and `engine.runTurn`. Two further scenario flags,
+`hostAccess` and `interventions`, apply the opening access posture and the
+third-party triggers (Pakistan, Egypt, Hezbollah, Houthis, PMF) once each.
 
 | Flag | Effect | Anchored to |
 | --- | --- | --- |
@@ -36,7 +42,9 @@ All nine flags live in `src/combat/endurance.ts`; hooks are in `Game.start`,
 | `iranProduction` | Output surges at 150% on stockpiled components, then 60%; blockade halves solid fuel only | 200–500 assembleable rounds, 0.5 solid-fuel modifier |
 | `proxySupply` | Proxy magazines refill only at indigenous production rates, capped at establishment | Houthi ~90% indigenous; Hezbollah route closed |
 | `cyberLimits` | Cyber may only blind radar (0.7 detection, two turns) or delay one launcher; nothing is destroyed | "Temporary disruption only" |
-| `israelMobilization` | Israeli ground formations lose 2% a turn from turn 12 to a 75% floor | 450,000 reservists, 9% output gap |
+| `israelMobilization` | Israeli ground formations lose 2% a turn from turn 12 to a 75% floor, while home-front pressure can end the war at 85 for two turns | 450,000 reservists, 9% output gap |
+| `hostAccess` | Each host starts at its documented access posture | OOB host table |
+| `interventions` | Third-party triggers fire once under their stated conditions | OOB intervention table |
 
 The **playable path** is a new-campaign menu toggle: choosing *Endurance systems*
 passes the preset into `Game.start`, which overrides the scenario flags for that
@@ -58,7 +66,8 @@ constant was fitted to it. An experiment raising IRIAF effectiveness from 0.2 to
 `base_pk` and `interception_pk` remain **null**: the briefs give range, warhead,
 CEP, propulsion and reliability, but no published hit probability against a
 defended target. `DATA_GAPS.md` records this rather than filling the columns with
-invented numbers.
+invented numbers. The full old → new → source table, including the Pk decision,
+is in `docs/CALIBRATION_2026.md`.
 
 ## Provenance
 
@@ -72,7 +81,7 @@ when a mapping does not explain the conversion.
 
 ## Verification
 
-`pnpm run typecheck` 0, `pnpm test` 52 files / 408 tests, `pnpm run build` 0, CI
+`pnpm run typecheck` 0, `pnpm test` 52 files / 416 tests, `pnpm run build` 0, CI
 green on every commit on the branch.
 
 Coverage highlights: pools initialise from sourced inventories; a strike spends a
@@ -94,5 +103,8 @@ fatigue, order-boundary rejection and detection blinding are each asserted.
   turns for nine months, reservist fatigue 12 turns for four months.
 - **Cyber's radar effect is a flat detection multiplier**, not a per-node
   compromise model.
-- **No visual verification.** The browser window was minimised throughout, so
-  all evidence is headless tests, builds and CI.
+- **No visual verification of the expanded map.** The browser window was
+  minimised throughout this pass, so node rendering and label collision on the
+  96-node map are unverified.
+- **Generated nodes have no Persian names**, so the UI falls back to English for
+  them (recorded in `DATA_GAPS.md`).
