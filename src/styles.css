@@ -1711,6 +1711,24 @@ html[dir='rtl'] .warn-line.tasked {
 }
 
 /* ----------------------------------------------------------------- persian */
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('./assets/fonts/vazirmatn-arabic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200D, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('./assets/fonts/vazirmatn-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+2000-206F, U+20AC, U+2122;
+}
+
 /* Arabic script does not tolerate tracking: it breaks the visual joins. */
 body.lang-fa {
   font-family: 'Vazirmatn', 'Segoe UI', Tahoma, 'Iranian Sans', system-ui, sans-serif;

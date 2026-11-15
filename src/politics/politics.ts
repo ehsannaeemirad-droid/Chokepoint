@@ -264,17 +264,7 @@ export function setHostStatus(
     return true;
   }
   if (host.status === 'closed' && snap.turn < host.closedUntilTurn) return false;
-  if (host.status === status) {
-    if (status === 'restricted') {
-      events.push({
-        text: `${host.name} keeps offensive missions restricted — threat perception ${Math.round(host.threat)}.`,
-        tone: 'warn',
-        faction: hostId,
-      });
-      return false;
-    }
-    return false;
-  }
+  if (host.status === status) return false;
   host.status = status;
   if (status === 'restricted') {
     events.push({
@@ -318,8 +308,13 @@ export function updateHosts(
   }
   void events;
 
+  // Political will is a finite resource in this campaign: it starts at 50 and is
+  // only ever spent, never regenerated. A threshold above the starting value
+  // would make Incirlik permanently unreachable, so "high legitimacy" means
+  // still holding the opening level while Turkey feels safe.
   snap.incirlikOpen =
-    snap.resources.politicalWill > 60 && (snap.hosts.turkey?.threat ?? 100) < 40;
+    snap.resources.politicalWill >= BALANCE.politicalWillStart &&
+    (snap.hosts.turkey?.threat ?? 100) < 40;
 }
 
 /**
