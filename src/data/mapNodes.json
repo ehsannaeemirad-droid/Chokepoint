@@ -926,7 +926,7 @@
     "confidence": "confirmed",
     "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
     "maxIntegrity": 100,
-    "name_fa": "پایگاه هوایی رمات داوود"
+    "name_fa": "پایگاه هوایی رمات داوید"
   },
   {
     "id": "hatzor",
@@ -943,7 +943,7 @@
     "confidence": "confirmed",
     "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
     "maxIntegrity": 100,
-    "name_fa": "پایگاه هوایی حتسور"
+    "name_fa": "پایگاه هوایی هاتزور"
   },
   {
     "id": "ramon",
@@ -977,7 +977,7 @@
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
     "maxIntegrity": 100,
-    "name_fa": "پایگاه هوایی عوفدا"
+    "name_fa": "پایگاه هوایی اوفدا"
   },
   {
     "id": "idf_naval_haifa",
@@ -1202,7 +1202,7 @@
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
     "maxIntegrity": 140,
-    "name_fa": "تاسیسات زیرزمینی حاجی‌آباد"
+    "name_fa": "تأسیسات زیرزمینی حاجی‌آباد"
   },
   {
     "id": "khorramabad",
@@ -1236,7 +1236,7 @@
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
     "maxIntegrity": 100,
-    "name_fa": "پایگاه موشکی بختاران"
+    "name_fa": "پایگاه موشکی باختران"
   },
   {
     "id": "semnan",
@@ -1586,7 +1586,7 @@
     "maxIntegrity": 100,
     "detection_radius_km": 1100,
     "degradation_effect": "Destroying this radar removes its detection contribution and leaves dependent batteries firing without cueing.",
-    "name_fa": "رادار فراسافق غدیر"
+    "name_fa": "رادار فراسوی افق غدیر"
   },
   {
     "id": "alim_radar",
@@ -1656,7 +1656,7 @@
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief",
     "maxIntegrity": 100,
-    "name_fa": "حشد شعبی (انبار: القائم، حبانیه، تققدم)"
+    "name_fa": "حشد شعبی (انبار: القائم، حبانیه، التقدم)"
   },
   {
     "id": "pmf_jurf",
