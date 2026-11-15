@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { Game } from '../core/Game';
 import { defenderOfNode, nodeState, unitType } from '../core/world';
-import { cyberTargets, hostileTo, resolveCyber, strikeRange } from './combat';
+import { cyberTargets, hostileTo, resolveCyber, strikeRange, validateStrike } from './combat';
+import { detectionChance } from './airdefence';
 import {
   CARRIER_ENDURANCE_TURNS,
   COALITION_AIR_SORTIES_PER_TURN,
@@ -11,6 +12,7 @@ import {
   airSortieCap,
   consumeCoalitionMunitions,
   enduranceEnabled,
+  applyCyberRadar,
   cyberRadarFactor,
   groundEffectiveness,
   iranProductionFactor,
@@ -447,5 +449,57 @@ describe('Israeli mobilization fatigue (2h)', () => {
     expect(groundEffectiveness(game.snap, 'israel', 'ground')).toBeCloseTo(0.75, 5);
     expect(groundEffectiveness(game.snap, 'israel', 'air')).toBe(1);
     expect(groundEffectiveness(game.snap, 'usa', 'ground')).toBe(1);
+  });
+});
+
+describe('endurance wiring at the order boundary (task 5)', () => {
+  it('refuses a strike order once the endurance cap is reached', () => {
+    const game = new Game();
+    game.start('campaign', 'usa', 11);
+    setEnduranceSystems(game.snap, ALL_ON);
+    const aircraft = game.snap.units.filter(
+      (u) => u.faction === 'usa' && unitType(u.typeId).category === 'air' && u.magazine > 0 && u.cooldown === 0,
+    );
+    const target = strikeTargetFor(game, 'usa');
+    expect(aircraft.length).toBeGreaterThan(1);
+    expect(target).toBeTruthy();
+    // Fill the day's slots with the first airframe, then ask with another.
+    const busy = aircraft[0]!;
+    game.snap.orders = Array.from({ length: COALITION_AIR_SORTIES_PER_TURN + 3 }, () => ({
+      kind: 'strike',
+      unitUid: busy.uid,
+      col: target!.hex.col,
+      row: target!.hex.row,
+      nodeId: target!.node.id,
+    })) as never;
+    const fresh = aircraft[1]!;
+    const result = validateStrike(
+      game.snap,
+      game.map,
+      fresh,
+      target!.hex.col,
+      target!.hex.row,
+      target!.node.id,
+    );
+    expect(result.ok).toBe(false);
+    expect(!result.ok && result.code).toBe('no-munitions');
+  });
+
+  it('blinds Iranian detection while the cyber effect is active', () => {
+    const game = new Game();
+    game.start('campaign', 'usa', 11);
+    setEnduranceSystems(game.snap, { cyberLimits: true });
+    const node = game.map.nodes.find((n) => n.host === 'iran');
+    expect(node).toBeTruthy();
+    const hex = game.map.nodeHexOf(node!.id);
+    expect(hex).toBeTruthy();
+    const before = detectionChance(game.snap, game.map, hex!.col, hex!.row, 'iran', 'ballistic', 0).chance;
+    applyCyberRadar(game.snap);
+    const during = detectionChance(game.snap, game.map, hex!.col, hex!.row, 'iran', 'ballistic', 0).chance;
+    expect(before).toBeGreaterThan(0);
+    expect(during).toBeLessThan(before);
+    game.snap.turn += 3;
+    const after = detectionChance(game.snap, game.map, hex!.col, hex!.row, 'iran', 'ballistic', 0).chance;
+    expect(after).toBeCloseTo(before, 6);
   });
 });

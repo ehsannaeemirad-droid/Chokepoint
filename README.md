@@ -160,6 +160,13 @@ close facilities, mediate, or intervene.
 | `campaign` | The Narrow Sea | 30 | Full theatre, all three factions playable |
 | `tutorial` | First Strike | 5 | Scripted Iranian response; win by holding three operational Gulf bases |
 
+## 2026 war data integration
+
+The four supplied briefs are integrated additively, behind scenario flags that
+default to off. The data layers, the eight endurance mechanics, calibration,
+provenance and the remaining gaps are summarised in `docs/INTEGRATION.md`;
+`DATA_GAPS.md` lists what the sources do not establish.
+
 ## Data provenance
 
 Every modelled value carries a provenance record in `src/data/references.ts`:

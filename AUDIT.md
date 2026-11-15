@@ -2005,3 +2005,17 @@ free-text source line:
   deficit forecasts.
 
 Checks: typecheck 0, `pnpm test` 52 files / **406 tests** (one new), build 0.
+
+## 54. Integration close-out (tasks 5-6)
+
+Two order-boundary tests complete the mechanics coverage: a strike is refused
+with `no-munitions` once the endurance cap is reached (proving the cap is wired
+into validation, not just computed), and Iranian detection drops while a cyber
+radar effect is active, then returns to its previous value when the effect
+expires.
+
+The final report is `docs/INTEGRATION.md`: the data layers, all nine flags and
+their anchors, calibration results, the provenance mechanism, verification and
+the remaining gaps in one place. README links it beside the endurance section.
+
+Checks: typecheck 0, `pnpm test` 52 files / **408 tests**, build 0.
