@@ -12,6 +12,7 @@
  *   a weapon record keep their existing damage.
  */
 import oob from '../data/orderOfBattle.json';
+import units from '../data/units.json';
 
 interface WeaponRow {
   id: string;
@@ -27,6 +28,23 @@ const rows = (oob.weaponPerformance as unknown as WeaponRow[]).filter(
 const byUnit = new Map<string, WeaponRow>();
 for (const row of rows) byUnit.set(row.game_field!.unit_type_id!, row);
 
+/**
+ * Coalition aircraft carry precision ordnance, but the supplied briefs give no
+ * range/warhead/CEP table for it, so no weapon-performance row can be added
+ * without inventing one. Airframes without a row use this stated model instead;
+ * the B-2 keeps its sourced GBU-57 row, and everything not in the air category
+ * is unchanged.
+ */
+export const COALITION_AIR_MODEL_PK = 0.85;
+
+const airUnitIds = new Set<string>();
+for (const list of Object.values(units)) {
+  if (!Array.isArray(list)) continue;
+  for (const unit of list as { id?: string; category?: string }[]) {
+    if (unit.id && unit.category === 'air') airUnitIds.add(unit.id);
+  }
+}
+
 /** Interception probability recorded for a defensive unit, when present. */
 export function interceptionPk(unitTypeId: string): number | null {
   const row = byUnit.get(unitTypeId);
@@ -41,8 +59,9 @@ export function interceptionPk(unitTypeId: string): number | null {
  */
 export function strikePkFactor(unitTypeId: string): number {
   const row = byUnit.get(unitTypeId);
-  if (!row || row.base_pk === null) return 1;
-  return 0.6 + 0.4 * row.base_pk;
+  if (row && row.base_pk !== null) return 0.6 + 0.4 * row.base_pk;
+  if (airUnitIds.has(unitTypeId)) return 0.6 + 0.4 * COALITION_AIR_MODEL_PK;
+  return 1;
 }
 
 /** Weapon record id mapped to a unit, for tests and tooltips. */

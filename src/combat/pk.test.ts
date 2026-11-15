@@ -8,8 +8,9 @@ describe('weapon Pk bridge', () => {
     expect(strikePkFactor('shahed136')).toBeCloseTo(0.66, 2);
     // A precise guided weapon keeps full damage.
     expect(strikePkFactor('b2')).toBe(1);
-    // Unmapped aircraft are unchanged.
-    expect(strikePkFactor('f35a')).toBe(1);
+    // Airframes without a briefed munition row use the stated precision-air model.
+    expect(strikePkFactor('f35a')).toBeCloseTo(0.94, 2);
+    expect(strikePkFactor('mq9')).toBeCloseTo(0.94, 2);
   });
 
   it('supplies interceptor probabilities from the weapon data', () => {

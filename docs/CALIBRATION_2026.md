@@ -28,10 +28,11 @@ formula is reproducible from the data in the repository.
 Combat consumes them in `src/combat/pk.ts`: interceptor rows provide the general
 engagement probability (hypersonic engagements keep their dedicated value), and
 strike rows scale damage by `0.6 + 0.4 × base_pk` for the units they are mapped
-to. Units without a weapon record are unchanged. The eight-seed outcome table in
-`BALANCE.md` is identical before and after this wiring, because the policy flies
-mostly unmapped airframes; the effect is visible per strike, not in the aggregate
-table.
+to. Coalition airframes without a weapon record use a stated precision-air model
+(`COALITION_AIR_MODEL_PK = 0.85`, factor 0.94), because the supplied briefs
+publish no range/warhead/CEP table for their ordnance; the B-2 keeps its sourced
+GBU-57 row. The eight-seed outcome table in `BALANCE.md` is identical before and
+after this wiring; the effect is visible per strike, not in the aggregate table.
 
 ## Old → new → source (task 3.4)
 
