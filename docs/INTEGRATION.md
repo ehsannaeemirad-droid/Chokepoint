@@ -81,7 +81,7 @@ when a mapping does not explain the conversion.
 
 ## Verification
 
-`pnpm run typecheck` 0, `pnpm test` 53 files / 420 tests, `pnpm run build` 0, CI
+`pnpm run typecheck` 0, `pnpm test` 53 files / 422 tests, `pnpm run build` 0, CI
 green on every commit on the branch.
 
 Coverage highlights: pools initialise from sourced inventories; a strike spends a
@@ -91,6 +91,8 @@ with one event; a 30-turn campaign runs with every flag on; the flags-off baseli
 is untouched; fatigue, diversion, permanent pilot loss, carrier extension, tanker
 cap, Iran surge/decline, proxy refill cadence, cyber's two effects, reservist
 fatigue, order-boundary rejection and detection blinding are each asserted.
+Launchers reload from remaining rounds between turns, and a campaign test fires
+an opening salvo then confirms Iran can still strike several turns later.
 
 ## Known gaps
 

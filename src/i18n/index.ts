@@ -18,8 +18,8 @@ const DICT = {
     'منوی کارزار: بازی تازه، ذخیره‌ها و خروجی بازپخش.',
   ],
   'tip.hormuz': [
-    'Hormuz disruption is recalculated every turn from Iranian launchers, mines, fast attack craft and coalition naval presence.',
-    'اختلال هرمز هر نوبت از روی پرتابگرهای ایران، مین‌ها، قایق‌های تندرو و حضور دریایی ائتلاف محاسبه می‌شود.',
+    'Hormuz disruption, 0–100%, recalculated each turn from Iranian launchers, mines, fast attack craft and coalition naval presence. Above 65% the strait is effectively closed: oil prices rise and the oil-shock clock runs; above 40% shipping is badly hurt.',
+    'اختلال هرمز، ۰ تا ۱۰۰٪، هر نوبت از روی پرتابگرهای ایران، مین‌ها، قایق‌های تندرو و حضور دریایی ائتلاف محاسبه می‌شود. بالای ۶۵٪ تنگه عملاً بسته است: قیمت نفت بالا می‌رود و ساعت شوک نفتی کار می‌کند؛ بالای ۴۰٪ کشتیرانی آسیب سنگین می‌بیند.',
   ],
   'tip.lang': ['Switch language (English / Persian)', 'تغییر زبان (فارسی / انگلیسی)'],
 
@@ -153,42 +153,106 @@ const DICT = {
   'gauge.res': ['RES', 'منابع'],
 
   'tip.intUS': [
-    'Shared Patriot/THAAD interceptor pool.',
-    'مخزن مشترک موشک‌های رهگیر پاتریوت و تاد.',
+    'Interceptors ready (Patriot/THAAD), 0–100+. Each incoming raid spends 1–2. Below 30 is thin, below 12 is critical; airlift resupplies them every few turns.',
+    'رهگیرهای آماده (پاتریوت/تاد)، ۰ تا ۱۰۰ و بیشتر. هر یورش ۱ تا ۲ فروند مصرف می‌کند. زیر ۳۰ کم و زیر ۱۲ بحرانی است؛ ترابری هوایی هر چند نوبت آن را پر می‌کند.',
   ],
   'tip.willUS': [
-    'Domestic political will. At 0 the US withdraws.',
-    'اراده سیاسی داخلی. با رسیدن به صفر، آمریکا عقب‌نشینی می‌کند.',
+    'Political will, 0–100. Starts at 84; casualties, strikes on Iran and time lower it. At 0 the US withdraws and the campaign is lost. 40 and 20 are the warning lines.',
+    'اراده سیاسی، ۰ تا ۱۰۰. با ۸۴ آغاز می‌شود؛ تلفات، حملات به ایران و گذر زمان آن را کم می‌کند. با رسیدن به صفر آمریکا عقب می‌نشیند و کارزار باخته است. ۴۰ و ۲۰ خط هشدارند.',
   ],
   'tip.lift': [
-    'Airlift capacity shared with Israel.',
-    'ظرفیت ترابری هوایی که با اسرائیل مشترک است.',
+    'Airlift points. Each reinforcement or airlift mission spends them; a few regenerate every turn, less when the economy is strained. Below 3 is thin, below 1 is critical.',
+    'امتیاز ترابری هوایی. هر مأموریت تقویت یا ترابری آن را خرج می‌کند؛ هر نوبت چند امتیاز برمی‌گردد و با فشار اقتصادی کمتر. زیر ۳ کم و زیر ۱ بحرانی است.',
   ],
-  'tip.intIL': ['Israeli interceptor stockpile.', 'ذخیره رهگیرهای اسرائیل.'],
-  'tip.tank': ['Tanker sorties for deep strikes.', 'پروازهای سوخت‌رسان برای حملات عمقی.'],
+  'tip.turn': [
+    'Campaign turn (one turn is the game\'s planning cycle). The number after the slash is the last turn; most outcomes are decided by then.',
+    'نوبت کارزار (هر نوبت یک چرخه برنامه‌ریزی بازی است). عدد پس از خط، آخرین نوبت است و بیشتر سرنوشت کارزار تا آن زمان روشن می‌شود.',
+  ],
+  'tip.faction': [
+    'The side you command. Its colour matches your units and friendly sites on the map.',
+    'طرفی که فرماندهی می‌کنید. رنگ آن با یگان‌ها و پایگاه‌های دوست روی نقشه یکی است.',
+  ],
+  'tip.intIL': [
+    'Israeli interceptor pool, 0–100+. Arrow, David\'s Sling and Iron Dome draw on it. Below 30 is thin, below 12 critical; a raid that is not intercepted hits the cities.',
+    'مخزن رهگیرهای اسرائیل، ۰ تا ۱۰۰ و بیشتر. پیکان، فلاخن داوود و گنبد آهنین از آن مصرف می‌کنند. زیر ۳۰ کم و زیر ۱۲ بحرانی است؛ یورشی که رهگیری نشود به شهرها می‌رسد.',
+  ],
+  'tip.tank': [
+    'Tanker sorties for deep strikes. A long-range mission costs 2, a short one 1. At 0 only short-range missions can fly.',
+    'پروازهای سوخت‌رسان برای حملات عمقی. مأموریت دوربرد ۲ و کوتاه‌برد ۱ هزینه دارد. با صفر فقط مأموریت کوتاه‌برد ممکن است.',
+  ],
   'tip.willIL': [
     'US domestic will. If it collapses, so does your airlift.',
     'اراده داخلی آمریکا. اگر فرو بریزد، ترابری هوایی هم قطع می‌شود.',
   ],
-  'tip.drone': ['Shahed one-way attack drones.', 'پهپادهای انتحاری شاهد.'],
+  'tip.drone': [
+    'Ready Shahed rounds. Each drone strike spends one and production adds more; launchers can fire up to 12 a turn. Below 30 is thin, below 10 critical.',
+    'موشک‌های آماده شاهد. هر حمله پهپادی یکی مصرف می‌کند و تولید بر آن می‌افزاید؛ پرتابگرها تا ۱۲ فروند در نوبت شلیک می‌کنند. زیر ۳۰ کم و زیر ۱۰ بحرانی است.',
+  ],
   'tip.ball': [
-    'Ballistic and hypersonic missiles.',
-    'موشک‌های بالستیک و هایپرسونیک.',
+    'Ready ballistic, hypersonic and anti-ship rounds. Each launcher fires once a turn (9 ballistic slots); production replaces what you spend. Below 15 is thin, below 5 critical.',
+    'موشک‌های آماده بالستیک، هایپرسونیک و ضدکشتی. هر پرتابگر یک بار در نوبت شلیک می‌کند (۹ جایگاه بالستیک)؛ تولید جای مصرف را پر می‌کند. زیر ۱۵ کم و زیر ۵ بحرانی است.',
   ],
   'tip.res': [
-    'War resources produced by the wartime economy.',
-    'منابع جنگی که اقتصاد زمان جنگ تولید می‌کند.',
+    'War resources, the currency for production and special operations. The wartime economy adds to it each turn; at 0 you cannot build or repair.',
+    'منابع جنگی، ارز تولید و عملیات ویژه. اقتصاد زمان جنگ هر نوبت بر آن می‌افزاید؛ با صفر نمی‌توانید بسازید یا تعمیر کنید.',
   ],
-  'tip.willIran': ['US political will: drive it to 0 to win.', 'اراده سیاسی آمریکا: برای پیروزی به صفر برسانید.'],
+  'tip.willIran': [
+    'US political will, 0–100. Drive it to 0 to win: casualties, a closed Hormuz and time erode it. Below 40 is the warning line.',
+    'اراده سیاسی آمریکا، ۰ تا ۱۰۰. برای پیروزی به صفر برسانید: تلفات، بسته‌شدن هرمز و زمان آن را می‌فرساید. زیر ۴۰ خط هشدار است.',
+  ],
   'gauge.congress': ['CONGRESS', 'کنگره'],
   'gauge.econ': ['ECON', 'اقتصاد'],
   'tip.congress': [
-    'Congressional support for the campaign. Low support brings announced restrictions on US operations.',
-    'حمایت کنگره از کارزار. حمایت کم، محدودیت‌های اعلام‌شده روی عملیات آمریکا می‌آورد.',
+    'Congressional support, 0–100 (100 = full support). Starts at 60. Below 35 US strikes inside Iran are restricted; below 20 all US offensive strikes are suspended. Casualties lower it; a public address (3 will) raises it by 8.',
+    'حمایت کنگره، ۰ تا ۱۰۰ (۱۰۰ = حمایت کامل). با ۶۰ آغاز می‌شود. زیر ۳۵ حملات آمریکا داخل ایران محدود و زیر ۲۰ همه حملات تهاجمی آمریکا تعلیق می‌شود. تلفات آن را کم و سخنرانی عمومی (۳ اراده) آن را ۸ واحد بالا می‌برد.',
   ],
   'tip.econ': [
-    'Economic pressure at home. High pressure cuts interceptor resupply and airlift.',
-    'فشار اقتصادی در خانه. فشار بالا، ترابری و پشتیبانی موشک رهگیر را کم می‌کند.',
+    'Economic pressure at home, 0–100 (higher is worse). It rises with oil prices and war disruption. Every 25 points cuts airlift regeneration by 1 and every 15 cuts interceptor resupply.',
+    'فشار اقتصادی داخلی، ۰ تا ۱۰۰ (بیشتر بدتر). با قیمت نفت و اختلال جنگ بالا می‌رود. هر ۲۵ واحد یک امتیاز بازسازی ترابری و هر ۱۵ واحد پشتیبانی رهگیر را کم می‌کند.',
+  ],
+  'tip.obj.nuclear_degraded': [
+    'Average integrity of Iran\'s nuclear sites. The coalition aims to destroy them or push the best site below 40% before the last turn.',
+    'میانگین یکپارچگی تأسیسات هسته‌ای ایران. ائتلاف باید آن‌ها را نابود کند یا بهترین تأسیسات را پیش از نوبت آخر زیر ۴۰٪ ببرد.',
+  ],
+  'tip.obj.war_cost': [
+    'Iran\'s accumulated war cost, 0–100. Strikes, blockade and proxy losses raise it; at 100 the Iranian war effort collapses.',
+    'هزینه انباشته جنگ برای ایران، ۰ تا ۱۰۰. حملات، محاصره و تلفات نیابتی آن را بالا می‌برد؛ با ۱۰۰ توان جنگ ایران فرو می‌ریزد.',
+  ],
+  'tip.obj.domestic': [
+    'US domestic pressure, 0–100 (60% Congress, 40% economy). At 85 for two turns the US withdraws.',
+    'فشار داخلی آمریکا، ۰ تا ۱۰۰ (۶۰٪ کنگره، ۴۰٪ اقتصاد). با ۸۵ برای دو نوبت، آمریکا عقب می‌نشیند.',
+  ],
+  'tip.obj.basing': [
+    'Gulf bases still open to the coalition. Lose enough and the basing network collapses, ending the campaign.',
+    'پایگاه‌های خلیج که هنوز به روی ائتلاف باز هستند. از دست رفتن تعداد کافی، شبکه پایگاه‌ها را فرو می‌ریزد و کارزار را پایان می‌دهد.',
+  ],
+  'tip.obj.hormuz_open': [
+    'Hormuz disruption, 0–100%. Above 65% the strait is effectively closed: oil prices climb and Iran\'s oil-shock clock runs.',
+    'اختلال هرمز، ۰ تا ۱۰۰٪. بالای ۶۵٪ تنگه عملاً بسته می‌شود: قیمت نفت بالا می‌رود و ساعت شوک نفتی ایران کار می‌کند.',
+  ],
+  'tip.obj.enemy_nuclear': [
+    'Iran\'s nuclear breakout progress. If it completes, the coalition has lost the strategic objective.',
+    'پیشرفت هسته‌ای ایران. اگر کامل شود، ائتلاف هدف راهبردی را باخته است.',
+  ],
+  'tip.obj.oil_shock': [
+    'Oil price index and streak. Push it to 130 for 5 consecutive turns to win by oil shock; disruption raises it, restored shipping lowers it.',
+    'شاخص قیمت نفت و زنجیره آن. برای پیروزی با شوک نفتی آن را ۵ نوبت پیاپی روی ۱۳۰ نگه دارید؛ اختلال آن را بالا و بازگشت کشتیرانی پایین می‌برد.',
+  ],
+  'tip.obj.regime_survival': [
+    'Keep the regime standing and at least one nuclear site above 40% through the final 10 turns. Progress is the weaker of the survival streak and nuclear integrity.',
+    'رژیم را سرپا و دست‌کم یک تأسیسات هسته‌ای را تا ۱۰ نوبت آخر بالای ۴۰٪ نگه دارید. پیشرفت، ضعیف‌تر از زنجیره بقا و یکپارچگی هسته‌ای است.',
+  ],
+  'tip.obj.no_occupation': [
+    'Prevent sustained occupation: fewer than 3 Iranian nodes held for 5 turns, with a strategic score of at least 50.',
+    'از اشغال پایدار جلوگیری کنید: کمتر از ۳ گره ایرانی برای ۵ نوبت و نمره راهبردی دست‌کم ۵۰.',
+  ],
+  'tip.obj.israeli_degradation': [
+    'Cut Israeli offensive capacity below 30% by turn 25. Capacity falls with lost airframes, drained magazines and exhausted interceptors.',
+    'توان تهاجمی اسرائیل را تا نوبت ۲۵ زیر ۳۰٪ برسانید. توان با از دست رفتن هواپیما، خالی شدن مهمات و فرسودگی رهگیرها کم می‌شود.',
+  ],
+  'tip.obj.generic': [
+    'Progress toward this objective. Tap for the detailed breakdown.',
+    'پیشرفت به سوی این هدف. برای جزئیات بزنید.',
   ],
 
   'panel.domestic': ['Domestic pressure', 'فشار داخلی'],

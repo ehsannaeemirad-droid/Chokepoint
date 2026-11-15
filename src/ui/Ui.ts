@@ -126,8 +126,8 @@ function template(): string {
   return `
 <header class="topbar">
   <button class="icon-btn" data-action="menu" data-tip="${t('tip.menu')}">☰</button>
-  <div class="turn-block"><b id="turn-num">1</b><span id="turn-max">/30</span></div>
-  <div id="faction-chip" class="faction-chip"></div>
+  <div class="turn-block" data-tip="${t('tip.turn')}"><b id="turn-num">1</b><span id="turn-max">/30</span></div>
+  <div id="faction-chip" class="faction-chip" data-tip="${t('tip.faction')}"></div>
   <div id="gauges" class="gauges"></div>
   <div class="hormuz" data-tip="${t('tip.hormuz')}">
     <span>${t('label.hormuz')}</span>
@@ -2283,7 +2283,23 @@ export class Ui {
         const tone = row.tone;
         const enemy = row.enemy ? 'enemy' : '';
         const label = this.objLabel(row);
-        return `<button class="obj-row ${tone} ${enemy}" data-action="obj-detail:${row.id}" aria-label="${label}">
+        const objTips: Record<string, StringKey> = {
+          nuclear_degraded: 'tip.obj.nuclear_degraded',
+          war_cost: 'tip.obj.war_cost',
+          domestic: 'tip.obj.domestic',
+          basing: 'tip.obj.basing',
+          hormuz_open: 'tip.obj.hormuz_open',
+          enemy_nuclear: 'tip.obj.enemy_nuclear',
+          oilShock: 'tip.obj.oil_shock',
+          regimeSurvival: 'tip.obj.regime_survival',
+          noOccupation: 'tip.obj.no_occupation',
+          israeliDegradation: 'tip.obj.israeli_degradation',
+        };
+        // Threat rows prefix the enemy path id (`enemy_oilShock`), so map them
+        // back to the same explanation.
+        const key = objTips[row.id] ?? objTips[row.id.replace(/^enemy_/, '')] ?? 'tip.obj.generic';
+        const tip = t(key);
+        return `<button class="obj-row ${tone} ${enemy}" data-action="obj-detail:${row.id}" title="${tip}" data-tip="${tip}" aria-label="${label}">
           <span class="obj-name">${label}</span>
           <span class="obj-bar"><i style="width:${Math.max(4, row.progress)}%"></i></span>
           <span class="obj-cap">${row.caption}</span>

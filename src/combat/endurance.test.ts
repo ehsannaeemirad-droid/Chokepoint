@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Game, SCENARIOS } from '../core/Game';
 import { defenderOfNode, nodeState, unitType } from '../core/world';
 import { cyberTargets, hostileTo, resolveCyber, strikeRange, validateStrike } from './combat';
+import { strikeTargetsFor } from './targets';
 import { defenceLayers, detectionChance } from './airdefence';
 import { checkOutcome } from '../politics/victory';
 import {
@@ -657,5 +658,47 @@ describe('AI sortie accounting', () => {
         Number.isFinite(cap) ? cap : Number.POSITIVE_INFINITY,
       );
     }
+  });
+});
+
+describe('Iranian launcher reload', () => {
+  it('reloads launch units between turns while rounds remain', () => {
+    const game = new Game();
+    game.start('campaign', 'iran', 5);
+    game.snap.warStarted = true;
+    const shahed = game.snap.units.find((u) => u.typeId === 'shahed136')!;
+    const fateh = game.snap.units.find((u) => u.typeId === 'fateh110')!;
+    shahed.magazine = 0;
+    fateh.magazine = 0;
+    game.endTurn();
+    expect(game.snap.status).toBe('playing');
+    expect(shahed.magazine).toBeGreaterThan(0);
+    expect(fateh.magazine).toBeGreaterThan(0);
+  });
+
+  it('can still queue Iranian strikes on turn 8', () => {
+    const game = new Game();
+    game.start('campaign', 'iran', 9);
+    game.snap.warStarted = true;
+    const types = ['shahed136', 'fateh110', 'khorramshahr', 'fattah', 'asm_launcher'];
+    // Fire the opening salvo, the way the reported game did, then wait several
+    // turns before trying again: the launchers must have reloaded from rounds.
+    for (const unit of game.snap.units) {
+      if (unit.faction !== 'iran' || !types.includes(unit.typeId) || unit.magazine <= 0) continue;
+      const target = strikeTargetsFor(game.snap, game.map, unit, (id) => id, (col, row) => `${col},${row}`)[0];
+      if (!target) continue;
+      game.queueOrder({ kind: 'strike', unitUid: unit.uid, col: target.col, row: target.row, nodeId: target.nodeId });
+    }
+    for (let turn = 0; turn < 7 && game.snap.status === 'playing'; turn++) game.endTurn();
+    expect(game.snap.status).toBe('playing');
+    let queued = 0;
+    for (const unit of game.snap.units) {
+      if (unit.faction !== 'iran' || !types.includes(unit.typeId) || unit.magazine <= 0) continue;
+      const target = strikeTargetsFor(game.snap, game.map, unit, (id) => id, (col, row) => `${col},${row}`)[0];
+      if (!target) continue;
+      const result = game.queueOrder({ kind: 'strike', unitUid: unit.uid, col: target.col, row: target.row, nodeId: target.nodeId });
+      if (result.ok) queued++;
+    }
+    expect(queued, 'Iran has magazines, rounds and launcher sorties but cannot strike').toBeGreaterThan(0);
   });
 });

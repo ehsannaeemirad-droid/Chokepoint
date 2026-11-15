@@ -538,6 +538,31 @@ interface StockSpend {
 }
 
 /**
+ * Reload launchers and aircraft between turns.
+ *
+ * A unit's `magazine` is its ready load, not the campaign stockpile: Iranian
+ * rounds are spent from `iran.rounds` and coalition munitions from their pools
+ * at the moment of firing. Without this reload every launcher fires once and
+ * then sits empty for the rest of the war, which made Iran unplayable after the
+ * first few turns even with hundreds of rounds left. Proxy factions keep their
+ * separate, documented resupply cadence.
+ */
+function rearmLaunchUnits(snap: GameSnapshot): void {
+  for (const unit of snap.units) {
+    const def = unitType(unit.typeId);
+    if (def.category !== 'air' && def.category !== 'missile' && def.category !== 'drone') continue;
+    // Only the three playable air forces reload from their own stocks; proxy
+    // factions keep the resupply cadence in `refillProxyMagazines`.
+    if (unit.faction !== 'usa' && unit.faction !== 'israel' && unit.faction !== 'iran') continue;
+    if (unit.faction === 'iran') {
+      const cls = deliveryClassFor(unit.typeId);
+      if (cls && snap.iran.rounds[cls] <= 0) continue;
+    }
+    unit.magazine = def.magazine;
+  }
+}
+
+/**
  * Spend one round for a firing unit. The stock and the launcher budget are both
  * consumed here, so the player and the AI follow the same rule.
  */
@@ -1010,6 +1035,7 @@ export function runTurn(snap: GameSnapshot, map: TheaterMap): TurnResult {
   if (snap.status === 'playing') {
     snap.turn += 1;
     resetLauncherSorties(snap);
+    rearmLaunchUnits(snap);
   }
   snap.orders = [];
   return { events, status: snap.status, outcome: snap.outcome };
