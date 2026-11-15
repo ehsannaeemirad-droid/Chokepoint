@@ -2438,6 +2438,126 @@
         "use": "data only: no Hezbollah units in the order of battle"
       },
       "pk_basis": "line-of-sight ATGM model"
+    },
+    {
+      "id": "jdam-gbu31",
+      "name": "JDAM GBU-31 (2,000 lb)",
+      "type": "guided bomb",
+      "propulsion": "unguided bomb + GPS/INS tail kit",
+      "range_km": [
+        24,
+        24
+      ],
+      "warhead_kg": [
+        925,
+        961
+      ],
+      "cep_m": [
+        5,
+        5
+      ],
+      "reliability": null,
+      "confidence": "confirmed",
+      "note": "GBU-31 JDAM on a Mk 84/BLU-109 warhead; 5 m CEP with GPS.",
+      "source": "US Air Force JDAM GBU-31/32/38 fact sheet; US Navy JDAM fact file",
+      "game_field": {
+        "unit_type_ids": [
+          "f35a",
+          "f15e",
+          "f35i"
+        ],
+        "use": "Coalition fighter precision strike"
+      },
+      "base_pk": 1,
+      "interception_pk": 0,
+      "pk_basis": "CEP model: target radius 100 m, 1-0.5^(100/CEP)^2"
+    },
+    {
+      "id": "jassm-er",
+      "name": "JASSM-ER (AGM-158B)",
+      "type": "cruise missile",
+      "propulsion": "turbofan",
+      "range_km": [
+        370,
+        1000
+      ],
+      "warhead_kg": [
+        450,
+        450
+      ],
+      "cep_m": [
+        3,
+        3
+      ],
+      "reliability": null,
+      "confidence": "confirmed",
+      "note": "Baseline/ER family; 3 m CEP with the imaging-infrared seeker, 450 kg WDU-42/B penetrator.",
+      "source": "CSIS Missile Threat; DoD Selected Acquisition Report (JASSM)",
+      "game_field": {
+        "unit_type_id": "b52",
+        "use": "B-52 standoff cruise strike"
+      },
+      "base_pk": 1,
+      "interception_pk": 0,
+      "pk_basis": "CEP model: target radius 100 m, 1-0.5^(100/CEP)^2"
+    },
+    {
+      "id": "hellfire-agm114",
+      "name": "AGM-114 Hellfire",
+      "type": "air-to-surface missile",
+      "propulsion": "solid rocket",
+      "range_km": [
+        7,
+        11
+      ],
+      "warhead_kg": [
+        8,
+        11
+      ],
+      "cep_m": [
+        0.9,
+        1
+      ],
+      "reliability": null,
+      "confidence": "reported-estimate",
+      "note": "Light point-target missile carried by the Reaper; sub-metre reported CEP.",
+      "source": "CSIS Missile Threat; US Navy AGM-114 fact file",
+      "game_field": {
+        "unit_type_id": "mq9",
+        "use": "MQ-9 light precision strike"
+      },
+      "base_pk": 1,
+      "interception_pk": 0,
+      "pk_basis": "CEP model: target radius 100 m, 1-0.5^(100/CEP)^2"
+    },
+    {
+      "id": "spice-2000",
+      "name": "SPICE 2000",
+      "type": "guided glide bomb",
+      "propulsion": "glide kit",
+      "range_km": [
+        60,
+        60
+      ],
+      "warhead_kg": [
+        429,
+        429
+      ],
+      "cep_m": [
+        3,
+        3
+      ],
+      "reliability": null,
+      "confidence": "reported-estimate",
+      "note": "Israeli GPS/EO glide kit on a 2,000 lb warhead, integrated on the F-15 family.",
+      "source": "Rafael SPICE 2000/1000 brochure; public SPICE specifications",
+      "game_field": {
+        "unit_type_id": "f15i",
+        "use": "Israeli long-range precision strike"
+      },
+      "base_pk": 1,
+      "interception_pk": 0,
+      "pk_basis": "CEP model: target radius 100 m, 1-0.5^(100/CEP)^2"
     }
   ]
 }

@@ -18,15 +18,18 @@ interface WeaponRow {
   id: string;
   base_pk: number | null;
   interception_pk: number | null;
-  game_field?: { unit_type_id?: string | null };
+  game_field?: { unit_type_id?: string | null; unit_type_ids?: string[] };
 }
 
 const rows = (oob.weaponPerformance as unknown as WeaponRow[]).filter(
-  (row) => row.game_field?.unit_type_id && row.base_pk !== null,
+  (row) => row.base_pk !== null && (row.game_field?.unit_type_id || row.game_field?.unit_type_ids?.length),
 );
 
 const byUnit = new Map<string, WeaponRow>();
-for (const row of rows) byUnit.set(row.game_field!.unit_type_id!, row);
+for (const row of rows) {
+  const ids = row.game_field?.unit_type_ids ?? [row.game_field?.unit_type_id];
+  for (const id of ids) if (id) byUnit.set(id, row);
+}
 
 /**
  * Coalition aircraft carry precision ordnance, but the supplied briefs give no
@@ -48,7 +51,7 @@ for (const list of Object.values(units)) {
 /** Interception probability recorded for a defensive unit, when present. */
 export function interceptionPk(unitTypeId: string): number | null {
   const row = byUnit.get(unitTypeId);
-  if (!row || row.interception_pk === null) return null;
+  if (!row || row.interception_pk === null || row.interception_pk <= 0) return null;
   return row.interception_pk;
 }
 

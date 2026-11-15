@@ -91,9 +91,9 @@ Reading:
   the pre-fix measurement; the table in this section is the current one.
 - **`base_pk` / `interception_pk` are model values, not published facts, and are
   used in combat.** Interception reads the data row; mapped strike units scale
-  damage by `0.6 + 0.4 × Pk`. Coalition airframes without a briefed munition row
-  use a stated 0.85 precision-air model (factor 0.94). This eight-seed table is
-  unchanged by that wiring; per-strike damage differs.
+  damage by `0.6 + 0.4 × Pk`. Coalition airframes now map to sourced JDAM,
+  SPICE, JASSM and Hellfire records, all with CEP-derived Pk 1.00. This eight-seed
+  table is unchanged by that wiring; per-strike damage differs.
 
 Parameters calibrated (all game-scale readings, each stated in code and README):
 

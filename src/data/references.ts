@@ -1387,3 +1387,82 @@ REFERENCES.push(
     gameMapping: 'Two drone cells, two loads each, range 8 hexes.',
   }),
 );
+
+// ---- coalition air munitions (Pk records) ----------------------------------
+// Values here describe publicly documented weapon performance; they are not
+// claims about a specific loadout on a specific sortie.
+REFERENCES.push(
+  ref({
+    id: 'ref-weapon-jdam-gbu31',
+    subjectId: 'jdam-gbu31',
+    category: 'weapon',
+    validAt: PREWAR,
+    value: 5,
+    unit: 'm_cep',
+    evidenceType: 'reported-estimate',
+    confidence: 'high',
+    sourceName: 'US Air Force JDAM GBU-31/32/38 fact sheet',
+    sourceUrl:
+      'https://www.af.mil/About-Us/Fact-Sheets/Display/Article/104572/joint-direct-attack-munition-gbu-313238',
+    sourceUndated: true,
+    notes:
+      'The Air Force states a 5 m or better CEP with GPS in the JDAM most-accurate mode, and up to 24 km range with a 2,000 lb GBU-31 warhead.',
+    gameMapping:
+      'Mapped to the F-35A, F-15E and F-35I. CEP 5 m in the 100 m target-radius model gives Pk 1.00; the game does not model GPS denial separately.',
+  }),
+  ref({
+    id: 'ref-weapon-jassm-er',
+    subjectId: 'jassm-er',
+    category: 'weapon',
+    validAt: PREWAR,
+    min: 370,
+    max: 1000,
+    unit: 'km_range',
+    evidenceType: 'reported-estimate',
+    confidence: 'high',
+    sourceName: 'DoD JASSM Selected Acquisition Report; CSIS Missile Threat',
+    sourceUrl:
+      'https://www.esd.whs.mil/Portals/54/Documents/FOID/Reading%20Room/Selected_Acquisition_Reports/FY_2022_SARS/JASSM-ER_SAR_DEC_2022.pdf',
+    sourcePublishedAt: '2023-04-04',
+    notes:
+      'Baseline JASSM is about 370 km and JASSM-ER about 1,000 km, with a 450 kg WDU-42/B penetrator and a 3 m CEP using the imaging-infrared seeker.',
+    gameMapping:
+      'Mapped to the B-52H as its standoff cruise shot. CEP 3 m gives Pk 1.00; the missile itself is spent from the JASSM logistics pool.',
+  }),
+  ref({
+    id: 'ref-weapon-hellfire-agm114',
+    subjectId: 'hellfire-agm114',
+    category: 'weapon',
+    validAt: PREWAR,
+    min: 7,
+    max: 11,
+    unit: 'km_range',
+    evidenceType: 'reported-estimate',
+    confidence: 'medium',
+    sourceName: 'CSIS Missile Threat; US Navy AGM-114 fact file',
+    sourceUrl: 'https://missilethreat.csis.org/missile/agm-114-hellfire/',
+    sourcePublishedAt: '2020-05-04',
+    notes:
+      'Hellfire is listed at 7-11 km with an 8-11 kg payload; public specifications put its CEP below one metre.',
+    gameMapping:
+      'Mapped to the MQ-9 for light precision strikes. CEP 0.9-1.0 m gives Pk 1.00; the small warhead is represented by the Reaper\'s low attack value, not a second Pk penalty.',
+  }),
+  ref({
+    id: 'ref-weapon-spice-2000',
+    subjectId: 'spice-2000',
+    category: 'weapon',
+    validAt: PREWAR,
+    value: 429,
+    unit: 'warhead_kg',
+    evidenceType: 'reported-estimate',
+    confidence: 'medium',
+    sourceName: 'Rafael SPICE 2000/1000 brochure; public SPICE specifications',
+    sourceUrl:
+      'https://www.rafael.co.il/wp-content/uploads/2024/09/spice-1000-and-spice-2000.pdf',
+    sourcePublishedAt: '2024-03-21',
+    notes:
+      'SPICE 2000 is a GPS/electro-optical glide kit on a 2,000 lb warhead, reported at about 60 km range and 3 m CEP, integrated on the F-15 family.',
+    gameMapping:
+      'Mapped to the Israeli F-15I. CEP 3 m gives Pk 1.00; standoff range is not converted to extra hexes because the aircraft range already covers the theatre.',
+  }),
+);

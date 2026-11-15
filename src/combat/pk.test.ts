@@ -8,9 +8,15 @@ describe('weapon Pk bridge', () => {
     expect(strikePkFactor('shahed136')).toBeCloseTo(0.66, 2);
     // A precise guided weapon keeps full damage.
     expect(strikePkFactor('b2')).toBe(1);
-    // Airframes without a briefed munition row use the stated precision-air model.
-    expect(strikePkFactor('f35a')).toBeCloseTo(0.94, 2);
-    expect(strikePkFactor('mq9')).toBeCloseTo(0.94, 2);
+    // Aircraft now have their own sourced munition records.
+    expect(weaponIdFor('f35a')).toBe('jdam-gbu31');
+    expect(weaponIdFor('f15e')).toBe('jdam-gbu31');
+    expect(weaponIdFor('f35i')).toBe('jdam-gbu31');
+    expect(weaponIdFor('f15i')).toBe('spice-2000');
+    expect(weaponIdFor('b52')).toBe('jassm-er');
+    expect(weaponIdFor('mq9')).toBe('hellfire-agm114');
+    expect(strikePkFactor('f35a')).toBe(1);
+    expect(strikePkFactor('mq9')).toBe(1);
   });
 
   it('supplies interceptor probabilities from the weapon data', () => {

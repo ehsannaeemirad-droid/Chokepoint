@@ -11,7 +11,7 @@ import oobData from './orderOfBattle.json';
 import logisticsData from './logistics.json';
 import scenariosData from './scenarios.json';
 
-const LABELS = ['confirmed', 'single_source', 'belligerent_claim', 'estimate_range', 'data_gap'];
+const LABELS = ['confirmed', 'single_source', 'belligerent_claim', 'estimate_range', 'reported-estimate', 'data_gap'];
 const SIDES = ['usa', 'israel', 'iran', 'hezbollah', 'houthi', 'pmf', 'hamas'];
 const ACCESS = ['full', 'restricted', 'denied'];
 
