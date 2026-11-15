@@ -773,7 +773,8 @@
     "undergroundRegen": {
       "drones": 3
     },
-    "provenance": "Coastal underground munition storage reported near Bandar Abbas; coordinates approximate."
+    "provenance": "Coastal underground munition storage reported near Bandar Abbas; coordinates approximate.",
+    "short_name": "Coastal storage"
   },
   {
     "id": "tabriz_complex",
@@ -1142,7 +1143,8 @@
     "effect": "Destroying this base cuts launchers and reload capacity from the Iranian missile force.",
     "confidence": "confirmed",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "short_name": "Shiraz North"
   },
   {
     "id": "bandar_abbas_khorgu",
@@ -1158,7 +1160,8 @@
     "effect": "Destroying this naval base removes coastal missiles and fast-attack craft from the Strait.",
     "confidence": "confirmed",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "short_name": "Khorgu missiles"
   },
   {
     "id": "hajabad",
@@ -1254,7 +1257,8 @@
     "effect": "Destroying this airbase removes sortie generation and its aircraft from the theatre.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "short_name": "Bandar Abbas AB"
   },
   {
     "id": "khatam_ab",
@@ -1302,7 +1306,8 @@
     "effect": "Destroying this airbase removes sortie generation and its aircraft from the theatre.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "short_name": "Shiraz AB"
   },
   {
     "id": "tabriz_ab",
@@ -1350,7 +1355,8 @@
     "effect": "Destroying this naval base removes coastal missiles and fast-attack craft from the Strait.",
     "confidence": "confirmed",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 140
+    "maxIntegrity": 140,
+    "short_name": "Bandar Abbas naval"
   },
   {
     "id": "chabahar",

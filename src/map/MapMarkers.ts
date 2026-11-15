@@ -380,7 +380,7 @@ export class MapMarkers {
       const state = this.game.snap.nodes[node.id];
       const friendly = node.operators.includes(this.game.snap.faction);
       el.className = `node-label${friendly ? ' friendly' : ''}${node.strategic ? ' strategic' : ''}`;
-      el.innerHTML = `<span class="dot" style="background:${FACTION_COLORS[node.operators[0] ?? node.host] ?? COLORS.textDim}"></span><span class="name">${localName(node)}</span>${state && state.integrity < 100 ? `<span class="int">${Math.round(state.integrity)}%</span>` : ''}`;
+      el.innerHTML = `<span class="dot" style="background:${FACTION_COLORS[node.operators[0] ?? node.host] ?? COLORS.textDim}"></span><span class="name">${node.short_name ?? localName(node)}</span>${state && state.integrity < 100 ? `<span class="int">${Math.round(state.integrity)}%</span>` : ''}`;
       el.title = localName(node);
       el.setAttribute('aria-label', localName(node));
       el.onclick = () => this.game.selectHex(hex.col, hex.row);
