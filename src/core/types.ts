@@ -75,6 +75,7 @@ export interface MapNodeDef {
   name_fa?: string;
   /** Compact map label for sites that share a small area with others. */
   short_name?: string;
+  short_name_fa?: string;
   kind: NodeKind;
   lon: number;
   lat: number;

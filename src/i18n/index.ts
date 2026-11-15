@@ -1015,6 +1015,12 @@ export function localName(record: { name: string; name_fa?: string }): string {
   return lang === 'fa' && record.name_fa ? record.name_fa : record.name;
 }
 
+/** Localised compact map label, falling back to the full name. */
+export function localShortName(record: { name: string; name_fa?: string; short_name?: string; short_name_fa?: string }): string {
+  if (lang === 'fa') return record.short_name_fa ?? record.name_fa ?? record.name;
+  return record.short_name ?? record.name;
+}
+
 /** Localised one-line mechanical effect for map nodes. */
 export function localEffect(record: { effect: string; effect_fa?: string }): string {
   return lang === 'fa' && record.effect_fa ? record.effect_fa : record.effect;

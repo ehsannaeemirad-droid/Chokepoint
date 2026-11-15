@@ -774,7 +774,8 @@
       "drones": 3
     },
     "provenance": "Coastal underground munition storage reported near Bandar Abbas; coordinates approximate.",
-    "short_name": "Coastal storage"
+    "short_name": "Coastal storage",
+    "short_name_fa": "انبار ساحلی"
   },
   {
     "id": "tabriz_complex",
@@ -839,7 +840,8 @@
     "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه هوایی عین‌الاسد"
   },
   {
     "id": "erbil",
@@ -855,7 +857,8 @@
     "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
     "confidence": "confirmed",
     "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه هوایی اربیل"
   },
   {
     "id": "duqm",
@@ -871,7 +874,8 @@
     "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
     "confidence": "confirmed",
     "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "بندر دقم"
   },
   {
     "id": "thumrait",
@@ -887,7 +891,8 @@
     "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
     "confidence": "data_gap",
     "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه هوایی ثمریت"
   },
   {
     "id": "masirah",
@@ -903,7 +908,8 @@
     "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
     "confidence": "data_gap",
     "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه هوایی مصیره"
   },
   {
     "id": "ramat_david",
@@ -919,7 +925,8 @@
     "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
     "confidence": "confirmed",
     "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه هوایی رمات داوود"
   },
   {
     "id": "hatzor",
@@ -935,7 +942,8 @@
     "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
     "confidence": "confirmed",
     "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه هوایی حتسور"
   },
   {
     "id": "ramon",
@@ -951,7 +959,8 @@
     "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
     "confidence": "confirmed",
     "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه هوایی رامون"
   },
   {
     "id": "uvda",
@@ -967,7 +976,8 @@
     "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه هوایی عوفدا"
   },
   {
     "id": "idf_naval_haifa",
@@ -983,7 +993,8 @@
     "effect": "Destroying this naval base removes coastal missiles and fast-attack craft from the Strait.",
     "confidence": "data_gap",
     "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه دریایی حیفا"
   },
   {
     "id": "idf_naval_eilat",
@@ -999,7 +1010,8 @@
     "effect": "Destroying this naval base removes coastal missiles and fast-attack craft from the Strait.",
     "confidence": "data_gap",
     "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه دریایی ایلات"
   },
   {
     "id": "iron_dome_battery",
@@ -1015,7 +1027,8 @@
     "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "سامانه پدافند گنبد آهنین"
   },
   {
     "id": "davids_sling_battery",
@@ -1031,7 +1044,8 @@
     "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "سامانه پدافند فلاخن داوود"
   },
   {
     "id": "arrow3_battery",
@@ -1047,7 +1061,8 @@
     "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 1; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "منطقه استقرار سامانه پیکان ۳"
   },
   {
     "id": "tabriz_north",
@@ -1063,7 +1078,8 @@
     "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
     "confidence": "confirmed",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه موشکی شمال تبریز"
   },
   {
     "id": "tabriz_south",
@@ -1079,7 +1095,8 @@
     "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
     "confidence": "confirmed",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه موشکی جنوب تبریز"
   },
   {
     "id": "kermanshah",
@@ -1095,7 +1112,8 @@
     "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
     "confidence": "confirmed",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه موشکی کرمانشاه (شهید منتظری)"
   },
   {
     "id": "panj_pelleh",
@@ -1111,7 +1129,8 @@
     "effect": "Destroying this base cuts launchers and reload capacity from the Iranian missile force.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "سایت پرتاب پنج پله"
   },
   {
     "id": "kamijeh",
@@ -1127,7 +1146,8 @@
     "effect": "Destroying this base cuts launchers and reload capacity from the Iranian missile force.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "سایت پرتاب کمیجه"
   },
   {
     "id": "shiraz_north",
@@ -1144,7 +1164,9 @@
     "confidence": "confirmed",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
     "maxIntegrity": 100,
-    "short_name": "Shiraz North"
+    "short_name": "Shiraz North",
+    "name_fa": "پایگاه موشکی شمال شیراز",
+    "short_name_fa": "شمال شیراز"
   },
   {
     "id": "bandar_abbas_khorgu",
@@ -1161,7 +1183,9 @@
     "confidence": "confirmed",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
     "maxIntegrity": 100,
-    "short_name": "Khorgu missiles"
+    "short_name": "Khorgu missiles",
+    "name_fa": "پایگاه موشکی بندرعباس/خورگو",
+    "short_name_fa": "موشک‌های خورگو"
   },
   {
     "id": "hajabad",
@@ -1177,7 +1201,8 @@
     "effect": "Destroying this base cuts launchers and reload capacity from the Iranian missile force.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 140
+    "maxIntegrity": 140,
+    "name_fa": "تاسیسات زیرزمینی حاجی‌آباد"
   },
   {
     "id": "khorramabad",
@@ -1193,7 +1218,8 @@
     "effect": "Destroying this base cuts launchers and reload capacity from the Iranian missile force.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 140
+    "maxIntegrity": 140,
+    "name_fa": "پایگاه موشکی زیرزمینی خرم‌آباد"
   },
   {
     "id": "bakhtaran",
@@ -1209,7 +1235,8 @@
     "effect": "Destroying this base cuts launchers and reload capacity from the Iranian missile force.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه موشکی بختاران"
   },
   {
     "id": "semnan",
@@ -1225,7 +1252,8 @@
     "effect": "Destroying this base cuts launchers and reload capacity from the Iranian missile force.",
     "confidence": "confirmed",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "مجتمع موشکی سمنان"
   },
   {
     "id": "oghab44",
@@ -1241,7 +1269,8 @@
     "effect": "Destroying this airbase removes sortie generation and its aircraft from the theatre.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 140
+    "maxIntegrity": 140,
+    "name_fa": "پایگاه هوایی زیرزمینی عقاب ۴۴"
   },
   {
     "id": "bandar_abbas_ab",
@@ -1258,7 +1287,9 @@
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
     "maxIntegrity": 100,
-    "short_name": "Bandar Abbas AB"
+    "short_name": "Bandar Abbas AB",
+    "name_fa": "پایگاه هوایی بندرعباس",
+    "short_name_fa": "هوایی بندرعباس"
   },
   {
     "id": "khatam_ab",
@@ -1274,7 +1305,8 @@
     "effect": "Destroying this airbase removes sortie generation and its aircraft from the theatre.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه هوایی خاتم"
   },
   {
     "id": "dezful_ab",
@@ -1290,7 +1322,8 @@
     "effect": "Destroying this airbase removes sortie generation and its aircraft from the theatre.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه هوایی دزفول (وحدتی)"
   },
   {
     "id": "shiraz_ab",
@@ -1307,7 +1340,9 @@
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
     "maxIntegrity": 100,
-    "short_name": "Shiraz AB"
+    "short_name": "Shiraz AB",
+    "name_fa": "پایگاه هوایی شیراز",
+    "short_name_fa": "هوایی شیراز"
   },
   {
     "id": "tabriz_ab",
@@ -1323,7 +1358,8 @@
     "effect": "Destroying this airbase removes sortie generation and its aircraft from the theatre.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه هوایی تبریز"
   },
   {
     "id": "tehran_mehrabad",
@@ -1339,7 +1375,8 @@
     "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "تهران (مهرآباد/دوشان‌تپه)"
   },
   {
     "id": "bandar_abbas_naval",
@@ -1356,7 +1393,9 @@
     "confidence": "confirmed",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
     "maxIntegrity": 140,
-    "short_name": "Bandar Abbas naval"
+    "short_name": "Bandar Abbas naval",
+    "name_fa": "پایگاه دریایی بندرعباس",
+    "short_name_fa": "دریایی بندرعباس"
   },
   {
     "id": "chabahar",
@@ -1372,7 +1411,8 @@
     "effect": "Destroying this naval base removes coastal missiles and fast-attack craft from the Strait.",
     "confidence": "confirmed",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه دریایی چابهار"
   },
   {
     "id": "jask",
@@ -1388,7 +1428,8 @@
     "effect": "Destroying this base cuts launchers and reload capacity from the Iranian missile force.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 3; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "پایگاه دریایی جاسک"
   },
   {
     "id": "s300_tehran",
@@ -1407,7 +1448,8 @@
     "maxIntegrity": 100,
     "detection_radius_km": 200,
     "linked_system": "meraj4_network",
-    "degradation_effect": "Destroying this battery opens a hole in its air-defence layer and forces linked batteries onto their own sensors."
+    "degradation_effect": "Destroying this battery opens a hole in its air-defence layer and forces linked batteries onto their own sensors.",
+    "name_fa": "سامانه اس-۳۰۰پی‌ام‌یو-۲ (تهران)"
   },
   {
     "id": "bavar_fordow",
@@ -1426,7 +1468,8 @@
     "maxIntegrity": 100,
     "detection_radius_km": 300,
     "linked_system": "meraj4_network",
-    "degradation_effect": "Destroying this battery opens a hole in its air-defence layer and forces linked batteries onto their own sensors."
+    "degradation_effect": "Destroying this battery opens a hole in its air-defence layer and forces linked batteries onto their own sensors.",
+    "name_fa": "سامانه باور-۳۷۳ (فردو)"
   },
   {
     "id": "khordad15_isfahan",
@@ -1445,7 +1488,8 @@
     "maxIntegrity": 100,
     "detection_radius_km": 120,
     "linked_system": "kavosh_radar",
-    "degradation_effect": "Destroying this battery opens a hole in its air-defence layer and forces linked batteries onto their own sensors."
+    "degradation_effect": "Destroying this battery opens a hole in its air-defence layer and forces linked batteries onto their own sensors.",
+    "name_fa": "سامانه خرداد-۱۵ (اصفهان)"
   },
   {
     "id": "talash_layered",
@@ -1464,7 +1508,8 @@
     "maxIntegrity": 100,
     "detection_radius_km": 105,
     "linked_system": "kavosh_radar",
-    "degradation_effect": "Destroying this battery opens a hole in its air-defence layer and forces linked batteries onto their own sensors."
+    "degradation_effect": "Destroying this battery opens a hole in its air-defence layer and forces linked batteries onto their own sensors.",
+    "name_fa": "سامانه خرداد ۳ / تلاش"
   },
   {
     "id": "s200_isfahan",
@@ -1483,7 +1528,8 @@
     "maxIntegrity": 100,
     "detection_radius_km": 250,
     "linked_system": "meraj4_network",
-    "degradation_effect": "Destroying this battery opens a hole in its air-defence layer and forces linked batteries onto their own sensors."
+    "degradation_effect": "Destroying this battery opens a hole in its air-defence layer and forces linked batteries onto their own sensors.",
+    "name_fa": "سامانه اس-۲۰۰ (اصفهان)"
   },
   {
     "id": "meraj4_network",
@@ -1501,7 +1547,8 @@
     "provenance": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
     "maxIntegrity": 100,
     "detection_radius_km": 400,
-    "degradation_effect": "Destroying this radar removes its detection contribution and leaves dependent batteries firing without cueing."
+    "degradation_effect": "Destroying this radar removes its detection contribution and leaves dependent batteries firing without cueing.",
+    "name_fa": "شبکه پایش معراج-۴"
   },
   {
     "id": "kavosh_radar",
@@ -1519,7 +1566,8 @@
     "provenance": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
     "maxIntegrity": 100,
     "detection_radius_km": 150,
-    "degradation_effect": "Destroying this radar removes its detection contribution and leaves dependent batteries firing without cueing."
+    "degradation_effect": "Destroying this radar removes its detection contribution and leaves dependent batteries firing without cueing.",
+    "name_fa": "رادار کاوش (کستا ۲E2)"
   },
   {
     "id": "ghadir_radar",
@@ -1537,7 +1585,8 @@
     "provenance": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
     "maxIntegrity": 100,
     "detection_radius_km": 1100,
-    "degradation_effect": "Destroying this radar removes its detection contribution and leaves dependent batteries firing without cueing."
+    "degradation_effect": "Destroying this radar removes its detection contribution and leaves dependent batteries firing without cueing.",
+    "name_fa": "رادار فراسافق غدیر"
   },
   {
     "id": "alim_radar",
@@ -1555,7 +1604,8 @@
     "provenance": "Supplementary brief A (site and unit tables), module 4; originally OSINT/analyst compilation cited in the brief",
     "maxIntegrity": 100,
     "detection_radius_km": 275,
-    "degradation_effect": "Destroying this radar removes its detection contribution and leaves dependent batteries firing without cueing."
+    "degradation_effect": "Destroying this radar removes its detection contribution and leaves dependent batteries firing without cueing.",
+    "name_fa": "رادار غیرفعال عالم"
   },
   {
     "id": "hezbollah",
@@ -1571,7 +1621,8 @@
     "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "حزب‌الله (جنوب لبنان، بقاع، بیروت)"
   },
   {
     "id": "houthi",
@@ -1587,7 +1638,8 @@
     "effect": "Destroying this base cuts launchers and reload capacity from the Iranian missile force.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "حوثی‌ها (باب‌المندب، صنعا، حدیده)"
   },
   {
     "id": "pmf_anbar",
@@ -1603,7 +1655,8 @@
     "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "حشد شعبی (انبار: القائم، حبانیه، تققدم)"
   },
   {
     "id": "pmf_jurf",
@@ -1619,7 +1672,8 @@
     "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "حشد شعبی (جرف‌الصخر، اردوگاه اشرف، حومه موصل، جسر دیالی)"
   },
   {
     "id": "hamas",
@@ -1635,6 +1689,7 @@
     "effect": "Destroying this seat degrades proxy coordination and attack tempo.",
     "confidence": "single_source",
     "provenance": "Supplementary brief A (site and unit tables), module 6; originally OSINT/analyst compilation cited in the brief",
-    "maxIntegrity": 100
+    "maxIntegrity": 100,
+    "name_fa": "حماس (غزه)"
   }
 ]

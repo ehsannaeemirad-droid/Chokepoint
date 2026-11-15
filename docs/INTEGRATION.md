@@ -106,5 +106,8 @@ fatigue, order-boundary rejection and detection blinding are each asserted.
 - **No visual verification of the expanded map.** The browser window was
   minimised throughout this pass, so node rendering and label collision on the
   96-node map are unverified.
-- **Generated nodes have no Persian names**, so the UI falls back to English for
-  them (recorded in `DATA_GAPS.md`).
+- **Generated nodes' Persian names are transliterations** of the brief's place
+  names, not sourced translations; a native review is worthwhile.
+- **Compact labels are localized through `localShortName`**, and the FA map was
+  checked through the accessibility tree rather than a screenshot (the browser
+  window was not drawable at capture time).

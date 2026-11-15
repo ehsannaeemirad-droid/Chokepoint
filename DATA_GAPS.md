@@ -85,9 +85,9 @@ would be a fabricated number, so they are left empty and listed here.
 
 ## Map nodes added for named sites (task 1b)
 
-- **No Persian names for the 49 generated nodes.** Transliterating 49 place names
-  would be invention at the margin, so `name_fa` is omitted and the UI falls back
-  to the English label. Existing 47 nodes keep their Persian names.
+- **Persian names for the 49 generated nodes are transliterations** of the
+  brief's place names, not sourced translations. They follow the same spelling
+  conventions as the existing map labels; a native review is still worthwhile.
 - **Personnel counts exist for only five sites** (Al Udeid, Al Dhafra, Bahrain,
   Prince Sultan, Arifjan); other sites carry no number rather than a guess.
 - **Aircraft counts are mostly unknown.** Al Udeid's "about 100 aircraft" is
