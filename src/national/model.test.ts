@@ -263,6 +263,31 @@ describe('national command crisis model', () => {
     expect(objectiveCount(state).met).toBeGreaterThanOrEqual(3);
   });
 
+  it('keeps a viable win path through every campaign', () => {
+    const orders = {
+      hormuz: ['qatar-talks', 'backchannel', 'national-address', 'cut-subsidies', 'rationing', 'air-defence'],
+      'economic-pressure': ['nuclear-measure', 'qatar-talks', 'backchannel', 'cut-subsidies', 'rationing', 'national-address'],
+      settlement: ['qatar-talks', 'backchannel', 'national-address', 'cut-subsidies', 'rationing', 'air-defence'],
+    } as const;
+    for (const player of ['iran', 'usa'] as const) {
+      for (const campaignId of ['hormuz', 'economic-pressure', 'settlement'] as const) {
+        const state = createInitialState('campaign', 'flashpoint', 20260310, {
+          player,
+          campaign: campaignId,
+          priorities: ['security', 'economy'],
+        });
+        while (state.status === 'playing') {
+          for (const id of orders[campaignId]) {
+            if (state.decisions.length >= 2) break;
+            if (canQueue(state, id).ok) queueDecision(state, id);
+          }
+          resolveTurn(state);
+        }
+        expect(state.status, `${player}/${campaignId}`).toBe('won');
+      }
+    }
+  });
+
   it('closes every campaign configuration after its own clock', () => {
     for (const player of ['iran', 'usa'] as const) {
       for (const campaignId of ['hormuz', 'economic-pressure', 'settlement'] as const) {

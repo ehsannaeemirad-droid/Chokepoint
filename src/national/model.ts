@@ -221,6 +221,7 @@ export const DECISIONS: DecisionDef[] = [
     effects: {
       fiscal: 8,
       reserves: 5,
+      inflation: -5,
       publicPressure: 8,
       confidence: -5,
       socialTension: 4,
@@ -270,6 +271,7 @@ export const DECISIONS: DecisionDef[] = [
     cooldown: 3,
     effects: {
       sanctionsRelief: 10,
+      inflation: -4,
       legitimacy: 6,
       diplomatic: -5,
       elite: -4,
@@ -402,6 +404,7 @@ export const DECISIONS: DecisionDef[] = [
     effects: {
       publicPressure: -7,
       reserves: 3,
+      inflation: -3,
       confidence: -6,
       stability: -3,
       socialTension: -2,
