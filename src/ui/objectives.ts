@@ -5,7 +5,8 @@
  * No new simulation logic and no RNG — progress numbers are deterministic
  * functions of the snapshot so impact previews match resolution.
  */
-import type { GameSnapshot, PlayableFactionId } from '../core/types';
+import type { AsymmetricActionId, GameSnapshot, PlayableFactionId } from '../core/types';
+import { asymmetricAction } from '../asymmetric/model';
 import type { TheaterMap } from '../map/TheaterMap';
 import { nodeState, operationalGulfBases } from '../core/world';
 import {
@@ -333,7 +334,7 @@ export interface ImpactPreview {
 
 export function previewOrderImpact(
   snap: GameSnapshot,
-  order: { kind: string; host?: string; packageId?: string; posture?: string },
+  order: { kind: string; host?: string; packageId?: string; posture?: string; action?: string },
 ): ImpactPreview {
   const lines: string[] = [];
   const risks: string[] = [];
@@ -379,6 +380,18 @@ export function previewOrderImpact(
     }
     case 'mine': {
       lines.push(t('impact.mine'));
+      break;
+    }
+    case 'asymmetric': {
+      const def = order.action ? asymmetricAction(order.action as AsymmetricActionId) : undefined;
+      if (def) {
+        lines.push(t('impact.asym', { action: t(def.labelKey) }));
+        if (snap.asymmetric && (def.effects.attribution ?? 0) > 0 && snap.asymmetric.meters.attribution >= 45) {
+          risks.push(t('impact.asym.risk'));
+        }
+      } else {
+        lines.push(t('impact.default'));
+      }
       break;
     }
     case 'clear': {

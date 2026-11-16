@@ -2158,6 +2158,87 @@ html[dir='rtl'] .nav-drawer {
   .obj-row { min-width: 100px; max-width: 140px; }
 }
 
+/* ------------------------------------------------- asymmetric prototype UI */
+.asym-open {
+  cursor: pointer;
+  color: var(--text, #f5f5f5);
+  font: inherit;
+}
+.asym-open:hover,
+.asym-open:focus-visible {
+  border-color: var(--info, #3c8dbc);
+}
+.asym-card .modal-body {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.asym-meters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 12px;
+  margin: 8px 0;
+}
+.asym-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+.asym-action {
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+  text-align: start;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md, 10px);
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--text);
+  cursor: pointer;
+}
+.asym-action:hover:not(:disabled),
+.asym-action:focus-visible {
+  border-color: var(--info);
+}
+.asym-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.asym-action-main {
+  display: grid;
+  gap: 2px;
+}
+.asym-action-main b {
+  font-size: 13px;
+}
+.asym-action-main small {
+  color: var(--dim);
+  line-height: 1.35;
+}
+.asym-action-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 10px;
+  color: var(--muted, #9aa7b4);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.asym-effects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.asym-effect {
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 10px;
+  color: var(--text);
+}
+.asym-blocked {
+  font-size: 10px;
+  color: var(--warn);
+}
+
 /* Phase 4: pre-resolution review, collapsible strategic groups and grouped reports. */
 .modal-card.review { width: min(620px, 100%); }
 .review-body { overflow-y: auto; -webkit-overflow-scrolling: touch; }

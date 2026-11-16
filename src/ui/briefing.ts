@@ -419,6 +419,52 @@ export const SCENARIO_BRIEFINGS: Record<string, ScenarioBriefing> = {
     ],
   },
 
+  asymmetric: {
+    title: { en: 'Asymmetric Campaign (Prototype)', fa: 'کارزار نامتقارن (نمونه)' },
+    era: {
+      en: '10 March 2026 · war · 24 turns · Iran',
+      fa: '۱۰ مارس ۲۰۲۶ · جنگ · ۲۴ نوبت · ایران',
+    },
+    situation: {
+      en: 'A weaker Iran is already at war and cannot win the conventional exchange. You command a political campaign: proxies, mines, shipping disruption, information operations and selective direct action. Every operation buys enemy cost with attribution and escalation.',
+      fa: 'ایران ضعیف‌تر در جنگ است و نمی‌تواند در تبادل متعارف پیروز شود. شما یک کارزار سیاسی را فرماندهی می‌کنید: نیروهای نیابتی، مین، اختلال کشتیرانی، عملیات اطلاعاتی و اقدام مستقیم گزینشی. هر عملیات هزینه دشمن را با انتساب و تشدید تنش معامله می‌کند.',
+    },
+    objectives: [
+      {
+        en: 'Raise Enemy Cost to 75 while keeping Regime Stability, Domestic Support and International Legitimacy at 45 or above.',
+        fa: 'هزینه دشمن را به ۷۵ برسانید و همزمان ثبات رژیم، حمایت داخلی و مشروعیت بین‌المللی را ۴۵ یا بالاتر نگه دارید.',
+      },
+      {
+        en: 'Keep Attribution at 50 or below for a political win; at 45 it triggers limited strikes, and at 85 with Escalation 85 the regime collapses.',
+        fa: 'برای پیروزی سیاسی انتساب را ۵۰ یا کمتر نگه دارید؛ از ۴۵ حملات محدود آغاز می‌شود و با ۸۵ همراه با تشدید ۸۵ رژیم فرو می‌ریزد.',
+      },
+      {
+        en: 'If the clock runs out, Regime Stability at 35 or above is a survival victory.',
+        fa: 'اگر زمان تمام شود، ثبات رژیم ۳۵ یا بالاتر پیروزی بقاست.',
+      },
+    ],
+    ending: [
+      {
+        en: 'Political victory ends the campaign immediately; survival is judged on the final turn.',
+        fa: 'پیروزی سیاسی کارزار را فوراً پایان می‌دهد؛ بقا در نوبت پایانی سنجیده می‌شود.',
+      },
+      {
+        en: 'The enemy reacts to cost, attribution and escalation with sanctions, limited strikes, heavier pressure or isolation.',
+        fa: 'دشمن به هزینه، انتساب و تشدید با تحریم، حملات محدود، فشار سنگین‌تر یا انزوا پاسخ می‌دهد.',
+      },
+    ],
+    firstTurn: [
+      {
+        en: 'Open the GUERRILLA strip above the map and pick one action. There is one action per turn.',
+        fa: 'نوار «چریکی» بالای نقشه را باز کنید و یک اقدام انتخاب کنید. در هر نوبت یک اقدام دارید.',
+      },
+      {
+        en: 'Read the six meters before acting: high attribution and escalation are as dangerous as low stability.',
+        fa: 'پیش از اقدام شش سنجه را بخوانید: انتساب و تشدید بالا به‌اندازه ثبات پایین خطرناک‌اند.',
+      },
+    ],
+  },
+
   tutorial: {
     title: { en: 'First Strike (Tutorial)', fa: 'ضربه نخست (آموزشی)' },
     era: {

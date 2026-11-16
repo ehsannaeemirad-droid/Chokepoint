@@ -6,11 +6,24 @@
  * `t()`; map nodes and units use their localised data fields.
  */
 import { strikeCandidates, strikeTargetNodeId, strikeTargetsFor, type StrikeTarget } from '../combat/targets';
+import {
+  ASYMMETRIC_ACTIONS,
+  ASYMMETRIC_METER_DEFS,
+  asymmetricAction,
+  validateAsymmetricAction,
+} from '../asymmetric/model';
 import { FACTION_COLORS } from '../core/config';
 import { ISRAEL_AIRLIFT, REINFORCEMENTS, effectiveArrival } from '../core/engine';
 import { ARSENAL_UNCERTAINTY_PCT, arsenalRows, deliveryClassFor } from '../core/inventory';
 import { game, SCENARIOS, type Game, type InteractionMode } from '../core/Game';
-import type { FactionId, Order, PlayableFactionId, ResolveEvent, UnitInstance } from '../core/types';
+import type {
+  AsymmetricActionId,
+  FactionId,
+  Order,
+  PlayableFactionId,
+  ResolveEvent,
+  UnitInstance,
+} from '../core/types';
 import { defenderOfNode, unitType } from '../core/world';
 import { hostileTo } from '../combat/combat';
 import { ENDURANCE_PRESET } from '../combat/endurance';
@@ -115,6 +128,7 @@ const FACILITY_LABELS: Record<string, { en: string; fa: string }> = {
 const SCENARIO_FA: Record<string, string> = {
   campaign: 'دریای باریک',
   tutorial: 'ضربه نخست',
+  asymmetric: 'کارزار نامتقارن (نمونه)',
 };
 
 const bi = (value: Bi): string => (getLang() === 'fa' ? value.fa : value.en);
@@ -226,7 +240,7 @@ export class Ui {
   private cinMinor: ResolveEvent[] = [];
   private minorShown = false;
   private cinIndex = 0;
-  private modalKind: 'menu' | 'outcome' | 'review' | 'briefing' | 'replay' | null = null;
+  private modalKind: 'menu' | 'outcome' | 'review' | 'briefing' | 'replay' | 'asymmetric' | null = null;
   private replayView: { replay: ReplayFile; playback: PlaybackResult } | null = null;
   private reviewOpen = false;
   private lastFocused: HTMLElement | null = null;
@@ -386,6 +400,7 @@ export class Ui {
     else if (this.modalKind === 'outcome') this.openOutcome();
     else if (this.modalKind === 'briefing') this.openBriefing();
     else if (this.modalKind === 'replay') this.openReplay();
+    else if (this.modalKind === 'asymmetric') this.openAsymPanel();
   }
 
   private handle(action: string): void {
@@ -403,6 +418,17 @@ export class Ui {
     }
     if (verb === 'obj-detail' && a) {
       this.showObjectiveDetail(a);
+      return;
+    }
+    if (verb === 'asym-panel') return this.openAsymPanel();
+    if (verb === 'asym' && a) {
+      const result = this.game.queueOrder({
+        kind: 'asymmetric',
+        action: a as AsymmetricActionId,
+      });
+      if (!result.ok) return this.showToast(rejectionText(result), 'warn');
+      this.showToast(t('toast.asymQueued'), 'good');
+      this.openAsymPanel();
       return;
     }
     if (verb === 'end-turn') return this.openReview();
@@ -589,7 +615,7 @@ export class Ui {
     if (verb === 'brief') return this.openBriefing();
     if (verb === 'begin') {
       const scenario = a ?? this.menuScenario;
-      const faction = (b ?? this.menuFaction) as PlayableFactionId;
+      const faction = (scenario === 'asymmetric' ? 'iran' : (b ?? this.menuFaction)) as PlayableFactionId;
       this.closeModal();
       this.openPanel = null;
       this.navOpen = false;
@@ -624,6 +650,7 @@ export class Ui {
     if (verb === 'import-replay') return this.importReplay();
     if (verb === 'scenario') {
       this.menuScenario = a ?? 'campaign';
+      if (this.menuScenario === 'asymmetric') this.menuFaction = 'iran';
       this.openMenu();
       return;
     }
@@ -992,6 +1019,10 @@ export class Ui {
         return fa ? `${name} در موضع` : `${name} holds`;
       case 'aid':
         return fa ? `کمک ${order.patron === 'russia' ? 'روسیه' : 'چین'}` : `${order.patron === 'russia' ? 'Russia' : 'China'} aid`;
+      case 'asymmetric': {
+        const def = asymmetricAction(order.action);
+        return def ? t(def.labelKey) : t('order.asymmetric');
+      }
       default:
         return fa ? 'فرمان' : 'Order';
     }
@@ -2027,6 +2058,11 @@ export class Ui {
             <div class="stat"><span>${t('outcome.hormuz')}</span><b>${Math.round(s.meters.hormuz)}%</b></div>
             <div class="stat"><span>${t('outcome.iranCost')}</span><b>${Math.round(s.meters.iranWarCost)}</b></div>
           </div>
+          ${s.asymmetric ? `<div class="stat-row asym-outcome">
+            <div class="stat"><span>${t('asym.meter.stability')}</span><b>${Math.round(s.asymmetric.meters.stability)}</b></div>
+            <div class="stat"><span>${t('asym.meter.enemyCost')}</span><b>${Math.round(s.asymmetric.meters.enemyCost)}</b></div>
+            <div class="stat"><span>${t('asym.meter.attribution')}</span><b>${Math.round(s.asymmetric.meters.attribution)}</b></div>
+          </div>` : ''}
           ${scorecard}
           <div class="actions">
             <button class="primary" data-action="menu">${t('outcome.new')}</button>
@@ -2040,6 +2076,7 @@ export class Ui {
   /** Faction + scenario briefing between selection and the first turn. */
   private openBriefing(): void {
     const scenario = SCENARIOS[this.menuScenario] ?? SCENARIOS.campaign!;
+    if (scenario.mode === 'asymmetric') this.menuFaction = 'iran';
     const faction = factionBriefing(this.menuFaction);
     const scen = scenarioBriefing(scenario.id);
     this.modalKind = 'briefing';
@@ -2167,6 +2204,72 @@ export class Ui {
     `);
   }
 
+  /** Focused guerrilla action sheet; only reachable in the prototype mode. */
+  private openAsymPanel(): void {
+    const s = this.game.snap;
+    const state = s.asymmetric;
+    if (!state) return;
+    const queued = s.orders.find((order) => order.kind === 'asymmetric');
+    const meterRows = ASYMMETRIC_METER_DEFS.map((def) => {
+      const value = Math.round(state.meters[def.id]);
+      const tone = def.badHigh
+        ? value >= 70
+          ? 'alert'
+          : value >= 45
+            ? 'warn'
+            : 'info'
+        : value <= 25
+          ? 'alert'
+          : value <= 45
+            ? 'warn'
+            : 'ok';
+      return `<div class="meter-row" data-tip="${t(def.tipKey)}">
+        <span>${t(def.labelKey)}</span>
+        <div class="bar"><i style="width:${Math.max(3, value)}%;background:var(--${tone})"></i></div>
+        <b>${value}</b>
+      </div>`;
+    }).join('');
+
+    const actionRows = ASYMMETRIC_ACTIONS.map((def) => {
+      const block = validateAsymmetricAction(s, def.id);
+      const disabled = !!queued || !!block;
+      const reason = queued ? t('asym.queued') : block ? rejectionText(block) : '';
+      const effects = Object.entries(def.effects)
+        .map(([key, delta]) => {
+          const meter = ASYMMETRIC_METER_DEFS.find((m) => m.id === key);
+          const n = Math.round(delta as number);
+          return `<span class="asym-effect">${n > 0 ? '+' : ''}${n} ${meter ? t(meter.labelKey) : key}</span>`;
+        })
+        .join('');
+      const extra = [
+        def.hormuz ? `+${def.hormuz} ${t('label.hormuz')}` : '',
+        def.oilPrice ? `+${def.oilPrice} ${t('asym.oilPrice')}` : '',
+      ]
+        .filter(Boolean)
+        .join(' · ');
+      return `<button class="asym-action" data-action="asym:${def.id}" data-tip="${t(def.descKey)}" ${disabled ? 'disabled' : ''}>
+        <span class="asym-action-main"><b>${t(def.labelKey)}</b><small>${t(def.descKey)}</small></span>
+        <span class="asym-action-meta"><span>${def.cost ? t('asym.cost', { n: def.cost }) : t('asym.free')}</span>${extra ? `<span>${extra}</span>` : ''}</span>
+        <span class="asym-effects">${effects}</span>
+        ${reason ? `<span class="asym-blocked">${reason}</span>` : ''}
+      </button>`;
+    }).join('');
+
+    this.modalKind = 'asymmetric';
+    this.openModal(`
+      <div class="modal-card asym-card">
+        <header><h2>${t('asym.title')}</h2><button data-action="close-modal" aria-label="${t('btn.close')}">✕</button></header>
+        <div class="modal-body">
+          <p class="modal-note">${t('asym.subtitle')}</p>
+          <div class="asym-meters">${meterRows}</div>
+          <p class="modal-note">${t(queued ? 'asym.queued' : 'asym.oneAction')}</p>
+          <div class="asym-actions">${actionRows}</div>
+          <p class="modal-note">${t('asym.note')}</p>
+        </div>
+      </div>
+    `);
+  }
+
   private openMenu(): void {
     const saves = listSaves();
     const slotRows = SLOTS.map((slot, index) => {
@@ -2183,6 +2286,7 @@ export class Ui {
 
     const auto = saves[SLOTS.indexOf('auto')];
     const fa = getLang() === 'fa';
+    const asymmetricScenario = this.menuScenario === 'asymmetric';
     this.modalKind = 'menu';
     this.openModal(`
       <div class="modal-card">
@@ -2207,14 +2311,15 @@ export class Ui {
               <button class="choice ${this.menuEndurance ? 'active' : ''}" data-action="endurance:on">${t('menu.endurance')}<small>${t('menu.enduranceNote')}</small></button>
             </div>
             <div class="choice-row factions">
-              ${(['usa', 'israel', 'iran'] as const)
+              ${(asymmetricScenario ? (['iran'] as const) : (['usa', 'israel', 'iran'] as const))
                 .map(
                   (faction) =>
                     `<button class="choice ${this.menuFaction === faction ? 'active' : ''}" data-action="faction:${faction}"><i style="background:${FACTION_COLORS[faction]}"></i>${shortFaction(faction)}</button>`,
                 )
                 .join('')}
             </div>
-            <button class="primary wide" data-action="brief:${this.menuScenario}:${this.menuFaction}">${t('btn.start')}</button>
+            ${asymmetricScenario ? `<p class="modal-note">${t('asym.startLocked')}</p>` : ''}
+            <button class="primary wide" data-action="brief:${this.menuScenario}:${asymmetricScenario ? 'iran' : this.menuFaction}">${t('btn.start')}</button>
           </section>
           <section>
             <h3>${t('menu.saves')}</h3>
@@ -2345,6 +2450,10 @@ export class Ui {
       el.innerHTML = '';
       return;
     }
+    if (this.game.snap.asymmetric) {
+      el.innerHTML = this.asymmetricStripHtml();
+      return;
+    }
     const view = buildObjectives(this.game.snap, this.game.map);
     const rows = view.rows
       .map((row) => {
@@ -2376,6 +2485,35 @@ export class Ui {
       .join('');
     const grade = `<div class="obj-grade" data-tip="${t('tip.grade')}"><b>${view.grade}</b><span>${view.gradeLabel}</span></div>`;
     el.innerHTML = `<div class="obj-inner">${grade}${rows}</div>`;
+  }
+
+  /** Six political meters replace the classic objective rows in this mode. */
+  private asymmetricStripHtml(): string {
+    const meters = this.game.snap.asymmetric!.meters;
+    const rows = ASYMMETRIC_METER_DEFS.map((def) => {
+      const value = Math.round(meters[def.id]);
+      const tone = def.badHigh
+        ? value >= 70
+          ? 'bad'
+          : value >= 45
+            ? 'warn'
+            : 'info'
+        : value <= 25
+          ? 'bad'
+          : value <= 45
+            ? 'warn'
+            : 'ok';
+      return `<div class="obj-row ${tone}" data-tip="${t(def.tipKey)}" aria-label="${t(def.labelKey)}: ${value}">
+        <span class="obj-name">${t(def.labelKey)}</span>
+        <span class="obj-bar"><i style="width:${Math.max(3, value)}%"></i></span>
+        <span class="obj-cap">${value} / 100</span>
+      </div>`;
+    }).join('');
+    return `<div class="obj-inner">
+      <button class="obj-grade asym-open" data-action="asym-panel" data-tip="${t('asym.subtitle')}">
+        <b>⚑</b><span>${t('asym.ops')}</span>
+      </button>${rows}
+    </div>`;
   }
 
   private objLabel(row: ObjectiveRow): string {

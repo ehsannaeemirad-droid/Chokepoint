@@ -13,6 +13,7 @@ import { ISRAEL_AIRLIFT, REINFORCEMENTS } from '../core/engine';
 import { factionLabel, unitLabel } from './labels';
 import { previewOrderImpact } from './objectives';
 import { rejectionText } from './reason';
+import { asymmetricAction } from '../asymmetric/model';
 
 export interface ReviewOrder {
   index: number;
@@ -76,6 +77,10 @@ function labelFor(snap: GameSnapshot, map: TheaterMap, order: Order): string {
       return t('review.roe', { posture: t(`roe.${order.posture}`) });
     case 'nuclear':
       return fa ? 'آزمایش هسته‌ای' : 'Nuclear release';
+    case 'asymmetric': {
+      const def = asymmetricAction(order.action);
+      return def ? t(def.labelKey) : t('order.asymmetric');
+    }
     case 'special':
       return fa ? `${name} → خرابکاری` : `${name} → sabotage`;
     case 'cyber':
@@ -88,6 +93,8 @@ function labelFor(snap: GameSnapshot, map: TheaterMap, order: Order): string {
 
 function guaranteedFor(order: Order): string[] {
   switch (order.kind) {
+    case 'asymmetric':
+      return [t('asym.reviewGuaranteed')];
     case 'strike':
       return [t('review.guaranteedSortie')];
     case 'move':
@@ -127,6 +134,9 @@ export function buildTurnReview(snap: GameSnapshot, map: TheaterMap): TurnReview
   if (reserved.tankers > 0) spending.push({ label: t('review.tankers'), value: `−${reserved.tankers}` });
   if (reserved.airlift > 0) spending.push({ label: t('review.airlift'), value: `−${reserved.airlift}` });
   if (reserved.mines > 0) spending.push({ label: t('review.mines'), value: `−${reserved.mines}` });
+  if (snap.asymmetric && reserved.iranResources > 0) {
+    spending.push({ label: t('review.resources'), value: `−${reserved.iranResources}` });
+  }
   const rounds = Object.entries(reserved.rounds).filter(([, n]) => n > 0);
   if (rounds.length > 0) {
     spending.push({
