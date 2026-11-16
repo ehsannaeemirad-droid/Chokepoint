@@ -58,6 +58,13 @@ import {
   updateTalks,
   validateTalksOrder,
 } from '../politics/talks';
+import {
+  advanceAsymmetricTurn,
+  applyAsymmetricAction,
+  asymmetricAction,
+  asymmetricOutcome,
+  validateAsymmetricAction,
+} from '../asymmetric/model';
 import { BALANCE } from './config';
 import { factionRng } from './rng';
 import type { FactionId, GameSnapshot, LogisticsConfig, Order, Reinforcement, ResolveEvent, UnitInstance } from './types';
@@ -161,6 +168,7 @@ export interface OrderReservations {
   rounds: Record<DeliveryClass, number>;
   sorties: Record<'drone' | 'ballistic', number>;
   aid: boolean;
+  asymmetric: boolean;
 }
 
 export function emptyReservations(): OrderReservations {
@@ -174,6 +182,7 @@ export function emptyReservations(): OrderReservations {
     rounds: { drone: 0, fateh: 0, khorramshahr: 0, fattah: 0, asm: 0 },
     sorties: { drone: 0, ballistic: 0 },
     aid: false,
+    asymmetric: false,
   };
 }
 
@@ -233,6 +242,15 @@ export function reserveOrder(snap: GameSnapshot, reserved: OrderReservations, or
     case 'aid':
       reserved.aid = true;
       return;
+    case 'asymmetric': {
+      reserved.asymmetric = true;
+      const def = asymmetricAction(order.action);
+      if (def) {
+        reserved.iranResources += def.cost;
+        reserved.mines += def.mines ?? 0;
+      }
+      return;
+    }
     default:
       return;
   }
@@ -456,6 +474,16 @@ export function validateOrder(
         });
       }
       return { ok: true };
+    }
+    case 'asymmetric': {
+      if (!snap.asymmetric) {
+        return reject('asym-mode-only', 'That action belongs to the Asymmetric Campaign');
+      }
+      if (reserved.asymmetric) {
+        return reject('asym-one-action', 'Only one guerrilla action can be queued per turn');
+      }
+      const block = validateAsymmetricAction(snap, order.action);
+      return block ? reject(block.code, block.reason) : { ok: true };
     }
     case 'roe': {
       if (!COALITION_FACTIONS.has(snap.faction)) {
@@ -769,6 +797,10 @@ export function applyOrder(
       applyAid(snap, order.patron, order.aid, events);
       return;
     }
+    case 'asymmetric': {
+      applyAsymmetricAction(snap, order.action, events);
+      return;
+    }
     case 'communicate': {
       if (!snap.domestic) return;
       const cfg = domesticCfg(snap).communicate;
@@ -1011,8 +1043,16 @@ export function runTurn(snap: GameSnapshot, map: TheaterMap): TurnResult {
 
   advanceEndurance(snap, events);
   applyInterventions(snap, events);
-  updateVictoryClocks(snap, map);
-  const result = checkOutcome(snap, map);
+  let result: { status: GameSnapshot['status']; outcome: string };
+  if (snap.asymmetric) {
+    // The prototype has its own political clock. Classic campaigns keep the
+    // exact victory pipeline below, gated behind the absent mode marker.
+    advanceAsymmetricTurn(snap, events);
+    result = asymmetricOutcome(snap);
+  } else {
+    updateVictoryClocks(snap, map);
+    result = checkOutcome(snap, map);
+  }
   snap.status = result.status;
   snap.outcome = result.outcome;
 

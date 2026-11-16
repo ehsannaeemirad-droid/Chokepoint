@@ -36,6 +36,7 @@ import { DEFAULT_ROE_CFG, defaultRoeState } from '../politics/roe';
 import { DEFAULT_SCORECARD_CFG } from '../politics/scorecard';
 import { DEFAULT_INITIATIVE_CFG, defaultIsraelInitiative } from '../politics/initiative';
 import { DEFAULT_TALKS_CFG, defaultCeasefireTalks } from '../politics/talks';
+import { createAsymmetricState } from '../asymmetric/model';
 import type { InitiativeConfig, Meters, Resources, TalksConfig } from './types';
 import { DATA_VERSION, RULES_VERSION, SCENARIO_VERSION } from './versions';
 
@@ -74,6 +75,8 @@ export interface ScenarioDef {
   startDate?: string;
   warStarted?: boolean;
   phase?: 'prewar' | 'war';
+  /** Experimental mode marker; absent on classic campaigns. */
+  mode?: 'asymmetric';
   /** Optional endurance systems (munitions, interceptors, radar damage). */
   systems?: EnduranceSystems;
   /** Opening host-nation access posture from the order-of-battle brief. */
@@ -195,6 +198,8 @@ export class Game {
       dataVersion: DATA_VERSION,
       scenarioVersion: scenario.version ?? SCENARIO_VERSION,
       scenarioId: scenario.id,
+      mode: scenario.mode,
+      asymmetric: scenario.mode === 'asymmetric' ? createAsymmetricState() : undefined,
       faction,
       seed,
       turn: 1,

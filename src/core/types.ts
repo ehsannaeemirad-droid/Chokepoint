@@ -275,6 +275,40 @@ export interface IranStock {
   fac: number;
 }
 
+export type AsymmetricActionId =
+  | 'proxy'
+  | 'strike'
+  | 'mine'
+  | 'shipping'
+  | 'propaganda'
+  | 'deny'
+  | 'conventional'
+  | 'consolidate';
+
+export interface AsymmetricMeters {
+  /** 0 means the regime has fallen. */
+  stability: number;
+  /** Domestic political base; low support erodes stability. */
+  support: number;
+  /** International sympathy; low legitimacy enables isolation. */
+  legitimacy: number;
+  /** Cost imposed on the stronger side; the main political score. */
+  enemyCost: number;
+  /** Evidence tying operations to the player; high values invite retaliation. */
+  attribution: number;
+  /** Crisis intensity; combines with attribution for catastrophic risk. */
+  escalation: number;
+}
+
+export interface AsymmetricState {
+  meters: AsymmetricMeters;
+  lastAction?: AsymmetricActionId;
+  /** Turns spent above the retaliation threshold, kept for reporting. */
+  exposedTurns: number;
+  /** Set once attribution and escalation cross the catastrophic line. */
+  catastrophic?: boolean;
+}
+
 export type Order =
   | { kind: 'move'; unitUid: string; col: number; row: number }
   | { kind: 'strike'; unitUid: string; col: number; row: number; nodeId?: string }
@@ -293,7 +327,8 @@ export type Order =
   | { kind: 'israel-initiative'; stance: IsraelStance }
   | { kind: 'talks'; stance: TalksStance }
   | { kind: 'roe'; posture: RoePosture }
-  | { kind: 'aid'; patron: 'russia' | 'china'; aid: 'missiles' | 'production' | 'intel' };
+  | { kind: 'aid'; patron: 'russia' | 'china'; aid: 'missiles' | 'production' | 'intel' }
+  | { kind: 'asymmetric'; action: AsymmetricActionId };
 
 export type IsraelStance = 'approved' | 'constrained' | 'accepted';
 export type TalksStance = 'pursue' | 'walk';
@@ -609,6 +644,10 @@ export interface GameSnapshot {
   roe?: RoeState;
   scorecardCfg?: ScorecardConfig;
   scorecard?: Scorecard;
+  /** Experimental mode marker; absent on every classic campaign. */
+  mode?: 'asymmetric';
+  /** Asymmetric-prototype meters; present only when `mode` is asymmetric. */
+  asymmetric?: AsymmetricState;
   /** Endurance systems enabled for this scenario (absent means all off). */
   systems?: EnduranceSystems;
   /** Endurance bookkeeping; present only when a system is enabled. */

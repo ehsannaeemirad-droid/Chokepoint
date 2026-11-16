@@ -59,6 +59,16 @@ const attritionIran: IranStock = {
   fac: 3,
 };
 
+const asymmetricIran: IranStock = {
+  ...clone(base.iran),
+  resources: 110,
+  rounds: { drone: 40, fateh: 18, khorramshahr: 8, fattah: 3, asm: 6 },
+  launchers: { drone: 7, ballistic: 5, usedDrone: 0, usedBallistic: 0 },
+  mines: 2,
+  minesLaid: 0,
+  fac: 3,
+};
+
 const renewedIran: IranStock = {
   ...clone(base.iran),
   resources: 205,
@@ -122,6 +132,23 @@ const renewedResources: Partial<Resources> = {
 };
 
 export const LATE_SCENARIOS: Record<string, ScenarioDef> = {
+  // Experimental, additive mode. It reuses the theatre but owns its meters,
+  // actions and outcome in src/asymmetric/model.ts.
+  asymmetric: scenario({
+    id: 'asymmetric',
+    name: 'Asymmetric Campaign (Prototype)',
+    brief:
+      'A weaker Iran cannot win the conventional exchange. Survive, impose unsustainable political and economic costs, protect domestic support and international sympathy, and avoid leaving enough evidence to justify a general retaliation. Win politically before the clock or the regime gives way.',
+    turns: 24,
+    victory: null,
+    phase: 'war',
+    warStarted: true,
+    startDate: '2026-03-10',
+    initialHormuz: 32,
+    iran: asymmetricIran,
+    deploy: clone(base.deploy),
+    mode: 'asymmetric',
+  }),
   opening: scenario({
     id: 'opening',
     name: 'Opening Campaign',

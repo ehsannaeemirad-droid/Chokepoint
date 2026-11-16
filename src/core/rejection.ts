@@ -82,6 +82,9 @@ export const ORDER_REJECTION_CODES = [
   'iran-aid-only',
   'aid-already-queued',
   'not-enough-favors',
+  'asym-mode-only',
+  'asym-one-action',
+  'asym-too-hot',
 ] as const;
 
 export type OrderRejectCode = (typeof ORDER_REJECTION_CODES)[number];

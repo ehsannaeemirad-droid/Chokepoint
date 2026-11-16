@@ -60,6 +60,11 @@ as a guaranteed hit probability. Hex ranges are theatre distances on a compresse
 
 | Item | Value | Source | Confidence | Game mapping |
 | --- | --- | --- | --- | --- |
+| asymmetric:arsenal:asm | 6 mated_rounds | game abstraction | game-abstraction / low | 6 mated asm rounds available at turn 1; launchers, production and expenditure follow the normal rules. |
+| asymmetric:arsenal:drone | 40 mated_rounds | game abstraction | game-abstraction / low | 40 mated drone rounds available at turn 1; launchers, production and expenditure follow the normal rules. |
+| asymmetric:arsenal:fateh | 18 mated_rounds | game abstraction | game-abstraction / low | 18 mated fateh rounds available at turn 1; launchers, production and expenditure follow the normal rules. |
+| asymmetric:arsenal:fattah | 3 mated_rounds | game abstraction | game-abstraction / low | 3 mated fattah rounds available at turn 1; launchers, production and expenditure follow the normal rules. |
+| asymmetric:arsenal:khorramshahr | 8 mated_rounds | game abstraction | game-abstraction / low | 8 mated khorramshahr rounds available at turn 1; launchers, production and expenditure follow the normal rules. |
 | attrition:arsenal:asm | 5 mated_rounds | game abstraction | game-abstraction / low | 5 mated asm rounds available at turn 1; launchers, production and expenditure follow the normal rules. |
 | attrition:arsenal:drone | 31 mated_rounds | game abstraction | game-abstraction / low | 31 mated drone rounds available at turn 1; launchers, production and expenditure follow the normal rules. |
 | attrition:arsenal:fateh | 13 mated_rounds | game abstraction | game-abstraction / low | 13 mated fateh rounds available at turn 1; launchers, production and expenditure follow the normal rules. |
@@ -90,6 +95,8 @@ as a guaranteed hit probability. Hex ranges are theatre distances on a compresse
 
 | Item | Value | Source | Confidence | Game mapping |
 | --- | --- | --- | --- | --- |
+| asymmetric:launchers:ballistic | 5 launch_platforms | game abstraction | game-abstraction / low | 5 ballistic launchers at start; the launcher budget is spent per turn. |
+| asymmetric:launchers:drone | 7 launch_platforms | game abstraction | game-abstraction / low | 7 drone launchers at start; the launcher budget is spent per turn. |
 | attrition:launchers:ballistic | 5 launch_platforms | game abstraction | game-abstraction / low | 5 ballistic launchers at start; the launcher budget is spent per turn. |
 | attrition:launchers:drone | 7 launch_platforms | game abstraction | game-abstraction / low | 7 drone launchers at start; the launcher budget is spent per turn. |
 | campaign:launchers:ballistic | 9 sorties_per_turn | game abstraction | game-abstraction / low | 9 ballistic sorties per turn for Fateh/Khorramshahr/Fattah/ASM. Reset each turn; shared with the AI. |
@@ -125,6 +132,7 @@ as a guaranteed hit probability. Hex ranges are theatre distances on a compresse
 
 | Item | Value | Source | Confidence | Game mapping |
 | --- | --- | --- | --- | --- |
+| asymmetric:nuclear-material | 0 warhead_equivalents | game abstraction | game-abstraction / low | nuclearMaterial 0; intact enrichment sites and the escalation ladder carry the latency instead. |
 | attrition:nuclear-material | 0 warhead_equivalents | game abstraction | game-abstraction / low | nuclearMaterial 0; intact enrichment sites and the escalation ladder carry the latency instead. |
 | campaign:nuclear-material | 0 warhead_equivalents | game abstraction | game-abstraction / low | 0 warhead equivalents at start. The field exists to keep nuclear material disjoint from conventional rounds; no code path produces it in this build. |
 | opening:nuclear-material | 0 warhead_equivalents | game abstraction | game-abstraction / low | nuclearMaterial 0; intact enrichment sites and the escalation ladder carry the latency instead. |
@@ -135,6 +143,9 @@ as a guaranteed hit probability. Hex ranges are theatre distances on a compresse
 
 | Item | Value | Source | Confidence | Game mapping |
 | --- | --- | --- | --- | --- |
+| asymmetric:hosts | 8 host_nations | game abstraction | game-abstraction / low | Host threat seeds are listed in lateScenarios.ts; access closes through the normal politics rules. |
+| asymmetric:initial-hormuz | 32 percent_disruption | game abstraction | game-abstraction / low | Initial Hormuz disruption 32. Values above 60 trigger logistics delays. |
+| asymmetric:resources | 110 war_resources | game abstraction | game-abstraction / low | 110 starting resources with the standard per-turn income. |
 | attrition:hosts | 8 host_nations | game abstraction | game-abstraction / low | Host threat seeds are listed in lateScenarios.ts; access closes through the normal politics rules. |
 | attrition:initial-hormuz | 73 percent_disruption | game abstraction | game-abstraction / low | Initial Hormuz disruption 73. Values above 60 trigger logistics delays. |
 | attrition:resources | 58 war_resources | game abstraction | game-abstraction / low | 58 starting resources with the standard per-turn income. |
