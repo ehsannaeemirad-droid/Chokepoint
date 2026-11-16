@@ -411,6 +411,10 @@ export class Ui {
       window.location.assign('./national.html');
       return;
     }
+    if (verb === 'economic') {
+      window.location.assign('./economic.html');
+      return;
+    }
     if (verb === 'coach-dismiss') {
       this.coachDismissed = true;
       this.renderCoach();
@@ -2303,6 +2307,8 @@ export class Ui {
             ${auto ? `<button class="primary wide" data-action="continue">${t('menu.continue', { label: auto.label })}</button>` : ''}
             <button class="wide" data-action="national">${fa ? 'فرمان ملی — نمونه بازطراحی' : 'National Command — redesign prototype'}</button>
             <p class="modal-note">${fa ? 'یک حالت جداگانه رهبری ملی. کارزارهای میدانی بدون تغییر می‌مانند.' : 'A separate national-leadership mode. The theatre campaigns are unchanged.'}</p>
+            <button class="wide" data-action="economic">${fa ? 'بقای اقتصادی — حالت جدید' : 'Economic Survival — new mode'}</button>
+            <p class="modal-note">${fa ? 'یک شبیه‌ساز بحران اقتصادی ماهانه و جداگانه. بازی اصلی دست‌نخورده است.' : 'A separate monthly economic-crisis simulator. The original game is untouched.'}</p>
           </section>
           <section>
             <h3>${t('menu.new')}</h3>

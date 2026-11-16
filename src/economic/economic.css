@@ -1,0 +1,1317 @@
+/* Chokepoint: Economic Survival — an independent mode's stylesheet. */
+
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('../assets/fonts/vazirmatn-arabic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200D, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+:root {
+  --eco-bg: #0b1114;
+  --eco-bg-2: #0e171b;
+  --eco-surface: #111c21;
+  --eco-raised: #16252b;
+  --eco-line: #253b42;
+  --eco-line-soft: rgba(87, 118, 126, 0.26);
+  --eco-text: #eef3f2;
+  --eco-muted: #97aaaf;
+  --eco-dim: #657a80;
+  --eco-brass: #d8ad63;
+  --eco-brass-soft: rgba(216, 173, 99, 0.14);
+  --eco-teal: #64bdb2;
+  --eco-green: #86b78f;
+  --eco-red: #d9776b;
+  --eco-amber: #d9a75a;
+  --eco-blue: #7ea6c4;
+  --eco-radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--eco-bg);
+  color: var(--eco-text);
+  font-family: 'Segoe UI', ui-sans-serif, system-ui, -apple-system, Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+html[lang='fa'] body {
+  font-family: 'Vazirmatn', 'Segoe UI', Tahoma, sans-serif;
+  line-height: 1.65;
+}
+
+body {
+  background:
+    radial-gradient(circle at 82% 0%, rgba(44, 96, 98, 0.16), transparent 42%),
+    radial-gradient(circle at 2% 40%, rgba(146, 106, 44, 0.09), transparent 44%),
+    linear-gradient(168deg, #0c1317 0%, #0b1114 58%, #0d161a 100%);
+}
+
+button,
+a,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+  background: none;
+}
+
+.econ-shell {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Top bar ------------------------------------------------------------------ */
+
+.econ-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--eco-line-soft);
+  background: rgba(10, 17, 20, 0.86);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.econ-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.econ-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid rgba(216, 173, 99, 0.4);
+  color: var(--eco-brass);
+  font-size: 15px;
+  background: var(--eco-brass-soft);
+}
+
+.econ-brand strong {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+}
+
+.econ-brand em {
+  display: block;
+  font-style: normal;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--eco-muted);
+}
+
+.econ-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.econ-ghost,
+.econ-secondary,
+.econ-primary {
+  border-radius: 8px;
+  padding: 7px 11px;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.econ-ghost {
+  border: 1px solid var(--eco-line);
+  color: var(--eco-muted);
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.econ-ghost:hover {
+  color: var(--eco-text);
+  border-color: #3a555d;
+}
+
+.econ-secondary {
+  border: 1px solid rgba(216, 173, 99, 0.42);
+  color: var(--eco-brass);
+  background: var(--eco-brass-soft);
+}
+
+.econ-primary {
+  border: 1px solid rgba(100, 189, 178, 0.4);
+  background: linear-gradient(180deg, #1d4b47, #163c39);
+  color: #d9f2ee;
+  font-weight: 600;
+}
+
+.econ-primary:hover {
+  background: linear-gradient(180deg, #245a55, #1a4743);
+}
+
+.econ-link {
+  color: var(--eco-teal);
+  font-size: 12px;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.econ-ghost.is-disabled,
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Start screen ------------------------------------------------------------- */
+
+.econ-start {
+  width: min(1080px, 100%);
+  margin: 0 auto;
+  padding: 26px 16px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.econ-hero h1 {
+  margin: 6px 0 10px;
+  font-size: clamp(28px, 7vw, 46px);
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  font-weight: 650;
+}
+
+.econ-kicker {
+  margin: 0;
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--eco-brass);
+}
+
+.econ-lead {
+  margin: 0;
+  color: #c4d2d3;
+  font-size: 14.5px;
+  max-width: 62ch;
+}
+
+.econ-disclaimer {
+  display: inline-block;
+  margin: 12px 0 0;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--eco-line);
+  color: var(--eco-dim);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+
+.econ-segmented {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--eco-line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  width: fit-content;
+}
+
+.econ-segmented button {
+  padding: 7px 18px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  color: var(--eco-muted);
+  letter-spacing: 0.04em;
+}
+
+.econ-segmented button.is-active {
+  background: rgba(216, 173, 99, 0.16);
+  color: var(--eco-brass);
+}
+
+.econ-start-heading {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--eco-muted);
+}
+
+.econ-scenarios {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr;
+}
+
+.econ-scenario {
+  text-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 14px;
+  border-radius: var(--eco-radius);
+  border: 1px solid var(--eco-line);
+  background: linear-gradient(160deg, rgba(22, 37, 43, 0.9), rgba(13, 23, 27, 0.9));
+  transition: border-color 140ms ease, transform 140ms ease;
+}
+
+.econ-scenario:hover {
+  border-color: #3d5a62;
+}
+
+.econ-scenario.is-active {
+  border-color: rgba(216, 173, 99, 0.65);
+  box-shadow: inset 0 0 0 1px rgba(216, 173, 99, 0.16);
+}
+
+.econ-scenario-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.econ-scenario-head strong {
+  font-size: 15px;
+}
+
+.econ-scenario-head em {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--eco-dim);
+  white-space: nowrap;
+}
+
+.econ-scenario-blurb {
+  color: var(--eco-muted);
+  font-size: 12.8px;
+}
+
+.econ-scenario-tag {
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--eco-brass);
+}
+
+.econ-sandbox {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.econ-slider {
+  display: grid;
+  grid-template-columns: 1fr 60px;
+  gap: 4px 10px;
+  align-items: center;
+  font-size: 12.5px;
+  color: var(--eco-muted);
+}
+
+.econ-slider input {
+  grid-column: 1 / -1;
+  width: 100%;
+  accent-color: var(--eco-brass);
+}
+
+.econ-slider output {
+  grid-column: 2;
+  grid-row: 1;
+  text-align: end;
+  color: var(--eco-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.econ-start-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.econ-start-actions .econ-primary,
+.econ-start-actions .econ-secondary {
+  flex: 1 1 220px;
+  padding: 13px 16px;
+  font-size: 13.5px;
+}
+
+.econ-footnote {
+  margin: 0;
+  color: var(--eco-dim);
+  font-size: 11.5px;
+}
+
+/* Status and navigation ---------------------------------------------------- */
+
+.econ-statusbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--eco-line-soft);
+}
+
+.econ-statusbar strong {
+  display: block;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+}
+
+.econ-status-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font-size: 11.5px;
+  color: var(--eco-muted);
+  text-align: end;
+}
+
+.econ-pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+}
+
+.econ-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--eco-line-soft);
+  background: rgba(9, 15, 18, 0.6);
+  position: sticky;
+  top: 55px;
+  z-index: 20;
+  scrollbar-width: none;
+}
+
+.econ-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.econ-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 68px;
+  padding: 6px 10px;
+  border-radius: 9px;
+  color: var(--eco-dim);
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  border: 1px solid transparent;
+}
+
+.econ-tab span {
+  font-size: 15px;
+}
+
+.econ-tab em {
+  font-style: normal;
+}
+
+.econ-tab.is-active {
+  color: var(--eco-brass);
+  border-color: rgba(216, 173, 99, 0.32);
+  background: var(--eco-brass-soft);
+}
+
+/* Main grid ---------------------------------------------------------------- */
+
+.econ-main {
+  flex: 1;
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 14px 12px 108px;
+}
+
+.econ-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+
+.econ-card {
+  border: 1px solid var(--eco-line);
+  border-radius: var(--eco-radius);
+  background: linear-gradient(165deg, rgba(20, 33, 39, 0.94), rgba(12, 21, 25, 0.96));
+  padding: 14px;
+  min-width: 0;
+}
+
+.econ-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.econ-card-head h2 {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: #cfdbdc;
+  font-weight: 600;
+}
+
+.econ-hint {
+  font-size: 11px;
+  color: var(--eco-dim);
+  margin: 6px 0 0;
+}
+
+.econ-note {
+  color: var(--eco-dim);
+  font-size: 11.5px;
+  margin: 8px 0 0;
+}
+
+/* Metrics ------------------------------------------------------------------ */
+
+.econ-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.econ-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 10px;
+  border-radius: 9px;
+  border: 1px solid var(--eco-line-soft);
+  background: rgba(255, 255, 255, 0.014);
+  border-inline-start: 2px solid var(--eco-line);
+}
+
+.econ-metric-label {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--eco-muted);
+}
+
+.econ-metric strong {
+  font-size: 20px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.econ-metric-sub {
+  font-size: 10.5px;
+  color: var(--eco-dim);
+}
+
+.tone-good {
+  color: var(--eco-green);
+}
+
+.tone-warn {
+  color: var(--eco-amber);
+}
+
+.tone-bad {
+  color: var(--eco-red);
+}
+
+.tone-info {
+  color: var(--eco-blue);
+}
+
+.econ-metric.tone-good {
+  border-inline-start-color: var(--eco-green);
+}
+
+.econ-metric.tone-warn {
+  border-inline-start-color: var(--eco-amber);
+}
+
+.econ-metric.tone-bad {
+  border-inline-start-color: var(--eco-red);
+}
+
+/* Issues ------------------------------------------------------------------- */
+
+.econ-issues {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.econ-issue {
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--eco-line-soft);
+  border-inline-start: 2px solid var(--eco-line);
+  background: rgba(255, 255, 255, 0.012);
+}
+
+.econ-issue.tone-bad {
+  border-inline-start-color: var(--eco-red);
+}
+
+.econ-issue.tone-warn {
+  border-inline-start-color: var(--eco-amber);
+}
+
+.econ-issue.tone-good {
+  border-inline-start-color: var(--eco-green);
+}
+
+.econ-issue h3 {
+  margin: 0 0 2px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.econ-issue p {
+  margin: 0;
+  font-size: 11.8px;
+  color: var(--eco-muted);
+}
+
+/* Forecast and charts ------------------------------------------------------ */
+
+.econ-forecast {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.econ-forecast div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.econ-forecast span {
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--eco-muted);
+}
+
+.econ-forecast strong {
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+
+.econ-forecast em {
+  font-style: normal;
+  font-size: 10.5px;
+  color: var(--eco-dim);
+}
+
+.econ-chart-wrap {
+  position: relative;
+  margin-top: 10px;
+}
+
+.econ-chart {
+  width: 100%;
+  height: 84px;
+  display: block;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.econ-chart-empty {
+  height: 60px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.econ-chart-label {
+  position: absolute;
+  inset-inline-start: 8px;
+  bottom: 5px;
+  font-size: 9.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--eco-dim);
+}
+
+/* Rows, bars, splits ------------------------------------------------------- */
+
+.econ-rows {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.econ-rows > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(94, 122, 130, 0.14);
+}
+
+.econ-rows > div:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.econ-rows dt {
+  font-size: 12px;
+  color: var(--eco-muted);
+}
+
+.econ-rows dd {
+  margin: 0;
+  font-size: 12.8px;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.econ-split {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.econ-split h3 {
+  margin: 0 0 6px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--eco-dim);
+}
+
+.econ-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.econ-bar-row {
+  display: grid;
+  grid-template-columns: minmax(88px, 1.15fr) 2fr auto;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--eco-muted);
+}
+
+.econ-bar-row em {
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  color: var(--eco-text);
+  font-size: 11.5px;
+  min-width: 34px;
+  text-align: end;
+}
+
+.econ-bar {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(148, 170, 175, 0.16);
+  overflow: hidden;
+}
+
+.econ-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--eco-teal);
+}
+
+.econ-bar.tone-good i {
+  background: var(--eco-green);
+}
+
+.econ-bar.tone-warn i {
+  background: var(--eco-amber);
+}
+
+.econ-bar.tone-bad i {
+  background: var(--eco-red);
+}
+
+.econ-meter {
+  display: grid;
+  grid-template-columns: 1fr 2fr auto;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+  font-size: 11.5px;
+  color: var(--eco-muted);
+}
+
+.econ-meter em {
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  color: var(--eco-text);
+}
+
+/* Imports, partners, map --------------------------------------------------- */
+
+.econ-imports {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.econ-import-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12.5px;
+  margin-bottom: 5px;
+}
+
+.econ-import-head em {
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+.econ-partners {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.econ-partner .econ-bar-row {
+  grid-template-columns: 1fr auto;
+  margin: 4px 0;
+}
+
+.econ-partner > span:first-child {
+  font-size: 12.5px;
+}
+
+.econ-map svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 72% 42%, rgba(56, 104, 108, 0.18), transparent 46%),
+    rgba(255, 255, 255, 0.012);
+}
+
+.econ-route {
+  stroke-width: 1.6;
+  stroke-dasharray: 4 4;
+  opacity: 0.7;
+}
+
+.econ-route.tone-good {
+  stroke: var(--eco-green);
+}
+
+.econ-route.tone-warn {
+  stroke: var(--eco-amber);
+}
+
+.econ-route.tone-bad {
+  stroke: var(--eco-red);
+}
+
+.econ-map-node {
+  cursor: pointer;
+  outline: none;
+}
+
+.econ-map-node circle {
+  fill: #1d3238;
+  stroke: #6d8b91;
+  stroke-width: 1.4;
+  transition: fill 120ms ease, stroke 120ms ease;
+}
+
+.econ-map-node:hover circle,
+.econ-map-node:focus-visible circle {
+  fill: #2a4a52;
+  stroke: var(--eco-teal);
+}
+
+.econ-map-node.is-active circle {
+  fill: var(--eco-brass-soft);
+  stroke: var(--eco-brass);
+  stroke-width: 2;
+}
+
+.econ-map-node circle.node-energy {
+  fill: #3a2f1c;
+}
+
+.econ-map-node circle.node-port {
+  fill: #17333a;
+}
+
+.econ-map-node circle.node-farm {
+  fill: #22331f;
+}
+
+.econ-map-node circle.node-industry {
+  fill: #2c2a36;
+}
+
+.econ-map-node circle.node-partner {
+  fill: #20303a;
+}
+
+.econ-map-node text {
+  fill: #b9c9cb;
+  font-size: 9.5px;
+  letter-spacing: 0.02em;
+}
+
+.econ-map-node.is-active text {
+  fill: var(--eco-brass);
+}
+
+.econ-map-detail {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  color: #cbd8d9;
+}
+
+/* Lists, groups, institutions, policies ------------------------------------ */
+
+.econ-list {
+  margin: 0;
+  padding-inline-start: 16px;
+  font-size: 12.5px;
+  color: var(--eco-muted);
+}
+
+.econ-list li {
+  margin-bottom: 4px;
+}
+
+.econ-groups {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.econ-groups li {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(94, 122, 130, 0.14);
+}
+
+.econ-groups li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.econ-groups strong {
+  font-size: 12.5px;
+}
+
+.econ-groups span {
+  font-size: 11.8px;
+  color: var(--eco-muted);
+}
+
+.econ-institutions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.econ-glyph {
+  color: var(--eco-brass);
+  margin-inline-end: 7px;
+}
+
+.econ-recommendation {
+  margin: 0 0 10px;
+  padding: 9px 11px;
+  border-radius: 8px;
+  border: 1px solid var(--eco-line-soft);
+  background: rgba(216, 173, 99, 0.05);
+  font-size: 12px;
+  color: #c9d6d7;
+}
+
+.econ-policies {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.econ-policy {
+  border: 1px solid var(--eco-line-soft);
+  border-radius: 10px;
+  padding: 11px;
+  background: rgba(255, 255, 255, 0.012);
+}
+
+.econ-policy.is-queued {
+  border-color: rgba(216, 173, 99, 0.5);
+  background: rgba(216, 173, 99, 0.05);
+}
+
+.econ-policy.is-active {
+  border-color: rgba(100, 189, 178, 0.35);
+}
+
+.econ-policy header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.econ-policy h3 {
+  margin: 0 0 2px;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.econ-policy header p {
+  margin: 0;
+  font-size: 11.8px;
+  color: var(--eco-muted);
+}
+
+.econ-cost {
+  flex: none;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--eco-line);
+  color: var(--eco-brass);
+  white-space: nowrap;
+}
+
+.econ-policy-support {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: center;
+  margin: 9px 0;
+  font-size: 11px;
+  color: var(--eco-dim);
+}
+
+.econ-policy-support em {
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+.econ-policy details {
+  border-top: 1px solid rgba(94, 122, 130, 0.16);
+  padding-top: 7px;
+}
+
+.econ-policy summary {
+  cursor: pointer;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--eco-dim);
+}
+
+.econ-policy-detail {
+  margin-top: 8px;
+  display: grid;
+  gap: 8px;
+}
+
+.econ-policy-detail h4 {
+  margin: 0 0 3px;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--eco-muted);
+}
+
+.econ-policy-detail ul {
+  margin: 0;
+  padding-inline-start: 15px;
+  font-size: 11.8px;
+  color: #c3d1d2;
+}
+
+.econ-policy footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 9px;
+}
+
+/* Decision dock ------------------------------------------------------------ */
+
+.econ-decision-dock {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(216, 173, 99, 0.22);
+  background: rgba(10, 17, 20, 0.96);
+  backdrop-filter: blur(10px);
+}
+
+.econ-dock-queued {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-height: 0;
+}
+
+.econ-dock-empty {
+  font-size: 11.5px;
+  color: var(--eco-dim);
+}
+
+.econ-dock-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.econ-capital {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--eco-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.econ-dock-actions .econ-primary {
+  padding: 11px 20px;
+  font-size: 13px;
+}
+
+.econ-chip {
+  font-size: 11px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(216, 173, 99, 0.4);
+  background: rgba(216, 173, 99, 0.1);
+  color: #e6cf9f;
+}
+
+/* Report and outcome modals ------------------------------------------------ */
+
+.econ-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(4, 8, 10, 0.78);
+  backdrop-filter: blur(4px);
+  overflow-y: auto;
+}
+
+.econ-modal-card {
+  width: min(620px, 100%);
+  border: 1px solid var(--eco-line);
+  border-radius: 14px;
+  background: linear-gradient(168deg, #15242a, #0e1a1f);
+  padding: 18px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+
+.econ-modal-card header h2 {
+  margin: 4px 0 12px;
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.econ-modal-card footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.econ-outcome.tone-good {
+  border-color: rgba(134, 183, 143, 0.5);
+}
+
+.econ-outcome.tone-bad {
+  border-color: rgba(217, 119, 107, 0.5);
+}
+
+.econ-outcome .econ-lead {
+  margin-bottom: 14px;
+}
+
+.econ-report-headline {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #d7e2e3;
+}
+
+.econ-report-lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.econ-report-lines li {
+  position: relative;
+  padding-inline-start: 13px;
+  font-size: 12.5px;
+  color: #c6d4d5;
+}
+
+.econ-report-lines li::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0.55em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.8;
+}
+
+.econ-toast {
+  position: fixed;
+  inset-inline: 16px;
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  z-index: 70;
+  width: fit-content;
+  max-width: calc(100% - 32px);
+  margin-inline: auto;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(216, 173, 99, 0.45);
+  background: #1a2a30;
+  color: #e6edee;
+  font-size: 12.5px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Wider layouts ------------------------------------------------------------ */
+
+@media (min-width: 620px) {
+  .econ-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .econ-scenarios {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .econ-topbar {
+    padding: 12px 22px;
+  }
+
+  .econ-statusbar {
+    padding: 18px 22px 12px;
+  }
+
+  .econ-main {
+    padding: 18px 20px 112px;
+  }
+
+  .econ-split {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 940px) {
+  .econ-start {
+    padding: 40px 24px 80px;
+  }
+
+  .econ-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .econ-briefing,
+  .econ-institutions > .econ-card:first-child,
+  .econ-institutions > .econ-card {
+    grid-column: 1 / -1;
+  }
+
+  .econ-institutions {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .econ-decision-dock {
+    padding-inline: max(24px, calc((100vw - 1120px) / 2));
+  }
+
+  .econ-tabs {
+    justify-content: center;
+    top: 57px;
+  }
+
+  .econ-tab {
+    flex-direction: row;
+    gap: 7px;
+    min-width: 0;
+    padding: 8px 18px;
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

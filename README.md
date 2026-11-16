@@ -14,6 +14,20 @@ does not alter the classic campaign logic. Read [the design and scope note](docs
 
 Open it at `/national.html` or from **National Command — redesign prototype** in the classic menu.
 
+### Economic Survival mode
+
+`economic.html` is a second separate mode: a monthly national economic crisis simulator. You run the
+central bank, finance ministry, energy, trade, economic security and political leadership of one
+illustrative country, managing reserves, exchange rates, inflation, the budget, oil exports, essential
+imports, subsidies, banks, household welfare and political legitimacy under rising external pressure.
+It has five campaign scenarios, an open sandbox, six institutions, eighteen policies with costs,
+immediate/delayed/monthly effects and institutional support, data-driven events, forecasts, monthly
+reports, eight ending verdicts, English/Persian with RTL, and its own save key
+(`chokepoint:economic:v1`). All economic data is illustrative and labelled as such.
+
+Open it at `/economic.html` or from **Economic Survival — new mode** in the classic menu. It does not
+load the theatre engine and does not change classic or National Command behaviour.
+
 Built with TypeScript (strict), Phaser 4, Vite and Vitest. The map is a 79 × 70 hex theatre of the
 Middle East (26°E–78°E, 8°N–44°N); the interface is a DOM overlay above the canvas so text stays
 sharp and accessible.
