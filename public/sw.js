@@ -1,6 +1,6 @@
 /* Chokepoint service worker: app shell offline after first visit. */
-const CACHE = 'chokepoint-v1';
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
+const CACHE = 'chokepoint-v2';
+const SHELL = ['./', './index.html', './national.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -27,16 +27,17 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== location.origin) return;
 
-  // Navigation: network first, fall back to the cached shell (offline play).
+  // Navigation: network first, fall back to the matching cached shell (offline play).
   if (request.mode === 'navigate') {
+    const shell = url.pathname.endsWith('/national.html') ? './national.html' : './index.html';
     event.respondWith(
       fetch(request)
         .then((response) => {
           const copy = response.clone();
-          caches.open(CACHE).then((cache) => cache.put('./index.html', copy));
+          caches.open(CACHE).then((cache) => cache.put(shell, copy));
           return response;
         })
-        .catch(() => caches.match('./index.html')),
+        .catch(() => caches.match(shell)),
     );
     return;
   }

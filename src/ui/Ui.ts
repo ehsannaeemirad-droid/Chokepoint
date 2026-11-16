@@ -407,6 +407,10 @@ export class Ui {
     const [verb, a, b] = action.split(':');
 
     if (verb === 'menu') return this.openMenu();
+    if (verb === 'national') {
+      window.location.assign('./national.html');
+      return;
+    }
     if (verb === 'coach-dismiss') {
       this.coachDismissed = true;
       this.renderCoach();
@@ -2060,6 +2064,8 @@ export class Ui {
           </div>
           ${s.asymmetric ? `<div class="stat-row asym-outcome">
             <div class="stat"><span>${t('asym.meter.stability')}</span><b>${Math.round(s.asymmetric.meters.stability)}</b></div>
+            <div class="stat"><span>${t('asym.meter.support')}</span><b>${Math.round(s.asymmetric.meters.support)}</b></div>
+            <div class="stat"><span>${t('asym.meter.legitimacy')}</span><b>${Math.round(s.asymmetric.meters.legitimacy)}</b></div>
             <div class="stat"><span>${t('asym.meter.enemyCost')}</span><b>${Math.round(s.asymmetric.meters.enemyCost)}</b></div>
             <div class="stat"><span>${t('asym.meter.attribution')}</span><b>${Math.round(s.asymmetric.meters.attribution)}</b></div>
           </div>` : ''}
@@ -2295,6 +2301,8 @@ export class Ui {
           <section>
             <p class="modal-note">${t('menu.blurb')}</p>
             ${auto ? `<button class="primary wide" data-action="continue">${t('menu.continue', { label: auto.label })}</button>` : ''}
+            <button class="wide" data-action="national">${fa ? 'فرمان ملی — نمونه بازطراحی' : 'National Command — redesign prototype'}</button>
+            <p class="modal-note">${fa ? 'یک حالت جداگانه رهبری ملی. کارزارهای میدانی بدون تغییر می‌مانند.' : 'A separate national-leadership mode. The theatre campaigns are unchanged.'}</p>
           </section>
           <section>
             <h3>${t('menu.new')}</h3>

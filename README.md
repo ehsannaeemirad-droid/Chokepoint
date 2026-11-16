@@ -4,6 +4,16 @@ A mobile-first, single-player, turn-based strategy game about the 2026 Gulf war.
 United States, Israel or Iran over thirty turns while allied host nations decide, one missile impact
 at a time, whether they still want you on their soil.
 
+### National Command redesign mode
+
+`national.html` is a separate national-leadership crisis mode in the same repository: Iran or the
+United States, three ten/twelve-week campaigns, an open sandbox with a custom crisis constructor,
+six departments, player-selected national priorities, intelligence, diplomacy, tactical air-defence
+allocation, event definitions, replay export/import and six map layers. It does not load Phaser and
+does not alter the classic campaign logic. Read [the design and scope note](docs/NATIONAL_COMMAND.md).
+
+Open it at `/national.html` or from **National Command — redesign prototype** in the classic menu.
+
 Built with TypeScript (strict), Phaser 4, Vite and Vitest. The map is a 79 × 70 hex theatre of the
 Middle East (26°E–78°E, 8°N–44°N); the interface is a DOM overlay above the canvas so text stays
 sharp and accessible.
@@ -15,8 +25,8 @@ sharp and accessible.
 ```bash
 corepack pnpm install     # pnpm 10 via corepack
 corepack pnpm dev         # http://localhost:5173
-corepack pnpm test        # 141 unit/integration tests
-corepack pnpm build       # typecheck + production bundle in dist/
+corepack pnpm test        # unit/integration tests
+corepack pnpm build       # typecheck + production bundle in dist/ (includes national.html)
 corepack pnpm preview     # serve the production build
 ```
 

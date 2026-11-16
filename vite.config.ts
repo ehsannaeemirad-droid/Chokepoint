@@ -11,6 +11,10 @@ export default defineConfig({
     target: 'es2022',
     assetsInlineLimit: 0,
     rollupOptions: {
+      input: {
+        main: 'index.html',
+        national: 'national.html',
+      },
       output: {
         manualChunks(id: string) {
           return id.includes('node_modules/phaser') ? 'phaser' : undefined;

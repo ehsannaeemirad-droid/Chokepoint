@@ -42,7 +42,7 @@ const CATEGORY_ORDER: StringKey[] = [
 
 /** Information words that still change the player's picture when they fire. */
 const SIGNIFICANT_INFO =
-  /escalat|closed|clos(?:e|ing)\b|collapse|victory|defeat|signed|agreed|breakthrough|detected|revealed|intelligence|warning|ceasefire|talks/i;
+  /escalat|closed|clos(?:e|ing)\b|collapse|victory|defeat|signed|agreed|breakthrough|detected|revealed|intelligence|warning|ceasefire|talks|guerrilla action/i;
 
 /** A development worth interrupting for, versus a bookkeeping line. */
 export function importanceOf(event: ResolveEvent): Importance {

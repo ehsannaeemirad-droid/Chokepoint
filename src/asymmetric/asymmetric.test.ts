@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { Game } from '../core/Game';
 import { BALANCE } from '../core/config';
-import type { AsymmetricActionId } from '../core/types';
-import { asymmetricOutcome, ASYMMETRIC_START } from './model';
+import type { AsymmetricActionId, ResolveEvent } from '../core/types';
+import { applyAsymmetricAction, asymmetricOutcome, ASYMMETRIC_START } from './model';
 import { buildTurnReview } from '../ui/review';
+import { buildReport } from '../ui/report';
 
 function asymmetric(seed = 7): Game {
   const game = new Game();
@@ -42,6 +43,15 @@ describe('asymmetric campaign prototype', () => {
     expect(game.snap.status).toBe('playing');
     expect(game.snap.iran.resources).toBe(before - 2 + BALANCE.iranResourceIncome);
     expect(game.snap.asymmetric?.lastAction).toBe('proxy');
+  });
+
+  it('shows the player action in the turn report instead of burying it as minor', () => {
+    const game = asymmetric();
+    const events: ResolveEvent[] = [];
+    applyAsymmetricAction(game.snap, 'proxy', events);
+    const report = buildReport(events);
+    expect(report.majorCount).toBe(1);
+    expect(report.groups.flatMap((group) => group.events)[0]!.text).toContain('Guerrilla action');
   });
 
   it('does not allow the prototype action in a classic Iran campaign', () => {
