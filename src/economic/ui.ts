@@ -223,6 +223,7 @@ const TEXT = {
   verdict: l('Post-game analysis', 'تحلیل پس از بازی'),
   saveHint: l('Saved automatically each month.', 'هر ماه به‌طور خودکار ذخیره می‌شود.'),
   seeVerdict: l('See the verdict', 'دیدن نتیجه'),
+  menu: l('Menu', 'منو'),
   review: l('Review the situation', 'بررسی وضعیت'),
   ended: l('The crisis is over', 'بحران تمام شد'),
 };
@@ -299,9 +300,11 @@ export class EconomicApp {
   private tab: Tab = 'overview';
   private startMode: StartMode = 'campaign';
   private scenario: ScenarioId = 'hormuz';
-  private sandbox = { reserves: 18.4, oilPrice: 91, sanctions: 55, stability: 52, shipping: 55 };
+  private sandbox = { reserves: 18.5, oilPrice: 91, sanctions: 55, stability: 52, shipping: 55 };
   private modal: Modal = null;
   private outcomePending = false;
+  private modalWasOpen = false;
+  private focusBeforeModal: HTMLElement | null = null;
   private mapNode = 'hormuz';
   private toast = '';
   private toastTimer = 0;
@@ -318,6 +321,17 @@ export class EconomicApp {
     this.root.addEventListener('click', (event) => this.onClick(event));
     this.root.addEventListener('input', (event) => this.onInput(event));
     this.root.addEventListener('keydown', (event) => {
+      if (this.modal) {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          this.closeModal();
+          return;
+        }
+        if (event.key === 'Tab') {
+          this.trapTab(event);
+          return;
+        }
+      }
       if (event.key !== 'Enter' && event.key !== ' ') return;
       const target = (event.target as Element).closest<SVGGElement>('[data-act="map-node"]');
       if (!target) return;
@@ -342,6 +356,49 @@ export class EconomicApp {
     }
     this.applyDocumentLanguage();
     this.render();
+  }
+
+  private closeModal(): void {
+    if (!this.modal) return;
+    if (this.modal === 'outcome' || !this.outcomePending) {
+      this.modal = null;
+    } else {
+      // The final report hands over to the verdict instead of dismissing it.
+      this.modal = 'outcome';
+    }
+    this.outcomePending = false;
+    this.render();
+  }
+
+  private trapTab(event: KeyboardEvent): void {
+    const modal = this.root.querySelector<HTMLElement>('.econ-modal');
+    if (!modal) return;
+    const card = modal.querySelector<HTMLElement>('.econ-modal-card');
+    const focusables = Array.from(
+      modal.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input:not([disabled]), select, textarea, summary, [tabindex]:not([tabindex="-1"])'),
+    ).filter((element) => element.offsetParent !== null || element === document.activeElement);
+    if (focusables.length === 0) {
+      event.preventDefault();
+      card?.focus();
+      return;
+    }
+    const first = focusables[0]!;
+    const last = focusables[focusables.length - 1]!;
+    const active = document.activeElement;
+    if (event.shiftKey) {
+      if (!active || active === card || active === first || !modal.contains(active)) {
+        event.preventDefault();
+        last.focus();
+      }
+    } else if (!active || active === last || active === card || !modal.contains(active)) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  private focusModal(): void {
+    const card = this.root.querySelector<HTMLElement>('.econ-modal-card');
+    card?.focus();
   }
 
   private flash(message: string): void {
@@ -449,8 +506,13 @@ export class EconomicApp {
         this.render();
         return;
       case 'close-modal':
-        this.modal = this.outcomePending ? 'outcome' : null;
+        this.closeModal();
+        return;
+      case 'menu':
+        this.state = null;
+        this.modal = null;
         this.outcomePending = false;
+        this.tab = 'overview';
         this.render();
         return;
       case 'map-node':
@@ -480,11 +542,25 @@ export class EconomicApp {
   }
 
   render(): void {
+    const willOpen = this.modal !== null;
+    if (willOpen && !this.modalWasOpen) {
+      const active = document.activeElement;
+      this.focusBeforeModal = active instanceof HTMLElement && active !== document.body ? active : null;
+    }
     this.root.innerHTML = this.state ? this.renderGame(this.state) : this.renderStart();
     if (this.modal && this.state) {
       this.root.insertAdjacentHTML('beforeend', this.renderModal(this.state, this.modal));
+      this.focusModal();
     }
     if (this.toast) this.root.insertAdjacentHTML('beforeend', `<div class="econ-toast">${this.toast}</div>`);
+    if (!willOpen && this.modalWasOpen) {
+      const previous = this.focusBeforeModal;
+      this.focusBeforeModal = null;
+      if (previous && document.contains(previous)) previous.focus();
+      else this.root.querySelector<HTMLElement>('[data-act="outcome"], [data-act="resolve"], .econ-tab.is-active')?.focus();
+    }
+    this.modalWasOpen = willOpen;
+    document.body.style.overflow = willOpen ? 'hidden' : '';
   }
 
   private header(inner: string): string {
@@ -569,10 +645,10 @@ export class EconomicApp {
       </button>`,
     ).join('');
     return `<div class="econ-shell">
-      ${this.header(`<button class="econ-ghost" data-act="save">${this.text('save')}</button>`)}
+      ${this.header(`<button class="econ-ghost" data-act="menu">${this.text('menu')}</button><button class="econ-ghost" data-act="save">${this.text('save')}</button>`)}
       <header class="econ-statusbar">
         <div>
-          <span class="econ-kicker">${copy(SCENARIOS[state.scenario].short, this.lang)}</span>
+          <span class="econ-kicker">${state.mode === 'sandbox' ? this.text('sandbox') : copy(SCENARIOS[state.scenario].short, this.lang)}</span>
           <strong>${month}</strong>
         </div>
         <div class="econ-status-meta">
@@ -1115,9 +1191,9 @@ export class EconomicApp {
     const report = state.report;
     if (!report) return '';
     const last = state.status !== 'playing';
-    return `<div class="econ-modal" role="dialog" aria-modal="true">
-      <div class="econ-modal-card">
-        <header><span class="econ-kicker">${this.text('report')} · ${this.formatMonthLabel(report.month)}</span><h2>${copy(report.headline, this.lang)}</h2></header>
+    return `<div class="econ-modal" role="dialog" aria-modal="true" aria-labelledby="econ-dialog-title">
+      <div class="econ-modal-card" tabindex="-1">
+        <header><span class="econ-kicker">${this.text('report')} · ${this.formatMonthLabel(report.month)}</span><h2 id="econ-dialog-title">${copy(report.headline, this.lang)}</h2></header>
         <ul class="econ-report-lines">${report.lines.map((line) => `<li class="tone-${line.tone}">${copy(line.text, this.lang)}</li>`).join('')}</ul>
         <footer>
           ${last ? '' : `<button class="econ-secondary" data-act="goto" data-tab="government">${this.text('decisions')}</button>`}
@@ -1136,9 +1212,9 @@ export class EconomicApp {
       [this.text('productive'), outcome.axes.productive],
       [this.text('independence'), outcome.axes.independence],
     ];
-    return `<div class="econ-modal" role="dialog" aria-modal="true">
-      <div class="econ-modal-card econ-outcome tone-${outcome.status === 'lost' ? 'bad' : outcome.status === 'won' ? 'good' : 'warn'}">
-        <header><span class="econ-kicker">${this.text('verdict')}</span><h2>${copy(outcome.title, this.lang)}</h2></header>
+    return `<div class="econ-modal" role="dialog" aria-modal="true" aria-labelledby="econ-dialog-title">
+      <div class="econ-modal-card econ-outcome tone-${outcome.status === 'lost' ? 'bad' : outcome.status === 'won' ? 'good' : 'warn'}" tabindex="-1">
+        <header><span class="econ-kicker">${this.text('verdict')}</span><h2 id="econ-dialog-title">${copy(outcome.title, this.lang)}</h2></header>
         <p class="econ-lead">${copy(outcome.text, this.lang)}</p>
         <div class="econ-bars">${axes
           .map(([label, value]) => `<div class="econ-bar-row"><span>${label}</span>${bar(value)}<em>${fmt(value, this.lang)}</em></div>`)

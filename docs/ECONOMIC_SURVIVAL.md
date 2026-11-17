@@ -122,6 +122,14 @@ Early humanitarian, financial or political collapse is still possible through ba
 reserves on intervention, cutting subsidies without compensation, or letting food and medicine
 coverage fall near zero.
 
+## Interface behaviour
+
+Monthly reports and the verdict are modal dialogs: they take focus when they open, keep Tab
+inside themselves, close with Escape, and return focus to the board. On the final month, Escape on
+the report opens the verdict rather than skipping it. The in-game header's **Menu** returns to the
+start screen and keeps the saved situation available under **Continue**; **New session** on the
+verdict clears it.
+
 ## Known limitations
 
 - One country, one currency, illustrative numbers; no historical dataset or sourcing claims.
