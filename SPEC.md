@@ -161,24 +161,15 @@ Inspect the actual repository before editing. The following files have been iden
 
 These paths are a starting point, not permission to assume that every file is current or complete.
 
-## 6. Branch and deployment warning
+## 6. Branch and deployment
 
-The initial audit found a discrepancy:
+`main` is the canonical branch and the only one the Pages workflow deploys: every push to `main`
+runs typecheck, tests and the production build, then publishes `dist/`. The discrepancy recorded by
+the first audit (`main` holding core source while a feature branch held the reviewed interface) is
+resolved; the published site is rebuilt from `main` on every push.
 
-- `main` contains the current core source.
-- `feature/prewar-legibility-realism` contains the complete UI source and styles reviewed during the audit.
-- The published website may not reflect the feature branch.
-
-Before making changes:
-
-1. Inspect all available branches.
-2. Identify the intended production branch.
-3. Compare the relevant source files.
-4. Determine which interface version is actually deployed.
-5. Establish one canonical source of truth.
-6. Document the chosen baseline.
-
-Do not merge branches blindly.
+Before making changes, still confirm you are on the intended branch and compare the relevant source
+files rather than assuming a branch is current. Do not merge branches blindly.
 
 Do not overwrite working files merely because another branch contains a newer-looking implementation.
 
