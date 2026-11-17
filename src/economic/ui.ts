@@ -222,6 +222,9 @@ const TEXT = {
   report: l('Monthly report', 'گزارش ماهانه'),
   verdict: l('Post-game analysis', 'تحلیل پس از بازی'),
   saveHint: l('Saved automatically each month.', 'هر ماه به‌طور خودکار ذخیره می‌شود.'),
+  seeVerdict: l('See the verdict', 'دیدن نتیجه'),
+  review: l('Review the situation', 'بررسی وضعیت'),
+  ended: l('The crisis is over', 'بحران تمام شد'),
 };
 
 function copy(value: L, lang: Lang): string {
@@ -298,6 +301,7 @@ export class EconomicApp {
   private scenario: ScenarioId = 'hormuz';
   private sandbox = { reserves: 18.4, oilPrice: 91, sanctions: 55, stability: 52, shipping: 55 };
   private modal: Modal = null;
+  private outcomePending = false;
   private mapNode = 'hormuz';
   private toast = '';
   private toastTimer = 0;
@@ -359,6 +363,7 @@ export class EconomicApp {
     this.state = createInitialState(this.startMode, this.scenario, seed, this.startMode === 'sandbox' ? { ...this.sandbox } : undefined);
     this.tab = 'overview';
     this.modal = null;
+    this.outcomePending = false;
     this.render();
   }
 
@@ -370,6 +375,7 @@ export class EconomicApp {
     }
     this.state = restored;
     this.tab = 'overview';
+    this.outcomePending = false;
     this.modal = restored.status !== 'playing' ? 'outcome' : null;
     this.render();
   }
@@ -415,13 +421,21 @@ export class EconomicApp {
         this.render();
         return;
       case 'resolve': {
-        if (!state) return;
+        if (!state || state.phase === 'ended') return;
         resolveMonth(state);
         saveState(state);
-        this.modal = state.status !== 'playing' ? 'outcome' : 'report';
+        // Always show the final month's report first; the verdict follows it.
+        this.modal = 'report';
+        this.outcomePending = state.status !== 'playing';
         this.render();
         return;
       }
+      case 'outcome':
+      case 'show-outcome':
+        this.modal = 'outcome';
+        this.outcomePending = false;
+        this.render();
+        return;
       case 'save':
         if (!state) return;
         this.flash(saveState(state) ? this.text('saved') : this.text('saveFailed'));
@@ -430,11 +444,13 @@ export class EconomicApp {
         clearSave();
         this.state = null;
         this.modal = null;
+        this.outcomePending = false;
         this.tab = 'overview';
         this.render();
         return;
       case 'close-modal':
-        this.modal = null;
+        this.modal = this.outcomePending ? 'outcome' : null;
+        this.outcomePending = false;
         this.render();
         return;
       case 'map-node':
@@ -575,19 +591,24 @@ export class EconomicApp {
             : `<span class="econ-dock-empty">${this.text('noDecisions')}</span>`}
         </div>
         <div class="econ-dock-actions">
-          <span class="econ-capital">${fmt(state.policies.politicalCapital, this.lang)} · ${this.text('political')}</span>
-          <button class="econ-primary" data-act="resolve">${this.text('resolve')}</button>
+          <span class="econ-capital">${state.phase === 'ended' ? this.text('ended') : `${fmt(state.policies.politicalCapital, this.lang)} · ${this.text('political')}`}</span>
+          ${state.phase === 'ended'
+            ? `<button class="econ-primary" data-act="outcome">${this.text('outcome')}</button>`
+            : `<button class="econ-primary" data-act="resolve">${this.text('resolve')}</button>`}
         </div>
       </div>
     </div>`;
   }
 
   private monthLabel(state: EconomicState): string {
-    const raw = state.report && state.phase === 'ended' ? state.report.month : state.date;
+    return this.formatMonthLabel(state.report && state.phase === 'ended' ? state.report.month : state.date);
+  }
+
+  private formatMonthLabel(iso: string): string {
     try {
-      return new Intl.DateTimeFormat(this.lang === 'fa' ? 'fa-IR' : 'en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${raw}T00:00:00Z`));
+      return new Intl.DateTimeFormat(this.lang === 'fa' ? 'fa-IR' : 'en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`));
     } catch {
-      return raw;
+      return iso;
     }
   }
 
@@ -620,7 +641,12 @@ export class EconomicApp {
       metric(this.text('inflation'), pct(state.prices.headline, this.lang, 1), `${this.text('expectations')} ${pct(state.prices.expectations, this.lang, 0)}`, toneFor(state.prices.headline, true, [30, 50])),
       metric(this.text('parallel'), fmt(Math.round(state.currency.parallel), this.lang), `${this.text('gap')} ${pct(state.currency.fxGap, this.lang, 0)}`, toneFor(state.currency.fxGap, true, [25, 45])),
       metric(this.text('coverage'), `${fmt(coverageAverage(state), this.lang, 1)} ${this.text('weeks')}`, `${this.text('food')} ${fmt(state.trade.food.coverage, this.lang, 1)}w`, toneFor(coverageAverage(state), false, [3, 6])),
-      metric(this.text('balance'), `${state.fiscal.deficit >= 0 ? '−' : '+'}${money(Math.abs(state.fiscal.deficit), this.lang)}`, `${this.text('primary')} ${money(state.fiscal.primary, this.lang)}`, toneFor(state.fiscal.deficit, true, [1.2, 2.2])),
+      metric(
+        this.text('balance'),
+        `${state.fiscal.deficit >= 0 ? '−' : '+'}${money(Math.abs(state.fiscal.deficit), this.lang)}`,
+        `${this.text('primary')} ${state.fiscal.primary >= 0 ? '−' : '+'}${money(Math.abs(state.fiscal.primary), this.lang)}`,
+        toneFor(state.fiscal.deficit, true, [1.2, 2.2]),
+      ),
       metric(this.text('legitimacy'), `${fmt(state.society.legitimacy, this.lang)} / 100`, `${this.text('protests')} ${fmt(state.society.protests, this.lang)}`, toneFor(state.society.legitimacy)),
     ].join('');
     const lastReport = state.report
@@ -1075,7 +1101,7 @@ export class EconomicApp {
       <footer>
         ${active ? `<span class="econ-pill tone-good">${this.text('active')}</span>` : ''}
         <button class="${queued ? 'econ-secondary' : 'econ-ghost'} ${disabled ? 'is-disabled' : ''}" data-act="${queued ? 'unqueue' : 'queue'}" data-id="${policy.id}" ${disabled ? 'disabled' : ''}>
-          ${queued ? this.text('remove') : check.ok || active ? this.text('queue') : this.text('unavailable')}
+          ${queued ? this.text('remove') : active ? this.text('active') : check.ok ? this.text('queue') : this.text('unavailable')}
         </button>
       </footer>
       ${disabled && check.reason ? `<p class="econ-hint">${copy(check.reason, this.lang)}</p>` : ''}
@@ -1088,13 +1114,14 @@ export class EconomicApp {
     }
     const report = state.report;
     if (!report) return '';
+    const last = state.status !== 'playing';
     return `<div class="econ-modal" role="dialog" aria-modal="true">
       <div class="econ-modal-card">
-        <header><span class="econ-kicker">${this.text('report')}</span><h2>${copy(report.headline, this.lang)}</h2></header>
+        <header><span class="econ-kicker">${this.text('report')} · ${this.formatMonthLabel(report.month)}</span><h2>${copy(report.headline, this.lang)}</h2></header>
         <ul class="econ-report-lines">${report.lines.map((line) => `<li class="tone-${line.tone}">${copy(line.text, this.lang)}</li>`).join('')}</ul>
         <footer>
-          <button class="econ-secondary" data-act="goto" data-tab="government">${this.text('decisions')}</button>
-          <button class="econ-primary" data-act="close-modal">${this.text('continue')}</button>
+          ${last ? '' : `<button class="econ-secondary" data-act="goto" data-tab="government">${this.text('decisions')}</button>`}
+          <button class="econ-primary" data-act="${last ? 'show-outcome' : 'close-modal'}">${this.text(last ? 'seeVerdict' : 'continue')}</button>
         </footer>
       </div>
     </div>`;
@@ -1118,6 +1145,7 @@ export class EconomicApp {
           .join('')}</div>
         <ul class="econ-report-lines">${outcome.notes.map((note) => `<li class="tone-info">${copy(note, this.lang)}</li>`).join('')}</ul>
         <footer>
+          <button class="econ-ghost" data-act="close-modal">${this.text('review')}</button>
           <button class="econ-secondary" data-act="save">${this.text('save')}</button>
           <button class="econ-primary" data-act="new">${this.text('newSession')}</button>
         </footer>
