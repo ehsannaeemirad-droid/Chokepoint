@@ -40,7 +40,7 @@ sharp and accessible.
 corepack pnpm install     # pnpm 10 via corepack
 corepack pnpm dev         # http://localhost:5173
 corepack pnpm test        # unit/integration tests
-corepack pnpm build       # typecheck + production bundle in dist/ (includes national.html)
+corepack pnpm build       # typecheck + production bundle in dist/ (includes national.html and economic.html)
 corepack pnpm preview     # serve the production build
 ```
 
@@ -285,6 +285,7 @@ src/
   scenes/              MapScene: camera, input, chunk streaming, pan benchmark
   ui/                  DOM overlay, event bus, styles
   i18n/                English/Persian dictionary, language state, RTL application
+  economic/            Economic Survival mode: simulation, events, UI, styles, own save key
   data/                map nodes, unit rosters, scenarios, AI trees (JSON, with fa fields)
 scripts/make-icons.mjs PNG icon generator for the PWA manifest
 public/                manifest, service worker, icons
@@ -349,6 +350,8 @@ src/politics/scorecard.test.ts  the graded multi-axis settlement
 src/ui/fog.test.ts         estimate bands and reconnaissance narrowing
 src/ui/nav.test.ts         navigation drawer, filters, cycling
 src/i18n/log.test.ts       Persian named-variable templates and outcome coverage
+src/economic/model.test.ts      economic systems, fiscal lines and verdict axes
+src/economic/campaigns.test.ts  all five campaigns to their endings, governed and idle
 ```
 
 ## Known limitations

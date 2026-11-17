@@ -156,7 +156,7 @@ Inspect the actual repository before editing. The following files have been iden
 | Logistics | `src/data/logistics.json` |
 | Interface | `src/ui/Ui.ts` |
 | Styles | `src/styles.css` |
-| Documentation | `README.md`, `DESIGN.md`, `PUSH-FIRST.md` |
+| Documentation | `README.md`, `DESIGN.md`, `AUDIT.md`, `docs/` |
 | Deployment | `.github/workflows/pages.yml` |
 
 These paths are a starting point, not permission to assume that every file is current or complete.
