@@ -175,6 +175,7 @@ const TEXT = {
   discount: l('Discount', 'تخفیف'),
   refinery: l('Refinery capacity', 'ظرفیت پالایش'),
   importsTitle: l('Essential imports', 'واردات ضروری'),
+  consumer: l('Consumer goods', 'کالاهای مصرفی'),
   need: l('Monthly need', 'نیاز ماهانه'),
   financed: l('Financed', 'تأمین‌شده'),
   availability: l('Market availability', 'دسترسی بازار'),
@@ -784,7 +785,7 @@ export class EconomicApp {
           ${importLine(this.text('food'), state.trade.food)}
           ${importLine(this.text('medicine'), state.trade.medicine)}
           ${importLine(this.text('inputs'), state.trade.inputs)}
-          ${importLine(this.text('headline'), state.trade.consumer)}
+          ${importLine(this.text('consumer'), state.trade.consumer)}
         </div>`,
       )}
       ${section(

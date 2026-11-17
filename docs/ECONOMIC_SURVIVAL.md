@@ -97,9 +97,37 @@ monthly effects, intervention relative to a control month, institution support c
 save round-trip and rejection of foreign payloads, 36-month numerical stability, campaign termination
 with an attributable verdict, forecast bands, and event uniqueness.
 
+`src/economic/campaigns.test.ts` plays all five campaigns to their endings twice: once with a
+"sensible government" policy plan (sell crude, diversify, negotiate exemptions, raise revenue, protect
+households, invest early) and once doing nothing. It asserts that every campaign reaches its final
+month without a humanitarian, financial or political collapse, that governing the Hormuz and currency
+crises turns them into managed survivals while inaction does not, that the two hardest campaigns end
+as survival with severe weaknesses, and that a run is reproducible from the same seed and decisions.
+
+## Campaign balance
+
+Reserves are a buffer, not the only clock: import capacity is financed by current export and non-oil
+receipts with reserves absorbing the difference, part of the deficit is monetized, and coverage
+relaxes toward a target set by financing and domestic production. The intended outcomes are:
+
+| Campaign | Governed | Inaction |
+| --- | --- | --- |
+| Hormuz Crisis | Managed survival | Survived, diminished |
+| Oil Revenue Collapse | Survived, diminished | Survived, diminished |
+| Currency Crisis | Managed survival | Survived, diminished |
+| Sanctions Squeeze | Managed survival | Survived, diminished |
+| Food and Energy Shock | Survived, diminished | Survived, diminished |
+
+Early humanitarian, financial or political collapse is still possible through bad choices: exhausting
+reserves on intervention, cutting subsidies without compensation, or letting food and medicine
+coverage fall near zero.
+
 ## Known limitations
 
 - One country, one currency, illustrative numbers; no historical dataset or sourcing claims.
+- The two hardest campaigns are survivable but not winnable in the current policy set; reaching
+  "managed survival" there needs instruments the mode does not yet expose (debt rescheduling, formal
+  import compression).
 - Sanctions evasion is represented only through abstract cost and risk, never as operational guidance.
 - The economic map is a strategic schematic with clickable nodes, not a geographic projection.
 - Import categories and population groups are modelled at aggregate level; no household microdata.

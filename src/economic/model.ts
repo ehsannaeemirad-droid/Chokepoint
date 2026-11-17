@@ -412,8 +412,8 @@ export const POLICIES: PolicyDef[] = [
     cooldown: 1,
     support: { 'central-bank': 55, finance: 35, political: 45 },
     benefits: [l('Narrower parallel gap', 'شکاف موازی کمتر'), l('Calmer import prices this month', 'قیمت واردات آرام‌تر این ماه')],
-    costs: [l('$3.8B of usable reserves', '۳٫۸ میلیارد دلار ذخایر قابل استفاده'), l('No structural fix', 'بدون درمان ساختاری')],
-    effects: { usableReserves: -3.8, fxGap: -5, headlineInflation: -0.5, capitalFlight: -3 },
+    costs: [l('$2.6B of usable reserves', '۲٫۶ میلیارد دلار ذخایر قابل استفاده'), l('No structural fix', 'بدون درمان ساختاری')],
+    effects: { usableReserves: -2.6, fxGap: -5, headlineInflation: -0.5, capitalFlight: -3 },
     delayed: [{ months: 1, effects: { fxGap: 2, headlineInflation: 0.5 }, note: l('The market tests the central bank again.', 'بازار دوباره بانک مرکزی را می‌آزماید.') }],
     risk: l('Repeated intervention can exhaust the buffer before the real crisis arrives.', 'مداخله مکرر می‌تواند سپر را پیش از بحران واقعی تمام کند.'),
   },
@@ -426,8 +426,8 @@ export const POLICIES: PolicyDef[] = [
     cooldown: 1,
     support: { trade: 68, 'central-bank': 42, political: 55 },
     benefits: [l('Food and medicine coverage', 'پوشش غذا و دارو'), l('Lower household hardship', 'کاهش سختی خانوار')],
-    costs: [l('$2.4B reserves', '۲٫۴ میلیارد دلار ذخایر'), l('Consumer goods shortages', 'کمبود کالاهای مصرفی')],
-    effects: { usableReserves: -2.4, foodCoverage: 1.6, medicineCoverage: 1.8, consumerCoverage: -1, foodAffordability: 3, medicineAffordability: 3 },
+    costs: [l('$1.2B reserves', '۱٫۲ میلیارد دلار ذخایر'), l('Consumer goods shortages', 'کمبود کالاهای مصرفی')],
+    effects: { usableReserves: -1.2, foodCoverage: 1.6, medicineCoverage: 1.8, consumerCoverage: -1, foodAffordability: 3, medicineAffordability: 3 },
     risk: l('Priority allocation can create a parallel market in import licenses.', 'تخصیص اولویت‌دار می‌تواند بازار موازی مجوز واردات بسازد.'),
   },
   {
@@ -537,7 +537,7 @@ export const POLICIES: PolicyDef[] = [
     support: { energy: 58, finance: 62, political: 38 },
     benefits: [l('Higher export volume', 'حجم صادرات بیشتر'), l('Immediate revenue relief', 'کاهش فوری فشار درآمدی')],
     costs: [l('Lower realized price', 'قیمت واقعی کمتر'), l('Strategic dependence', 'وابستگی راهبردی')],
-    effects: { discount: 4, exports: 6, oilRevenue: 0.15, credibility: -1 },
+    effects: { discount: 4, exports: 0.2, shippingCost: -2, oilRevenue: 0.15, credibility: -1 },
     risk: l('Buyers may treat the discount as the new baseline.', 'خریداران ممکن است تخفیف را به baseline جدید تبدیل کنند.'),
   },
   {
@@ -551,8 +551,8 @@ export const POLICIES: PolicyDef[] = [
     support: { trade: 70, security: 62, political: 55 },
     benefits: [l('Lower supplier concentration', 'تمرکز کمتر تأمین‌کننده'), l('More strategic independence', 'استقلال راهبردی بیشتر')],
     costs: [l('Trade costs and delay', 'هزینه و تأخیر تجارت'), l('Fiscal and diplomatic attention', 'توجه مالی و دیپلماتیک')],
-    effects: { supplierRisk: -7, shippingCost: 1.5, sanctionsTechnology: -2, credibility: 1, fdi: 1 },
-    monthly: { supplierRisk: -1.2, shippingCost: 0.4 },
+    effects: { supplierRisk: -7, shippingCost: -1.5, exports: 0.12, sanctionsTechnology: -2, credibility: 1, fdi: 1 },
+    monthly: { supplierRisk: -1.2, shippingCost: -0.4 },
     risk: l('New partners can also become new dependencies.', 'شرکای جدید هم می‌توانند وابستگی جدید شوند.'),
   },
   {
@@ -621,7 +621,7 @@ export const POLICIES: PolicyDef[] = [
     support: { security: 65, trade: 72, political: 60, 'central-bank': 52 },
     benefits: [l('Lower sanctions friction', 'اصطکاک کمتر تحریم'), l('Medicine and food access', 'دسترسی غذا و دارو')],
     costs: [l('Diplomatic concessions', 'امتیازات دیپلماتیک'), l('Slow, uncertain talks', 'مذاکرات کند و نامطمئن')],
-    effects: { sanctionsFinancial: -3, sanctionsShipping: -2, sanctionsTechnology: -2, medicineCoverage: 0.8, foodCoverage: 0.6, credibility: 2 },
+    effects: { sanctionsFinancial: -4, sanctionsShipping: -4, sanctionsTechnology: -2, shippingCost: -2, medicineCoverage: 0.8, foodCoverage: 0.6, credibility: 2 },
     risk: l('Exemptions may be narrow and slow to arrive.', 'معافیت‌ها ممکن است محدود و دیر برسند.'),
   },
   {
@@ -643,10 +643,10 @@ export const POLICY_BY_ID = Object.fromEntries(POLICIES.map((policy) => [policy.
 
 const SCENARIO_START: Record<ScenarioId, { maxMonths: number; world: { globalOilPrice: number; shippingDisruption: number; sanctionsPressure: number; globalGrowth: number }; reserves: number; inflation: number; parallelGap: number }> = {
   hormuz: { maxMonths: 12, world: { globalOilPrice: 91, shippingDisruption: 55, sanctionsPressure: 55, globalGrowth: 48 }, reserves: 18.4, inflation: 38.6, parallelGap: 44 },
-  'oil-collapse': { maxMonths: 10, world: { globalOilPrice: 48, shippingDisruption: 34, sanctionsPressure: 50, globalGrowth: 38 }, reserves: 14.2, inflation: 31, parallelGap: 39 },
+  'oil-collapse': { maxMonths: 10, world: { globalOilPrice: 55, shippingDisruption: 34, sanctionsPressure: 50, globalGrowth: 38 }, reserves: 19.5, inflation: 31, parallelGap: 39 },
   'currency-crisis': { maxMonths: 10, world: { globalOilPrice: 88, shippingDisruption: 42, sanctionsPressure: 62, globalGrowth: 44 }, reserves: 12.8, inflation: 55, parallelGap: 76 },
-  'sanctions-squeeze': { maxMonths: 10, world: { globalOilPrice: 84, shippingDisruption: 61, sanctionsPressure: 78, globalGrowth: 43 }, reserves: 16.1, inflation: 43, parallelGap: 58 },
-  'food-energy-shock': { maxMonths: 10, world: { globalOilPrice: 101, shippingDisruption: 64, sanctionsPressure: 54, globalGrowth: 41 }, reserves: 16.9, inflation: 48, parallelGap: 51 },
+  'sanctions-squeeze': { maxMonths: 10, world: { globalOilPrice: 84, shippingDisruption: 60, sanctionsPressure: 74, globalGrowth: 43 }, reserves: 18.5, inflation: 43, parallelGap: 58 },
+  'food-energy-shock': { maxMonths: 10, world: { globalOilPrice: 101, shippingDisruption: 64, sanctionsPressure: 54, globalGrowth: 41 }, reserves: 18.2, inflation: 48, parallelGap: 51 },
 };
 
 export function grossReserves(state: EconomicState): number {
@@ -812,13 +812,13 @@ export function createInitialState(mode: Mode = 'campaign', scenario: ScenarioId
       investment: 44,
     },
     trade: {
-      nonOilExports: 0.8,
+      nonOilExports: 1,
       supplierRisk: 55,
       shippingCost: 72 + shipping * 0.2,
-      food: importLine(2.2, 1.7, 6, 4, 62),
-      medicine: importLine(0.9, 0.7, 5, 4, 58),
-      inputs: importLine(1.4, 0.9, 4, 3, 55),
-      consumer: importLine(1.8, 1.1, 5, 4, 60),
+      food: importLine(1.5, 0.9, 6, 4, 62),
+      medicine: importLine(0.6, 0.4, 5, 4, 58),
+      inputs: importLine(0.9, 0.5, 4, 3, 55),
+      consumer: importLine(1.2, 0.6, 5, 4, 60),
     },
     banking: { liquidity: 48, npl: 18, confidence: 52, credit: 44 },
     households: { unemployment: 14.2, realWage: 41, foodAffordability: 45, medicineAffordability: 42, energyAffordability: 50, poverty: 35, informal: 40 },
@@ -852,9 +852,9 @@ export function createInitialState(mode: Mode = 'campaign', scenario: ScenarioId
     firedEvents: [],
   };
   if (scenario === 'oil-collapse') {
-    state.fiscal.oilRevenue = 1.15;
-    state.energy.realizedPrice = 36;
-    state.fiscal.deficit = 2.6;
+    state.fiscal.oilRevenue = 1.5;
+    state.energy.realizedPrice = 40;
+    state.fiscal.deficit = 2.3;
     state.prices.headline = 31;
   } else if (scenario === 'currency-crisis') {
     state.currency.parallel = state.currency.official * 1.76;
@@ -868,7 +868,7 @@ export function createInitialState(mode: Mode = 'campaign', scenario: ScenarioId
     state.trade.inputs.coverage = 3;
     state.trade.consumer.coverage = 4;
     state.world.shippingDisruption = 71;
-    state.fiscal.oilRevenue = 2.15;
+    state.fiscal.oilRevenue = 2.35;
   } else if (scenario === 'food-energy-shock') {
     state.trade.food.coverage = 3;
     state.prices.food = 64;
@@ -1072,7 +1072,8 @@ export function resolveMonth(state: EconomicState): EconomicReport {
   state.energy.production = clamp(Math.min(state.energy.capacity, state.energy.capacity * (0.62 + inputAvailability / 250) + state.investment.productivity / 250), 0.2, state.energy.capacity);
   state.energy.domesticUse = clamp(state.energy.domesticUse + (state.households.energyAffordability < 40 ? 0.03 : -0.01), 0.7, state.energy.production);
   const exportable = Math.max(0, state.energy.production - state.energy.domesticUse);
-  const routeFactor = 1 - state.world.shippingDisruption / 260 - state.sanctions.shipping / 520;
+  // A larger discount buys buyer tolerance as well as a lower net price.
+  const routeFactor = 1 - state.world.shippingDisruption / 260 - state.sanctions.shipping / 520 + state.energy.discount * 0.004;
   state.energy.exports = clamp(exportable * clamp(routeFactor, 0.15, 1), 0, exportable);
   state.energy.realizedPrice = clamp(state.world.globalOilPrice - state.energy.discount - state.trade.shippingCost * 0.08, 15, 180);
   const exportRevenue = (state.energy.exports * 30 * state.energy.realizedPrice) / 1000;
@@ -1083,22 +1084,26 @@ export function resolveMonth(state: EconomicState): EconomicReport {
   // Import financing. Priority policies and coverage determine how much gets through.
   const essentialNeed = state.trade.food.need + state.trade.medicine.need + state.trade.inputs.need;
   const totalNeed = essentialNeed + state.trade.consumer.need;
-  const financingCapacity = Math.min(state.reserves.usable * 0.14, totalNeed * 0.48);
+  const financingCapacity = Math.min(state.reserves.usable * 0.13, totalNeed * 0.64);
   const financingRatio = clamp(financingCapacity / Math.max(0.1, totalNeed), 0.15, 1);
   for (const key of ['food', 'medicine', 'inputs', 'consumer'] as ImportId[]) {
     const line = state.trade[key];
     const priority = key === 'food' || key === 'medicine' ? 1.12 : key === 'inputs' ? 1.03 : 0.86;
     line.financed = Number((line.need * financingRatio * priority).toFixed(2));
     const lineRatio = clamp(line.financed / Math.max(0.2, line.need), 0, 1.2);
+    // Domestic production covers part of each category, so imported financing is
+    // not the whole story. Coverage relaxes toward a target instead of drifting.
+    const domestic = key === 'food' ? 2.2 : key === 'inputs' ? 1.4 : key === 'medicine' ? 0.6 : 0.2;
+    const target = clamp(0.5 + lineRatio * 8 + domestic, 0, 16);
     line.coverage = clamp(
-      line.coverage + (lineRatio - 0.5) * 3.4 - (state.world.shippingDisruption > 62 ? 0.2 : 0) + (state.trade.supplierRisk < 45 ? 0.2 : 0),
+      line.coverage + (target - line.coverage) * 0.4 - (state.world.shippingDisruption > 62 ? 0.15 : 0),
       0,
       20,
     );
-    line.inventory = clamp(line.inventory + (lineRatio - 0.55) * 1.6, 0, 12);
+    line.inventory = clamp(line.inventory + (clamp(target * 0.55, 0, 12) - line.inventory) * 0.3, 0, 12);
     line.availability = clamp(30 + line.coverage * 9 + line.inventory * 2 - state.world.shippingDisruption * 0.18, 5, 98);
   }
-  state.reserves.usable = clamp(state.reserves.usable - financingCapacity + exportRevenue * 0.95 + state.trade.nonOilExports * 0.55, 0, 100);
+  state.reserves.usable = clamp(state.reserves.usable - financingCapacity + exportRevenue * 0.9 + state.trade.nonOilExports * 0.75, 0, 100);
   state.reserves.importCover = clamp(state.reserves.usable / Math.max(1, totalNeed - exportRevenue * 0.2), 0, 30);
 
   // Debt service, capital flight and reserve accounting.
@@ -1107,14 +1112,22 @@ export function resolveMonth(state: EconomicState): EconomicReport {
   state.reserves.usable = clamp(state.reserves.usable - debtPaid, 0, 100);
   const unpaidDebt = Math.max(0, debtPressure - debtPaid);
   if (unpaidDebt > 0.05) state.fiscal.arrears = clamp(state.fiscal.arrears + unpaidDebt * 0.45, 0, 30);
-  const flight = (state.currency.capitalFlight / 100) * 0.6 * (1 + state.currency.fxGap / 100) * (state.policies.active.some((p) => p.id === 'capital-controls') ? 0.45 : 1);
+  const flight = (state.currency.capitalFlight / 100) * 0.5 * (1 + state.currency.fxGap / 100) * (state.policies.active.some((p) => p.id === 'capital-controls') ? 0.45 : 1);
   state.reserves.usable = clamp(state.reserves.usable - flight, 0, 100);
   state.reserves.importCover = newWeeks(state.reserves.usable, totalNeed, exportRevenue);
 
   // Currency pass-through.
   const inflationGap = state.prices.headline - state.prices.core;
-  const pressure = (state.reserves.importCover < 3 ? 4 : 0.8) + state.currency.capitalFlight * 0.025 + state.sanctions.financial * 0.018 + state.fiscal.deficit * 1.8 + inflationGap * 0.06 - (state.policies.active.some((p) => p.id === 'rate-hike') ? 2.5 : 0) - (state.policies.active.some((p) => p.id === 'spend-reserves') ? 1 : 0);
-  state.currency.fxGap = clamp(state.currency.fxGap + pressure - 0.5, 0, 180);
+  const pressure =
+    (state.reserves.importCover < 3 ? 3 : 0.5) +
+    state.currency.capitalFlight * 0.018 +
+    state.sanctions.financial * 0.012 +
+    state.fiscal.deficit * 1.2 +
+    inflationGap * 0.04 -
+    (state.policies.active.some((p) => p.id === 'rate-hike') ? 2.2 : 0) -
+    (state.policies.active.some((p) => p.id === 'spend-reserves') ? 1 : 0) -
+    (state.policies.active.some((p) => p.id === 'capital-controls') ? 0.8 : 0);
+  state.currency.fxGap = clamp(state.currency.fxGap + pressure - 0.9 - state.currency.fxGap * 0.07, 0, 180);
   state.currency.official = clamp(state.currency.official * (1 + Math.max(0, pressure) * 0.0025), 1000, 10000000);
   syncCurrency(state);
 
@@ -1130,12 +1143,14 @@ export function resolveMonth(state: EconomicState): EconomicReport {
   state.prices.headline = clamp(state.prices.food * 0.36 + state.prices.fuel * 0.18 + state.prices.medicine * 0.16 + state.prices.inputs * 0.12 + state.prices.core * 0.18, -5, 250);
   state.prices.cpi = Number((state.prices.cpi * (1 + state.prices.headline / 1200)).toFixed(2));
 
-  // Budget, debt and arrears.
+  // Budget, debt and arrears. Closed credit markets force the state to monetize
+  // part of the deficit, which is why fiscal policy shows up in reserves.
   syncFiscal(state);
+  state.reserves.usable = clamp(state.reserves.usable - Math.max(0, state.fiscal.deficit) * 0.12, 0, 100);
   const financing = Math.max(0, state.fiscal.deficit);
   state.fiscal.debt = clamp(state.fiscal.debt + financing * 0.72 - (state.fiscal.deficit < 0 ? Math.abs(state.fiscal.deficit) * 0.4 : 0), 0, 250);
   if (state.fiscal.deficit > 2.5) state.fiscal.arrears = clamp(state.fiscal.arrears + (state.fiscal.deficit - 2.5) * 0.18, 0, 30);
-  state.reserves.debtDue = clamp(0.7 + state.fiscal.debt * 0.01, 0.5, 8);
+  state.reserves.debtDue = clamp(0.55 + state.fiscal.debt * 0.01, 0.5, 8);
   state.reserves.usable = clamp(state.reserves.usable - Math.max(0, state.reserves.debtDue - debtPaid) * 0.2, 0, 100);
 
   // Banking, jobs and household welfare.
@@ -1145,10 +1160,10 @@ export function resolveMonth(state: EconomicState): EconomicReport {
   state.banking.credit = clamp(state.banking.credit + state.banking.liquidity * 0.02 - state.banking.npl * 0.025 - (state.policies.active.some((p) => p.id === 'rate-hike') ? 1.4 : 0), 0, 100);
   const productionGap = inputAvailability < 50 ? (50 - inputAvailability) * 0.12 : 0;
   state.households.unemployment = clamp(state.households.unemployment + productionGap - (state.investment.productivity > 55 ? 0.12 : 0) - (state.policies.active.some((p) => p.id === 'bank-liquidity') ? 0.1 : 0), 2, 55);
-  state.households.realWage = clamp(state.households.realWage - state.prices.headline * 0.065 + (state.households.unemployment < 15 ? 0.25 : 0), 0, 100);
-  state.households.foodAffordability = clamp(state.households.foodAffordability - state.prices.food * 0.035 + (state.trade.food.availability > 55 ? 0.4 : -0.5) + (state.policies.active.some((p) => p.id === 'targeted-transfers') ? 0.8 : 0), 0, 100);
-  state.households.medicineAffordability = clamp(state.households.medicineAffordability - state.prices.medicine * 0.025 + (state.trade.medicine.availability > 55 ? 0.35 : -0.5), 0, 100);
-  state.households.energyAffordability = clamp(state.households.energyAffordability - state.prices.fuel * 0.035 + (state.policies.active.some((p) => p.id === 'cut-subsidies') ? -0.8 : 0), 0, 100);
+  state.households.realWage = clamp(state.households.realWage - state.prices.headline * 0.022 + (state.households.unemployment < 15 ? 0.25 : 0), 0, 100);
+  state.households.foodAffordability = clamp(state.households.foodAffordability - state.prices.food * 0.015 + (state.trade.food.availability > 55 ? 0.4 : -0.5) + (state.policies.active.some((p) => p.id === 'targeted-transfers') ? 0.8 : 0), 0, 100);
+  state.households.medicineAffordability = clamp(state.households.medicineAffordability - state.prices.medicine * 0.012 + (state.trade.medicine.availability > 55 ? 0.35 : -0.5), 0, 100);
+  state.households.energyAffordability = clamp(state.households.energyAffordability - state.prices.fuel * 0.015 + (state.policies.active.some((p) => p.id === 'cut-subsidies') ? -0.8 : 0), 0, 100);
   state.households.poverty = clamp(state.households.poverty + (55 - state.households.foodAffordability) * 0.03 + (state.households.unemployment - 12) * 0.05, 0, 100);
   state.households.informal = clamp(state.households.informal + (state.households.unemployment - 12) * 0.03 - (state.banking.credit > 50 ? 0.1 : 0), 0, 100);
 
@@ -1218,8 +1233,22 @@ export function forecast(state: EconomicState): { weeks: number; low: number; hi
 }
 
 function axisScores(state: EconomicState): Outcome['axes'] {
-  const survival = clamp((state.reserves.usable * 4 + state.trade.food.coverage * 6 + state.trade.medicine.coverage * 4 + state.energy.exports * 10) / 3, 0, 100);
-  const financial = clamp((state.reserves.usable * 3 + (100 - state.currency.fxGap) * 0.45 + (100 - state.fiscal.debt) * 0.35 + (100 - state.banking.npl) * 0.2) / 2, 0, 100);
+  const survival = clamp(
+    Math.min(100, state.reserves.usable * 6) * 0.4 +
+      Math.min(100, coverageAverage(state) * 12) * 0.3 +
+      Math.min(100, state.energy.exports * 40) * 0.3 -
+      Math.min(25, state.fiscal.arrears * 6),
+    0,
+    100,
+  );
+  const financial = clamp(
+    state.reserves.usable * 2.5 +
+      (100 - Math.min(100, state.currency.fxGap)) * 0.3 +
+      (100 - state.fiscal.debt) * 0.25 +
+      (100 - state.banking.npl) * 0.15,
+    0,
+    100,
+  );
   const welfare = clamp((state.households.foodAffordability + state.households.medicineAffordability + state.households.energyAffordability + (100 - state.households.unemployment * 2) + state.households.realWage) / 5, 0, 100);
   const political = clamp((state.society.confidence + state.society.legitimacy + state.society.fairness + state.society.elite + (100 - state.society.protests)) / 5, 0, 100);
   const productive = clamp((state.investment.infrastructure + state.investment.productivity + state.investment.techAccess + state.banking.credit + state.investment.privateConfidence) / 5, 0, 100);
@@ -1260,7 +1289,7 @@ export function evaluateOutcome(state: EconomicState, finalTurn: boolean): Outco
     };
   }
   if (!finalTurn) return null;
-  const strongest = Math.max(axes.survival, axes.financial, axes.welfare, axes.political, axes.productive, axes.independence);
+  const functioningAxes = [axes.survival, axes.financial, axes.welfare, axes.political, axes.productive, axes.independence].filter((value) => value >= 45).length;
   if (axes.survival >= 58 && axes.financial >= 55 && axes.welfare >= 48 && axes.political >= 48 && axes.productive >= 52 && state.investment.infrastructure >= 45 && state.investment.privateConfidence >= 45) {
     return {
       status: 'won',
@@ -1291,7 +1320,7 @@ export function evaluateOutcome(state: EconomicState, finalTurn: boolean): Outco
       notes: [l('Short-term survival crowded out long-term capacity.', 'بقای کوتاه‌مدت ظرفیت بلندمدت را کنار زد.'), l('The country remains operational but less able to absorb the next shock.', 'کشور فعال می‌ماند اما کمتر می‌تواند شوک بعدی را جذب کند.')],
     };
   }
-  if (strongest >= 45) {
+  if (axes.survival >= 45 && axes.political >= 50 && axes.welfare >= 40 && functioningAxes >= 3) {
     return {
       status: 'won',
       verdict: 'managed',
@@ -1302,12 +1331,12 @@ export function evaluateOutcome(state: EconomicState, finalTurn: boolean): Outco
     };
   }
   return {
-    status: 'lost',
+    status: 'drawn',
     verdict: 'stagnation',
-    title: l('Economic failure', 'شکست اقتصادی'),
-    text: l('The government remains in office, but the economy has lost the capacity to protect households or recover on its own.', 'دولت در قدرت می‌ماند، اما اقتصاد توان محافظت از خانوارها یا بازیابی مستقل را از دست داده است.'),
+    title: l('Survived, diminished', 'بقا با هزینه سنگین'),
+    text: l('The state reached the end of the crisis without a collapse, but it did so with thin reserves, a weaker economy and a public that bore the cost.', 'دولت بدون فروپاشی به پایان بحران رسید، اما با ذخایری اندک، اقتصادی ضعیف‌تر و مردمی که هزینه را پرداختند.'),
     axes,
-    notes: [l('The crisis outlasted the policy response.', 'بحران از پاسخ سیاستی دوام بیشتری آورد.'), l('Reserves, welfare and productive capacity all ended below a sustainable line.', 'ذخایر، رفاه و ظرفیت تولیدی همه زیر خط پایدار پایان یافتند.')],
+    notes: [l('The crisis outlasted the policy response.', 'بحران از پاسخ سیاستی دوام بیشتری آورد.'), l('Reserves, welfare or political consent ended below a sustainable line.', 'ذخایر، رفاه یا رضایت سیاسی زیر خط پایدار پایان یافتند.')],
   };
 }
 
